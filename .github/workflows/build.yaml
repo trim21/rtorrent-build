@@ -1,0 +1,93 @@
+name: build
+
+on:
+  push:
+    branches: [master]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        variant:
+          - rtorrent-0.9.8
+          - rtorrent-0.16.12
+          - qbittorrent-nox
+        libc: [glibc, musl]
+        arch:
+          - { flag: amd/v1, name: amd.v1 }
+          - { flag: amd/v3, name: amd.v3 }
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install autotools
+        run: sudo apt-get update && sudo apt-get install -y autoconf automake libtool pkg-config
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v8.1.0
+        with:
+          activate-environment: "true"
+
+      - name: Install main dependencies
+        run: uv sync --frozen
+
+      - name: Cache downloaded sources
+        uses: actions/cache@v4
+        with:
+          path: assets/
+          key: sources-${{ hashFiles('manifests/*.jsonc') }}
+
+      - name: Cache build prefix
+        uses: actions/cache@v4
+        with:
+          path: |
+            build/
+          key: build-${{ matrix.variant }}-${{ matrix.libc }}-${{ matrix.arch.name }}-${{ hashFiles(format('manifests/{0}.*', matrix.variant)) }}
+
+      - name: Build ${{ matrix.variant }} (${{ matrix.libc }}/${{ matrix.arch.name }})
+        env:
+          PYTHONUNBUFFERED: "1"
+        run: python build.py "${{ matrix.variant }}" --libc "${{ matrix.libc }}" --arch "${{ matrix.arch.flag }}"
+
+      - name: Tail build log on failure
+        if: failure()
+        run: tail -n 500 "build/${{ matrix.variant }}/build.log"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.variant }}-${{ matrix.libc }}-${{ matrix.arch.name }}
+          path: "dist/*"
+          if-no-files-found: error
+
+  release:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: artifacts/*
+          fail_on_unmatched_files: true

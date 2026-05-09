@@ -1,0 +1,135 @@
+{
+  "$defs": {
+    "GitSource": {
+      "properties": {
+        "git": {
+          "title": "Git",
+          "type": "string"
+        },
+        "ref": {
+          "title": "Ref",
+          "type": "string"
+        }
+      },
+      "required": [
+        "git",
+        "ref"
+      ],
+      "title": "GitSource",
+      "type": "object"
+    },
+    "LibInfo": {
+      "properties": {
+        "source": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/URLSource"
+            },
+            {
+              "$ref": "#/$defs/GitSource"
+            }
+          ],
+          "title": "Source"
+        },
+        "version": {
+          "default": "",
+          "title": "Version",
+          "type": "string"
+        },
+        "cxx_std": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Cxx Std"
+        }
+      },
+      "required": [
+        "source"
+      ],
+      "title": "LibInfo",
+      "type": "object"
+    },
+    "URLSource": {
+      "properties": {
+        "url": {
+          "title": "Url",
+          "type": "string"
+        }
+      },
+      "required": [
+        "url"
+      ],
+      "title": "URLSource",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "packages": {
+      "additionalProperties": {
+        "$ref": "#/$defs/LibInfo"
+      },
+      "title": "Packages",
+      "type": "object"
+    },
+    "extends": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Extends"
+    },
+    "target_glibc": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Target Glibc"
+    },
+    "toolchain": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Toolchain"
+    },
+    "$schema": {
+      "type": "string",
+      "description": "JSON Schema reference"
+    }
+  },
+  "required": [
+    "packages"
+  ],
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rtorrent-static/manifest.schema.jsonc",
+  "title": "Build Manifest",
+  "description": "Build manifest for rtorrent-static variants"
+}

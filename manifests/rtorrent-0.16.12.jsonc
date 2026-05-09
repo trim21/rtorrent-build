@@ -1,0 +1,22 @@
+{
+  "extends": "common.jsonc",
+  "target_glibc": "2.28",
+  "packages": {
+    "rtorrent": {
+      "source": {
+        // "url": "https://github.com/rakshasa/rtorrent/releases/download/v0.16.12/rtorrent-0.16.12.tar.gz"
+        "url": "https://github.com/rakshasa/rtorrent/archive/2f7a984992a3a5b291b94a9b28f80ae364ca24ea.zip"
+      },
+      "version": "0.16.12",
+      "cxx_std": "c++17"
+    },
+    "rtorrent-libtorrent": {
+      "source": {
+        // "url": "https://github.com/rakshasa/rtorrent/releases/download/v0.16.12/libtorrent-0.16.12.tar.gz"
+        "url": "https://github.com/rakshasa/libtorrent/archive/27463ee72d83295444262d503130fb0f8cc227e0.zip"
+      },
+      "version": "0.16.12",
+      "cxx_std": "c++17"
+    }
+  }
+}

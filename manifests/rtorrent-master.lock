@@ -1,0 +1,7 @@
+{
+  "git": {
+    "https://github.com/rakshasa/libtorrent#master": "27463ee72d83295444262d503130fb0f8cc227e0",
+    "https://github.com/rakshasa/rtorrent#master": "088bf40bdfe0ba23bab22c17f3bcc89a9b1a97de"
+  },
+  "manifest_hash": "1d5bee5d7c3d405a1db956b14f95df18d93ed7b34cc0f33b6d8003eb38e3bff5"
+}

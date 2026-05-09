@@ -1,0 +1,20 @@
+{
+  "newLineKind": "lf",
+  "lineWidth": 60,
+  "excludes": [
+    "docs/**",
+    "**/node_modules",
+    "**/*-lock.json"
+  ],
+  "json": {
+    "trailingCommas": "never",
+    "commentLine.forceSpaceAfterSlashes": true
+  },
+  "plugins": [
+    "https://plugins.dprint.dev/toml-0.7.0.wasm",
+    "https://plugins.dprint.dev/g-plane/pretty_yaml-v0.6.0.wasm",
+    "https://plugins.dprint.dev/json-0.21.1.wasm",
+    "https://cdn.jsdelivr.net/npm/@trim21/dprint-plugin-beancount@0.1.26/plugin.wasm",
+    "https://plugins.dprint.dev/typescript-0.95.15.wasm"
+  ]
+}

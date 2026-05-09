@@ -1,0 +1,7 @@
+{
+  "git": {
+    "https://github.com/trim21/libtorrent#feature/socket-manager-categories": "5b598c3ab6d54323ff0c73ef03561a381a2eedd9",
+    "https://github.com/trim21/rtorrent-rakshasa#fix/scgi-socket-manager": "7c779fabed31f23631cf83c0325dfc636bcb44bf"
+  },
+  "manifest_hash": "eeb77633ea27d446d57e673b2d0ede4d792697437313e909638e08cdc3951e43"
+}

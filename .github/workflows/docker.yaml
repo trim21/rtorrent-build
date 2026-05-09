@@ -1,0 +1,101 @@
+name: docker
+
+on:
+  push:
+    branches: [master]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: trim21/rtorrent
+
+jobs:
+  docker:
+    strategy:
+      fail-fast: false
+      matrix:
+        variant:
+          - rtorrent-0.9.8
+          - rtorrent-0.16.12
+          - rtorrent-master
+        libc: [glibc]
+        arch:
+          - { flag: amd/v1, name: amd.v1 }
+          - { flag: amd/v3, name: amd.v3 }
+        disguise: [false]
+        include:
+          - variant: rtorrent-trim21-fork
+            libc: glibc
+            arch: { flag: amd/v1, name: amd.v1 }
+            disguise: true
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install autotools
+        run: sudo apt-get update && sudo apt-get install -y autoconf automake libtool pkg-config
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v8.1.0
+        with:
+          activate-environment: "true"
+
+      - name: Install main dependencies
+        run: uv sync --frozen
+
+      - name: Cache build prefix
+        uses: actions/cache@v4
+        with:
+          path: |
+            assets/
+            build/
+          key: docker-${{ matrix.variant }}-${{ matrix.libc }}-${{ matrix.arch.name }}-${{ hashFiles(format('manifests/{0}.*', matrix.variant)) }}-${{ matrix.disguise }}
+          restore-keys: |
+            docker-${{ matrix.variant }}-${{ matrix.libc }}-${{ matrix.arch.name }}-${{ hashFiles(format('manifests/{0}.*', matrix.variant)) }}
+
+      - name: Build ${{ matrix.variant }} (${{ matrix.libc }}/${{ matrix.arch.name }})${{ matrix.disguise && ' disguised' || '' }}
+        env:
+          PYTHONUNBUFFERED: "1"
+        run: |
+          DISGUISE_FLAG=""
+          if [[ "${{ matrix.disguise }}" == "true" ]]; then
+            DISGUISE_FLAG="--disguise"
+          fi
+          python build.py "${{ matrix.variant }}" --libc "${{ matrix.libc }}" --arch "${{ matrix.arch.flag }}" --docker --build-info build-info.json $DISGUISE_FLAG
+
+      - name: Tail build log on failure
+        if: failure()
+        run: tail -n 500 "build/${{ matrix.variant }}/build.log"
+
+      - name: Log in to Container Registry
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v4
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push Docker image
+        if: github.event_name != 'pull_request'
+        run: |
+          TAG="$(jq -r .tag build-info.json)"
+          LOCAL_TAG="rtorrent:${TAG}"
+          GHCR_TAG="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${TAG}"
+
+          docker tag "$LOCAL_TAG" "$GHCR_TAG"
+          docker push "$GHCR_TAG"
+          echo "Pushed $GHCR_TAG"

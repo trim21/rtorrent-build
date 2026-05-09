@@ -1,0 +1,5 @@
+FROM busybox:musl AS busybox
+FROM {{ base_image }}
+COPY --from=busybox /bin/busybox /usr/local/bin/busybox
+COPY {{ binary }} /usr/local/bin/rtorrent
+ENTRYPOINT ["/usr/local/bin/rtorrent"]
