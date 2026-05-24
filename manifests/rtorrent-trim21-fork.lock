@@ -1,7 +1,7 @@
 {
   "git": {
-    "https://github.com/trim21/libtorrent#feature/socket-manager-categories": "5b598c3ab6d54323ff0c73ef03561a381a2eedd9",
-    "https://github.com/trim21/rtorrent-rakshasa#fix/scgi-socket-manager": "7c779fabed31f23631cf83c0325dfc636bcb44bf"
+    "https://github.com/trim21/libtorrent#feature/socket-manager-categories": "93dd91d1d97ea95dcbd81a7c93d9b30eb9139e2b",
+    "https://github.com/trim21/rtorrent-rakshasa#fix/scgi-socket-manager": "83e0a9a4fb666e64368ea5be1e6aa93149aacf08"
   },
-  "manifest_hash": "eeb77633ea27d446d57e673b2d0ede4d792697437313e909638e08cdc3951e43"
+  "manifest_hash": "e64b687b25f850d98118e40e980bdbaa1729080a88b399c223310502f5905dec"
 }

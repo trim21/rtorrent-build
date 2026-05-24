@@ -6,15 +6,13 @@
       "source": {
         "git": "https://github.com/trim21/rtorrent-rakshasa",
         "ref": "fix/scgi-socket-manager"
-      },
-      "cxx_std": "c++17"
+      }
     },
     "rtorrent-libtorrent": {
       "source": {
         "git": "https://github.com/trim21/libtorrent",
         "ref": "feature/socket-manager-categories"
-      },
-      "cxx_std": "c++17"
+      }
     }
   }
 }

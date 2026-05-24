@@ -6,15 +6,13 @@
       "source": {
         "git": "https://github.com/rakshasa/rtorrent",
         "ref": "master"
-      },
-      "cxx_std": "c++17"
+      }
     },
     "rtorrent-libtorrent": {
       "source": {
         "git": "https://github.com/rakshasa/libtorrent",
         "ref": "master"
-      },
-      "cxx_std": "c++17"
+      }
     }
   }
 }
