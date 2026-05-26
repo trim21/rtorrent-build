@@ -81,5 +81,6 @@ class LibtorrentBuilder(Builder):
                     pc_file,
                     "Requires.private: zlib, libcrypto\n",
                     "Requires.private: zlib, libcrypto, libcurl\n",
+                    required=False,
                 )
         print(f"Built {self.name} {self.version}")
