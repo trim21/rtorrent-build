@@ -1,3 +1,4 @@
+from ..utils import replace_in_file
 from ._cmake import CMakeBuilder
 
 
@@ -15,11 +16,5 @@ class BrotliBuilder(CMakeBuilder):
         for pc in ["libbrotlidec.pc", "libbrotlienc.pc"]:
             pc_path = self.tc.install_prefix / "lib" / "pkgconfig" / pc
             if pc_path.exists():
-                content = pc_path.read_text()
-                assert self._REQUIRES_PRIVATE in content, (
-                    f"{pc}: expected '{self._REQUIRES_PRIVATE}'"
-                )
-                pc_path.write_text(
-                    content.replace(self._REQUIRES_PRIVATE, "Requires: libbrotlicommon")
-                )
+                replace_in_file(pc_path, self._REQUIRES_PRIVATE, "Requires: libbrotlicommon")
                 print(f"  Patched {pc}: Requires.private -> Requires")

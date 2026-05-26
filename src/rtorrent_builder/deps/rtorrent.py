@@ -5,6 +5,7 @@ import re
 from .._options import RtorrentOptions
 from ..manifest import LibInfo
 from ..toolchain import Builder, ResolvedSource, Toolchain
+from ..utils import replace_in_file
 
 
 def _semver(v: str) -> tuple[int, ...]:
@@ -75,14 +76,11 @@ class RtorrentBuilder(Builder):
 
         if self._opts.ua:
             config_h = self.src_dir / "config.h"
-            content = config_h.read_text()
-            content = re.sub(
-                r"^#define USER_AGENT .*",
+            replace_in_file(
+                config_h,
+                re.compile(r"^#define USER_AGENT .*$", re.MULTILINE),
                 f'#define USER_AGENT std::string("{self._opts.ua}")',
-                content,
-                flags=re.MULTILINE,
             )
-            config_h.write_text(content)
 
         cmd.run(
             ["make", *cmd.nproc_args()],
