@@ -5,6 +5,7 @@ import re
 from .._options import LibtorrentOptions
 from ..manifest import LibInfo
 from ..toolchain import Builder, ResolvedSource, Toolchain
+from ..utils import replace_in_file
 
 
 class LibtorrentBuilder(Builder):
@@ -56,14 +57,11 @@ class LibtorrentBuilder(Builder):
 
         if self._opts.peer_name:
             config_h = self.src_dir / "config.h"
-            content = config_h.read_text()
-            content = re.sub(
-                r'^#define PEER_NAME ".*"',
+            replace_in_file(
+                config_h,
+                re.compile(r'^#define PEER_NAME ".*?"$', re.MULTILINE),
                 f'#define PEER_NAME "{self._opts.peer_name}"',
-                content,
-                flags=re.MULTILINE,
             )
-            config_h.write_text(content)
 
         cmd.run(
             ["make", *cmd.nproc_args()],
@@ -79,11 +77,9 @@ class LibtorrentBuilder(Builder):
         if pc_file.exists():
             ac = self.src_dir / "configure.ac"
             if ac.exists() and "LIBCURL" in ac.read_text():
-                content = pc_file.read_text()
-                patched = content.replace(
+                replace_in_file(
+                    pc_file,
                     "Requires.private: zlib, libcrypto\n",
                     "Requires.private: zlib, libcrypto, libcurl\n",
                 )
-                if patched != content:
-                    pc_file.write_text(patched)
         print(f"Built {self.name} {self.version}")
