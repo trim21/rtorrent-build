@@ -1,0 +1,45 @@
+name: new rtorrent release
+
+on:
+  schedule:
+    - cron: "8 17 * * *"
+  workflow_dispatch:
+  push:
+    branches: [master]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v8.1.0
+        with:
+          activate-environment: "true"
+
+      - name: Install dependencies
+        run: uv sync --frozen
+
+      - name: Check for new release
+        id: check
+        run: uv run python scripts/new-rtorrent-release.py
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run pre-commit
+        run: uvx pre-commit run --all-files || true
+
+      - name: Create pull request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          commit-message: "feat: add manifest for latest rtorrent release"
+          token: "${{ secrets.PAT }}"
+          title: "feat: add manifest for latest rtorrent release"
+          branch: auto/rtorrent-release
+          body: Automated manifest creation for the latest rtorrent release.
