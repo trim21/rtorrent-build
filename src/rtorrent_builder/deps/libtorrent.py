@@ -4,18 +4,22 @@ import re
 
 from .._options import LibtorrentOptions
 from ..manifest import LibInfo
+from ..run import Commander
 from ..toolchain import Builder, ResolvedSource, Toolchain
 from ..utils import replace_in_file
 
 
 class LibtorrentBuilder(Builder):
-    def __init__(self, toolchain: Toolchain, lib: LibInfo, source: ResolvedSource) -> None:
+    def __init__(
+        self, toolchain: Toolchain, lib: LibInfo, source: ResolvedSource, commander: Commander
+    ) -> None:
         self.tc = toolchain
         self.lib = lib
         self.name = source.name
         self.version = source.version
         self.src_dir = source.src_dir
         self._opts = LibtorrentOptions.from_options(toolchain.options)
+        self.commander = commander
 
     @property
     def cache_key_extra(self) -> list[str]:
@@ -26,7 +30,7 @@ class LibtorrentBuilder(Builder):
         if (self.src_dir / "configure").exists():
             return
         print(f"configure script not found, running autoreconf -ivf in {self.src_dir}")
-        self.tc.commander.run(
+        self.commander.run(
             ["autoreconf", "-ivf"],
             cwd=str(self.src_dir),
             env=self.tc.env,
@@ -37,7 +41,7 @@ class LibtorrentBuilder(Builder):
 
         print(f"Building {self.name} {self.version}")
         env = dict(self.tc.env)
-        cmd = self.tc.commander
+        cmd = self.commander
 
         if self.lib.cxx_std:
             env["CXXFLAGS"] = f"{env['CXXFLAGS']} -std={self.lib.cxx_std}"

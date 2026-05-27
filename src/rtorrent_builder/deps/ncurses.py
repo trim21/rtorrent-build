@@ -20,7 +20,7 @@ class NcursesBuilder(MakeBuilder):
         ]
 
     def configure(self) -> None:
-        self.tc.commander.run(
+        self.commander.run(
             [
                 "./configure",
                 f"--prefix={self.tc.install_prefix}",
@@ -44,7 +44,7 @@ class NcursesBuilder(MakeBuilder):
         )
 
     def make_args(self) -> list[str]:
-        return self.tc.commander.nproc_args()
+        return self.commander.nproc_args()
 
     def install_args(self) -> list[str]:
         return ["install"]

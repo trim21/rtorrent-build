@@ -1,13 +1,16 @@
 from __future__ import annotations
 
 from ..manifest import LibInfo
+from ..run import Commander
 from ..toolchain import ResolvedSource, Toolchain
 from ._make import MakeBuilder
 
 
 class LuaJITBuilder(MakeBuilder):
-    def __init__(self, toolchain: Toolchain, lib: LibInfo, source: ResolvedSource) -> None:
-        super().__init__(toolchain, lib, source)
+    def __init__(
+        self, toolchain: Toolchain, lib: LibInfo, source: ResolvedSource, commander: Commander
+    ) -> None:
+        super().__init__(toolchain, lib, source, commander)
         self._build_env: dict[str, str] | None = None
 
     @property

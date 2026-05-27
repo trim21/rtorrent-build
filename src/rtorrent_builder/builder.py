@@ -1,8 +1,11 @@
 """Build orchestrator for rtorrent-static."""
 
+import os
 import re
 import shutil
 import subprocess
+import time
+from dataclasses import dataclass
 from graphlib import TopologicalSorter
 from pathlib import Path
 
@@ -166,6 +169,69 @@ def _binary_path(tc: Toolchain, name: str) -> Path:
     raise KeyError(f"No binary path known for top-level package: {name}")
 
 
+@dataclass
+class _Timing:
+    name: str
+    start: float
+    end: float = 0.0
+    skipped: bool = False
+
+
+def _render_timeline(timings: list[_Timing], total_elapsed: float) -> None:
+    if not timings:
+        return
+
+    timings.sort(key=lambda t: t.start)
+    active = [t for t in timings if not t.skipped]
+    if not active:
+        return
+
+    origin = min(t.start for t in active)
+    wall = total_elapsed
+
+    bar_width = 50
+    name_w = max(len(t.name) for t in timings) + 1
+
+    def _fmt_ts(sec: float) -> str:
+        if sec < 60:
+            return f"{sec:.1f}s"
+        return f"{int(sec // 60)}m{sec % 60:.0f}s"
+
+    print()
+    print(f"Build Timeline ({_fmt_ts(wall)} wall)")
+    print("-" * (name_w + bar_width + 20))
+
+    for t in timings:
+        if t.skipped:
+            print(f"{' ' * name_w} {'.' * bar_width}  skipped")
+            continue
+
+        s = t.start - origin
+        e = t.end - origin
+        scol = int(s / wall * bar_width)
+        ecol = int(e / wall * bar_width)
+        scol = max(0, min(scol, bar_width - 1))
+        ecol = max(scol + 1, min(ecol, bar_width))
+
+        bar = "." * scol + "#" * (ecol - scol) + "." * (bar_width - ecol)
+        dur = _fmt_ts(t.end - t.start)
+        print(f"{t.name:<{name_w}} {bar}  {dur}")
+
+    print("-" * (name_w + bar_width + 20))
+    print()
+
+    summary_path = os.environ.get("GITHUB_STEP_SUMMARY")
+    if summary_path:
+        with open(summary_path, "a") as f:
+            f.write(f"## Build Timeline ({_fmt_ts(wall)} wall)\n\n")
+            f.write("| Package | Duration |\n")
+            f.write("|---------|----------|\n")
+            for t in timings:
+                dur = "skipped" if t.skipped else _fmt_ts(t.end - t.start)
+                f.write(f"| {t.name} | {dur} |\n")
+            f.write("\n")
+
+
 def build_rtorrent(
     *,
     variant: str,
@@ -213,33 +279,48 @@ def build_rtorrent(
     ts.prepare()
 
     resolved: dict[str, ResolvedSource] = {}
+    timings: list[_Timing] = []
+    build_origin = time.monotonic()
+
+    def _build_pkg(name: str) -> str:
+        t = _Timing(name=name, start=time.monotonic() - build_origin)
+        timings.append(t)
+
+        pkg = pkgs[name]
+        builder_cls = _BUILDER_MAP[name]
+        commander = tc.make_commander(name)
+
+        source = tc.prepare_source(name, pkg)
+        resolved[name] = source
+        builder = builder_cls(tc, pkg, source, commander)
+        features = builder.cache_key_extra
+
+        if not no_cache and tc.is_built(name, source.version, features):
+            print(f"Already built {name} {source.version}")
+            t.end = time.monotonic() - build_origin
+            return name
+
+        tc.clean_source(name, pkg)
+        source = tc.prepare_source(name, pkg)
+        resolved[name] = source
+        builder = builder_cls(tc, pkg, source, commander)
+        builder.build()
+        tc.mark_built(name, source.version, features)
+        t.end = time.monotonic() - build_origin
+        return name
 
     while ts.is_active():
         for name in ts.get_ready():
             if name in skip_deps:
                 print(f"Skipping {name}")
+                timings.append(_Timing(name=name, start=0, end=0, skipped=True))
                 ts.done(name)
                 continue
-            pkg = pkgs[name]
-            builder_cls = _BUILDER_MAP[name]
-
-            source = tc.prepare_source(name, pkg)
-            resolved[name] = source
-            builder = builder_cls(tc, pkg, source)
-            features = builder.cache_key_extra
-
-            if not no_cache and tc.is_built(name, source.version, features):
-                print(f"Already built {name} {source.version}")
-                ts.done(name)
-                continue
-
-            tc.clean_source(name, pkg)
-            source = tc.prepare_source(name, pkg)
-            resolved[name] = source
-            builder = builder_cls(tc, pkg, source)
-            builder.build()
-            tc.mark_built(name, source.version, features)
+            _build_pkg(name)
             ts.done(name)
+
+    total_elapsed = time.monotonic() - build_origin
+    _render_timeline(timings, total_elapsed)
 
     app_name = _top_package(pkgs)
     top_source = resolved[app_name]
