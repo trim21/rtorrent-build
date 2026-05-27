@@ -173,6 +173,7 @@ def _binary_path(tc: Toolchain, name: str) -> Path:
 class _Timing:
     name: str
     start: float
+    gen_end: float = 0.0
     end: float = 0.0
     skipped: bool = False
 
@@ -189,7 +190,7 @@ def _render_timeline(timings: list[_Timing], total_elapsed: float) -> None:
     origin = min(t.start for t in active)
     wall = total_elapsed
 
-    bar_width = 50
+    bar_width = min(os.get_terminal_size().columns - 30, 120)
     name_w = max(len(t.name) for t in timings) + 1
 
     def _fmt_ts(sec: float) -> str:
@@ -213,7 +214,11 @@ def _render_timeline(timings: list[_Timing], total_elapsed: float) -> None:
         scol = max(0, min(scol, bar_width - 1))
         ecol = max(scol + 1, min(ecol, bar_width))
 
-        bar = "." * scol + "#" * (ecol - scol) + "." * (bar_width - ecol)
+        g_end = t.gen_end - origin
+        gcol = int(g_end / wall * bar_width)
+        gcol = max(scol + 1, min(gcol, ecol))
+
+        bar = "." * scol + "\u2591" * (gcol - scol) + "#" * (ecol - gcol) + "." * (bar_width - ecol)
         dur = _fmt_ts(t.end - t.start)
         print(f"{t.name:<{name_w}} {bar}  {dur}")
 
@@ -297,6 +302,7 @@ def build_rtorrent(
 
         if not no_cache and tc.is_built(name, source.version, features):
             print(f"Already built {name} {source.version}")
+            t.gen_end = time.monotonic() - build_origin
             t.end = time.monotonic() - build_origin
             return name
 
@@ -304,6 +310,7 @@ def build_rtorrent(
         source = tc.prepare_source(name, pkg)
         resolved[name] = source
         builder = builder_cls(tc, pkg, source, commander)
+        t.gen_end = time.monotonic() - build_origin
         builder.build()
         tc.mark_built(name, source.version, features)
         t.end = time.monotonic() - build_origin
