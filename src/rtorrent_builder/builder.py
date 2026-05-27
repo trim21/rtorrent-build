@@ -229,11 +229,16 @@ def _render_timeline(timings: list[_Timing], total_elapsed: float) -> None:
     if summary_path:
         with open(summary_path, "a") as f:
             f.write(f"## Build Timeline ({_fmt_ts(wall)} wall)\n\n")
-            f.write("| Package | Duration |\n")
-            f.write("|---------|----------|\n")
+            f.write("| Package | Generate | Build | Total |\n")
+            f.write("|---------|----------|-------|-------|\n")
             for t in timings:
-                dur = "skipped" if t.skipped else _fmt_ts(t.end - t.start)
-                f.write(f"| {t.name} | {dur} |\n")
+                if t.skipped:
+                    f.write(f"| {t.name} | skipped | skipped | skipped |\n")
+                else:
+                    gen_dur = _fmt_ts(t.gen_end - t.start)
+                    build_dur = _fmt_ts(t.end - t.gen_end)
+                    total_dur = _fmt_ts(t.end - t.start)
+                    f.write(f"| {t.name} | {gen_dur} | {build_dur} | {total_dur} |\n")
             f.write("\n")
 
 
