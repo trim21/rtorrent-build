@@ -16,11 +16,6 @@ tasks:
     cmds:
       - python build.py rtorrent-master {{.CLI_ARGS}}
 
-  rtorrent-trim21-fork:
-    desc: Build rtorrent trim21 fork
-    cmds:
-      - python build.py rtorrent-trim21-fork {{.CLI_ARGS}}
-
   qbittorrent-nox:
     desc: Build qbittorrent-nox
     cmds:
@@ -32,5 +27,4 @@ tasks:
       - task: rtorrent-0.9.8
       - task: rtorrent-0.16.11
       - task: rtorrent-master
-      - task: rtorrent-trim21-fork
       - task: qbittorrent-nox
