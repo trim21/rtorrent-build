@@ -3,16 +3,20 @@ from __future__ import annotations
 from abc import abstractmethod
 
 from ..manifest import LibInfo
+from ..run import Commander
 from ..toolchain import Builder, ResolvedSource, Toolchain
 
 
 class CMakeBuilder(Builder):
-    def __init__(self, toolchain: Toolchain, lib: LibInfo, source: ResolvedSource) -> None:
+    def __init__(
+        self, toolchain: Toolchain, lib: LibInfo, source: ResolvedSource, commander: Commander
+    ) -> None:
         self.tc = toolchain
         self.lib = lib
         self.name = source.name
         self.version = source.version
         self.src_dir = source.src_dir
+        self.commander = commander
 
     @abstractmethod
     def cmake_args(self, prefix: str) -> list[str]: ...
@@ -26,7 +30,7 @@ class CMakeBuilder(Builder):
         env = self.tc.cmake_env
         build_dir = self.src_dir / "build"
         prefix = str(self.tc.install_prefix)
-        cmd = self.tc.commander
+        cmd = self.commander
 
         cmd.run(
             [

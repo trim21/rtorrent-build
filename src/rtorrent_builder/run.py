@@ -19,13 +19,13 @@ class Commander:
     both the console and the log file, giving terminal-like behaviour.
     """
 
-    def __init__(self, log_path: Path) -> None:
+    def __init__(self, log_path: Path, jobs: int = 1) -> None:
         self.log_path = log_path
+        self._jobs = jobs
 
-    @staticmethod
-    def nproc_args() -> list[str]:
-        jobs = os.environ.get("RTORRENT_JOBS")
-        return ["-j", jobs] if jobs else []
+    def nproc_args(self) -> list[str]:
+        jobs = os.environ.get("RTORRENT_JOBS") or str(self._jobs)
+        return ["-j", jobs]
 
     def _log_header(self, f, cmd_str: str) -> None:
         ts = datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S")

@@ -29,7 +29,9 @@ class ResolvedSource:
 
 class Builder(ABC):
     @abstractmethod
-    def __init__(self, toolchain: Toolchain, lib: LibInfo, source: ResolvedSource) -> None: ...
+    def __init__(
+        self, toolchain: Toolchain, lib: LibInfo, source: ResolvedSource, commander: Commander
+    ) -> None: ...
 
     @abstractmethod
     def build(self) -> None: ...
@@ -40,8 +42,6 @@ class Builder(ABC):
 
 
 class Toolchain:
-    commander: Commander
-
     def __init__(
         self,
         variant: str,
@@ -80,7 +80,12 @@ class Toolchain:
         ]:
             d.mkdir(parents=True, exist_ok=True)
 
-        self.commander = Commander(work_dir / "build.log")
+        self._log_dir = work_dir / "logs"
+        self._commander = Commander(work_dir / "prepare.log")
+
+    def make_commander(self, name: str) -> Commander:
+        self._log_dir.mkdir(parents=True, exist_ok=True)
+        return Commander(self._log_dir / f"{name}.log")
 
     def dep_prefix(self, dep_name: str) -> Path:
         return self.install_prefix
@@ -168,10 +173,10 @@ class Toolchain:
         if not (clone_dir / ".git").exists():
             clone_dir.parent.mkdir(parents=True, exist_ok=True)
             print(f"Cloning {source.git}...")
-            self.commander.run(["git", "clone", source.git, str(clone_dir)])
+            self._commander.run(["git", "clone", source.git, str(clone_dir)])
 
         print(f"Fetching {full_sha} from {source.git}...")
-        self.commander.run(["git", "-C", str(clone_dir), "fetch", "--prune", "origin", full_sha])
+        self._commander.run(["git", "-C", str(clone_dir), "fetch", "--prune", "origin", full_sha])
 
         tarball = self.package_dir / f"{name}-{full_sha}.tar.gz"
         src_dir = self.build_dir / f"{name}-{full_sha}"
@@ -179,7 +184,7 @@ class Toolchain:
         if not src_dir.exists():
             if not tarball.exists():
                 print(f"Creating archive {tarball}")
-                self.commander.run(
+                self._commander.run(
                     [
                         "git",
                         "-C",
@@ -231,7 +236,7 @@ class Toolchain:
 
         print(f"Syncing toolchain for {self.variant} at {toolchain_dir}")
         sync_env = os.environ | {"VIRTUAL_ENV": str(self.venv_dir)}
-        self.commander.run(
+        self._commander.run(
             ["uv", "sync", "--no-install-project"],
             cwd=str(toolchain_dir),
             env=sync_env,

@@ -1,15 +1,19 @@
 """OpenSSL builder."""
 
 from ..manifest import LibInfo
+from ..run import Commander
 from ..toolchain import Builder, ResolvedSource, Toolchain
 
 
 class OpensslBuilder(Builder):
-    def __init__(self, toolchain: Toolchain, lib: LibInfo, source: ResolvedSource) -> None:
+    def __init__(
+        self, toolchain: Toolchain, lib: LibInfo, source: ResolvedSource, commander: Commander
+    ) -> None:
         self.tc = toolchain
         self.name = source.name
         self.version = source.version
         self.src_dir = source.src_dir
+        self.commander = commander
 
     @property
     def cache_key_extra(self) -> list[str]:
@@ -18,7 +22,7 @@ class OpensslBuilder(Builder):
     def build(self) -> None:
         print(f"Building {self.name} {self.version}")
         env = self.tc.env
-        cmd = self.tc.commander
+        cmd = self.commander
 
         zig_cc = " ".join(self.tc.zig_cc)
         zig_cxx = " ".join(self.tc.zig_cxx)
