@@ -4,6 +4,7 @@ import os
 import re
 import shutil
 import subprocess
+import sys
 import time
 from dataclasses import dataclass
 from graphlib import TopologicalSorter
@@ -178,68 +179,44 @@ class _Timing:
     skipped: bool = False
 
 
-def _render_timeline(timings: list[_Timing], total_elapsed: float) -> None:
+def _fmt_ts(sec: float) -> str:
+    if sec < 60:
+        return f"{sec:.1f}s"
+    return f"{int(sec // 60)}m{sec % 60:.0f}s"
+
+
+def _append_step_summary_row(t: _Timing) -> None:
+    summary_path = os.environ.get("GITHUB_STEP_SUMMARY")
+    if not summary_path:
+        return
+    with open(summary_path, "a") as f:
+        if t.skipped:
+            f.write(f"| {t.name} | skipped | skipped | skipped |\n")
+        else:
+            gen_dur = _fmt_ts(t.gen_end - t.start)
+            build_dur = _fmt_ts(t.end - t.gen_end)
+            total_dur = _fmt_ts(t.end - t.start)
+            f.write(f"| {t.name} | {gen_dur} | {build_dur} | {total_dur} |\n")
+
+
+def _render_timeline_table(timings: list[_Timing], total_elapsed: float) -> None:
     if not timings:
         return
-
-    timings.sort(key=lambda t: t.start)
-    active = [t for t in timings if not t.skipped]
-    if not active:
-        return
-
-    origin = min(t.start for t in active)
-    wall = total_elapsed
-
-    bar_width = min(os.get_terminal_size().columns - 30, 120)
-    name_w = max(len(t.name) for t in timings) + 1
-
-    def _fmt_ts(sec: float) -> str:
-        if sec < 60:
-            return f"{sec:.1f}s"
-        return f"{int(sec // 60)}m{sec % 60:.0f}s"
-
-    print()
-    print(f"Build Timeline ({_fmt_ts(wall)} wall)")
-    print("-" * (name_w + bar_width + 20))
-
+    wall = _fmt_ts(total_elapsed)
+    lines = [
+        f"Build Timeline ({wall} wall)",
+        "| Package | Generate | Build | Total |",
+        "|---------|----------|-------|-------|",
+    ]
     for t in timings:
         if t.skipped:
-            print(f"{' ' * name_w} {'.' * bar_width}  skipped")
-            continue
-
-        s = t.start - origin
-        e = t.end - origin
-        scol = int(s / wall * bar_width)
-        ecol = int(e / wall * bar_width)
-        scol = max(0, min(scol, bar_width - 1))
-        ecol = max(scol + 1, min(ecol, bar_width))
-
-        g_end = t.gen_end - origin
-        gcol = int(g_end / wall * bar_width)
-        gcol = max(scol + 1, min(gcol, ecol))
-
-        bar = "." * scol + "\u2591" * (gcol - scol) + "#" * (ecol - gcol) + "." * (bar_width - ecol)
-        dur = _fmt_ts(t.end - t.start)
-        print(f"{t.name:<{name_w}} {bar}  {dur}")
-
-    print("-" * (name_w + bar_width + 20))
-    print()
-
-    summary_path = os.environ.get("GITHUB_STEP_SUMMARY")
-    if summary_path:
-        with open(summary_path, "a") as f:
-            f.write(f"## Build Timeline ({_fmt_ts(wall)} wall)\n\n")
-            f.write("| Package | Generate | Build | Total |\n")
-            f.write("|---------|----------|-------|-------|\n")
-            for t in timings:
-                if t.skipped:
-                    f.write(f"| {t.name} | skipped | skipped | skipped |\n")
-                else:
-                    gen_dur = _fmt_ts(t.gen_end - t.start)
-                    build_dur = _fmt_ts(t.end - t.gen_end)
-                    total_dur = _fmt_ts(t.end - t.start)
-                    f.write(f"| {t.name} | {gen_dur} | {build_dur} | {total_dur} |\n")
-            f.write("\n")
+            lines.append(f"| {t.name} | skipped | skipped | skipped |")
+        else:
+            gen_dur = _fmt_ts(t.gen_end - t.start)
+            build_dur = _fmt_ts(t.end - t.gen_end)
+            total_dur = _fmt_ts(t.end - t.start)
+            lines.append(f"| {t.name} | {gen_dur} | {build_dur} | {total_dur} |")
+    sys.stderr.write("\n".join(lines) + "\n\n")
 
 
 def build_rtorrent(
@@ -292,6 +269,12 @@ def build_rtorrent(
     timings: list[_Timing] = []
     build_origin = time.monotonic()
 
+    summary_path = os.environ.get("GITHUB_STEP_SUMMARY")
+    if summary_path:
+        with open(summary_path, "a") as f:
+            f.write("| Package | Generate | Build | Total |\n")
+            f.write("|---------|----------|-------|-------|\n")
+
     def _build_pkg(name: str) -> str:
         t = _Timing(name=name, start=time.monotonic() - build_origin)
         timings.append(t)
@@ -309,6 +292,7 @@ def build_rtorrent(
             print(f"Already built {name} {source.version}")
             t.gen_end = time.monotonic() - build_origin
             t.end = time.monotonic() - build_origin
+            _append_step_summary_row(t)
             return name
 
         tc.clean_source(name, pkg)
@@ -319,20 +303,23 @@ def build_rtorrent(
         builder.build()
         tc.mark_built(name, source.version, features)
         t.end = time.monotonic() - build_origin
+        _append_step_summary_row(t)
         return name
 
     while ts.is_active():
         for name in ts.get_ready():
             if name in skip_deps:
                 print(f"Skipping {name}")
-                timings.append(_Timing(name=name, start=0, end=0, skipped=True))
+                t = _Timing(name=name, start=0, end=0, skipped=True)
+                timings.append(t)
+                _append_step_summary_row(t)
                 ts.done(name)
                 continue
             _build_pkg(name)
             ts.done(name)
 
     total_elapsed = time.monotonic() - build_origin
-    _render_timeline(timings, total_elapsed)
+    _render_timeline_table(timings, total_elapsed)
 
     app_name = _top_package(pkgs)
     top_source = resolved[app_name]
