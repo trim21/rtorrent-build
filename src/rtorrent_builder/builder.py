@@ -185,38 +185,50 @@ def _fmt_ts(sec: float) -> str:
     return f"{int(sec // 60)}m{sec % 60:.0f}s"
 
 
-def _append_step_summary_row(t: _Timing) -> None:
-    summary_path = os.environ.get("GITHUB_STEP_SUMMARY")
-    if not summary_path:
-        return
-    with open(summary_path, "a") as f:
-        if t.skipped:
-            f.write(f"| {t.name} | skipped | skipped | skipped |\n")
-        else:
-            gen_dur = _fmt_ts(t.gen_end - t.start)
-            build_dur = _fmt_ts(t.end - t.gen_end)
-            total_dur = _fmt_ts(t.end - t.start)
-            f.write(f"| {t.name} | {gen_dur} | {build_dur} | {total_dur} |\n")
-
-
 def _render_timeline_table(timings: list[_Timing], total_elapsed: float) -> None:
     if not timings:
         return
     wall = _fmt_ts(total_elapsed)
-    lines = [
-        f"Build Timeline ({wall} wall)",
-        "| Package | Generate | Build | Total |",
-        "|---------|----------|-------|-------|",
-    ]
+
+    names = [t.name for t in timings]
+    name_w = max(max(len(n) for n in names), 8)
+
+    gens: list[str] = []
+    builds: list[str] = []
+    totals: list[str] = []
     for t in timings:
         if t.skipped:
-            lines.append(f"| {t.name} | skipped | skipped | skipped |")
+            gens.append("skipped")
+            builds.append("skipped")
+            totals.append("skipped")
         else:
-            gen_dur = _fmt_ts(t.gen_end - t.start)
-            build_dur = _fmt_ts(t.end - t.gen_end)
-            total_dur = _fmt_ts(t.end - t.start)
-            lines.append(f"| {t.name} | {gen_dur} | {build_dur} | {total_dur} |")
-    sys.stderr.write("\n".join(lines) + "\n\n")
+            gens.append(_fmt_ts(t.gen_end - t.start))
+            builds.append(_fmt_ts(t.end - t.gen_end))
+            totals.append(_fmt_ts(t.end - t.start))
+
+    header = f"| {'':<{name_w}} | " + " | ".join(f"{n:^{name_w}}" for n in names) + " |"
+    sep = "|-" + "-" * name_w + "-|" + "|".join("-" * (name_w + 2) for _ in names) + "|"
+    gen_row = f"| {'Generate':<{name_w}} | " + " | ".join(f"{g:>{name_w}}" for g in gens) + " |"
+    build_row = f"| {'Build':<{name_w}} | " + " | ".join(f"{b:>{name_w}}" for b in builds) + " |"
+    total_row = f"| {'Total':<{name_w}} | " + " | ".join(f"{t:>{name_w}}" for t in totals) + " |"
+
+    lines = [
+        f"Build Timeline ({wall} wall)",
+        header,
+        sep,
+        gen_row,
+        build_row,
+        total_row,
+        "",
+    ]
+    out = "\n".join(lines)
+
+    sys.stderr.write(out)
+
+    summary_path = os.environ.get("GITHUB_STEP_SUMMARY")
+    if summary_path:
+        with open(summary_path, "a") as f:
+            f.write(out)
 
 
 def build_rtorrent(
@@ -269,12 +281,6 @@ def build_rtorrent(
     timings: list[_Timing] = []
     build_origin = time.monotonic()
 
-    summary_path = os.environ.get("GITHUB_STEP_SUMMARY")
-    if summary_path:
-        with open(summary_path, "a") as f:
-            f.write("| Package | Generate | Build | Total |\n")
-            f.write("|---------|----------|-------|-------|\n")
-
     def _build_pkg(name: str) -> str:
         t = _Timing(name=name, start=time.monotonic() - build_origin)
         timings.append(t)
@@ -292,7 +298,6 @@ def build_rtorrent(
             print(f"Already built {name} {source.version}")
             t.gen_end = time.monotonic() - build_origin
             t.end = time.monotonic() - build_origin
-            _append_step_summary_row(t)
             return name
 
         tc.clean_source(name, pkg)
@@ -303,16 +308,13 @@ def build_rtorrent(
         builder.build()
         tc.mark_built(name, source.version, features)
         t.end = time.monotonic() - build_origin
-        _append_step_summary_row(t)
         return name
 
     while ts.is_active():
         for name in ts.get_ready():
             if name in skip_deps:
                 print(f"Skipping {name}")
-                t = _Timing(name=name, start=0, end=0, skipped=True)
-                timings.append(t)
-                _append_step_summary_row(t)
+                timings.append(_Timing(name=name, start=0, end=0, skipped=True))
                 ts.done(name)
                 continue
             _build_pkg(name)
