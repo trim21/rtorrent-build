@@ -19,9 +19,9 @@ class Commander:
     both the console and the log file, giving terminal-like behaviour.
     """
 
-    def __init__(self, log_path: Path, jobs: int = 1) -> None:
+    def __init__(self, log_path: Path, jobs: int | None = None) -> None:
         self.log_path = log_path
-        self._jobs = jobs
+        self._jobs = jobs if jobs is not None else (os.cpu_count() or 1)
 
     def nproc_args(self) -> list[str]:
         jobs = os.environ.get("RTORRENT_JOBS") or str(self._jobs)
