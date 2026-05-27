@@ -1,6 +1,9 @@
 """CLI entry point for rtorrent-static builder."""
 
 import json
+import re
+import subprocess
+from enum import Enum
 from pathlib import Path
 
 import click
@@ -11,7 +14,24 @@ from .builder import _BUILDER_MAP, _FINAL_PACKAGES, build_rtorrent
 from .docker import DISTROLESS_GLIBC_VERSION, build_docker_image
 from .manifest import load_manifest
 
+
+class CliLibc(Enum):
+    """Extended libc choices for CLI including 'current'."""
+
+    glibc = Libc.glibc.value
+    musl = Libc.musl.value
+    current = "current"
+
+
 _MANIFESTS_DIR = PROJECT_ROOT / "manifests"
+
+
+def _detect_host_glibc() -> str:
+    output = subprocess.check_output(["ldd", "--version"], text=True)
+    match = re.search(r"(\d+\.\d+)", output)
+    if not match:
+        raise RuntimeError("Could not detect host glibc version from ldd output")
+    return match.group(1)
 
 
 def _variant_choices() -> list[str]:
@@ -63,10 +83,10 @@ def _dep_choices() -> list[str]:
 )
 @click.option(
     "--libc",
-    type=click.Choice([e.value for e in Libc]),
-    default=Libc.glibc.value,
+    type=click.Choice([e.value for e in CliLibc]),
+    default=CliLibc.glibc.value,
     show_default=True,
-    help="Target libc: glibc (dynamic) or musl (fully static)",
+    help="Target libc: glibc (dynamic), musl (fully static), current (host glibc)",
 )
 @click.option(
     "--arch",
@@ -114,6 +134,19 @@ def main(
         options["rtorrent.disguise"] = "1"
         options["rtorrent-libtorrent.disguise"] = "1"
 
+    libc_enum = CliLibc(libc)
+    if libc_enum == CliLibc.current and build_docker:
+        raise click.BadParameter("--libc current cannot be used with --docker")
+    glibc_override: str | None = None
+    if libc_enum == CliLibc.current:
+        resolved_libc = Libc.glibc
+        glibc_override = _detect_host_glibc()
+        print(f"Detected host glibc version: {glibc_override}")
+    else:
+        resolved_libc = Libc(libc_enum.value)
+        if build_docker:
+            glibc_override = DISTROLESS_GLIBC_VERSION
+
     output_bin = build_rtorrent(
         variant=variant,
         manifest=manifest,
@@ -123,9 +156,9 @@ def main(
         clean=clean,
         no_cache=no_cache,
         options=options,
-        libc=Libc(libc),
+        libc=resolved_libc,
         arch=Arch(arch),
-        docker_target_glibc=DISTROLESS_GLIBC_VERSION if build_docker else None,
+        docker_target_glibc=glibc_override,
     )
 
     if build_docker:

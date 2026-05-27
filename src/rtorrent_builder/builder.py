@@ -248,7 +248,7 @@ def build_rtorrent(
     if libc == Libc.musl:
         output_name = f"{app_name}-{top_source.version}.{arch.safe}-musl"
     else:
-        output_name = f"{app_name}-{top_source.version}.{arch.safe}.glibc.{manifest.target_glibc}"
+        output_name = f"{app_name}-{top_source.version}.{arch.safe}.glibc.{glibc_target}"
     output_bin = output_dir / output_name
     if not binary.exists():
         raise FileNotFoundError(f"Binary not found: {binary}")
