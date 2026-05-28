@@ -4,65 +4,49 @@
   "packages": {
     "zlib": {
       "source": {
-        "git": {
-          "repo": "zlib-ng/zlib-ng",
-          "tag_range": ">=2,<3"
-        }
+        "github": "zlib-ng/zlib-ng",
+        "tag_range": ">=2,<3"
       }
     },
     "brotli": {
       "source": {
-        "git": {
-          "repo": "google/brotli",
-          "tag_range": ">=1,<2"
-        }
+        "github": "google/brotli",
+        "tag_range": ">=1,<2"
       }
     },
     "zstd": {
       "source": {
-        "git": {
-          "repo": "facebook/zstd",
-          "tag_range": ">=1,<2"
-        }
+        "github": "facebook/zstd",
+        "tag_range": ">=1,<2"
       }
     },
     "openssl": {
       "source": {
-        "git": {
-          "repo": "openssl/openssl",
-          "tag_range": ">=3,<4"
-        }
+        "github": "openssl/openssl",
+        "tag_range": ">=3,<4"
       }
     },
     "ncurses": {
       "source": {
-        "url": {
-          "url": "https://ftp.gnu.org/pub/gnu/ncurses/ncurses-6.6.tar.gz"
-        }
+        "url": "https://ftp.gnu.org/pub/gnu/ncurses/ncurses-6.6.tar.gz"
       },
       "version": "6.6"
     },
     "curl": {
       "source": {
-        "git": {
-          "repo": "curl/curl",
-          "tag_range": ">=8,<9"
-        }
+        "github": "curl/curl",
+        "tag_range": ">=8,<9"
       }
     },
     "cares": {
       "source": {
-        "git": {
-          "repo": "c-ares/c-ares",
-          "tag_range": ">=1,<2"
-        }
+        "github": "c-ares/c-ares",
+        "tag_range": ">=1,<2"
       }
     },
     "lua": {
       "source": {
-        "url": {
-          "url": "https://www.lua.org/ftp/lua-5.4.8.tar.gz"
-        }
+        "url": "https://www.lua.org/ftp/lua-5.4.8.tar.gz"
       },
       "version": "5.4.8"
     }

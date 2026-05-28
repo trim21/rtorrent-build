@@ -11,7 +11,7 @@ from pathlib import Path
 import httpx
 from packaging.specifiers import SpecifierSet
 
-from rtorrent_builder.manifest import _load_jsonc_text
+from rtorrent_builder.manifest import GitHubTagSource, _load_jsonc_text, _raw_manifest_adapter
 
 _MANIFESTS_DIR = Path("manifests").resolve()
 _REPO = "rakshasa/rtorrent"
@@ -40,9 +40,11 @@ def _fetch_latest_release() -> dict[str, str]:
 def _read_existing_tag_range(manifest_path: Path) -> str | None:
     if not manifest_path.exists():
         return None
-    data: dict = _load_jsonc_text(manifest_path.read_text())  # type: ignore[assignment]
-    source = data.get("packages", {}).get("rtorrent", {}).get("source", {})
-    return source.get("git", {}).get("tag_range")
+    raw = _raw_manifest_adapter.validate_python(_load_jsonc_text(manifest_path.read_text()))
+
+    if isinstance(raw.packages["rtorrent"].source, GitHubTagSource):
+        return raw.packages["rtorrent"].source.tag_range
+    return None
 
 
 def _manifest_content(version_prefix: str) -> str:
@@ -54,18 +56,14 @@ def _manifest_content(version_prefix: str) -> str:
         "packages": {
             "rtorrent": {
                 "source": {
-                    "git": {
-                        "repo": _GIT_URL,
-                        "tag_range": tag_range,
-                    }
+                    "github": _GIT_URL,
+                    "tag_range": tag_range,
                 },
             },
             "rtorrent-libtorrent": {
                 "source": {
-                    "git": {
-                        "repo": "https://github.com/rakshasa/libtorrent.git",
-                        "tag_range": tag_range,
-                    }
+                    "github": "https://github.com/rakshasa/libtorrent.git",
+                    "tag_range": tag_range,
                 },
             },
         },

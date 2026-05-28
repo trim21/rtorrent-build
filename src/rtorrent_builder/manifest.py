@@ -15,24 +15,21 @@ def _load_jsonc_text(text: str) -> object:
 
 @dataclass(frozen=True, kw_only=True)
 class GitHubTagSource:
-    repo: str
+    github: str
     tag_range: str
 
 
 @dataclass(frozen=True, kw_only=True)
 class GitHubRefSource:
-    repo: str
+    github: str
     ref: str
 
 
 @dataclass(frozen=True, kw_only=True)
 class GitHubReleaseSource:
-    repo: str
+    github: str
     tag_range: str
     asset: str
-
-
-GitSource = GitHubTagSource | GitHubRefSource | GitHubReleaseSource
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -40,29 +37,12 @@ class URLSource:
     url: str
 
 
-@dataclass(frozen=True, kw_only=True)
-class Source:
-    git: GitSource | None = None
-    url: URLSource | None = None
-
-    def __post_init__(self) -> None:
-        if self.git is None and self.url is None:
-            raise ValueError("Source must have either 'git' or 'url'")
-        if self.git is not None and self.url is not None:
-            raise ValueError("Source cannot have both 'git' and 'url'")
-
-    @property
-    def kind(self) -> str:
-        if self.git is not None:
-            return "git"
-        if self.url is not None:
-            return "url"
-        raise ValueError("Source has neither git nor url")
+PackageSource = GitHubTagSource | GitHubRefSource | GitHubReleaseSource | URLSource
 
 
 @dataclass(frozen=True, kw_only=True)
 class LibInfo:
-    source: Source
+    source: PackageSource
     version: str = ""
     cxx_std: str | None = None
 
@@ -91,7 +71,7 @@ class ResolvedPackage:
 
     def to_libinfo(self) -> LibInfo:
         return LibInfo(
-            source=Source(url=URLSource(url=self.url)),
+            source=URLSource(url=self.url),
             version=self.version,
             cxx_std=self.cxx_std,
         )
@@ -115,15 +95,15 @@ class LockFile:
 
 @dataclass(frozen=True, kw_only=True)
 class Lock:
-    git: dict[str, str] = field(default_factory=dict)
+    github: dict[str, str] = field(default_factory=dict)
     resolved_tags: dict[str, str] = field(default_factory=dict)
     manifest_hash: str | None = None
 
-    def sha(self, repo: str, ref: str) -> str | None:
-        return self.git.get(f"{repo}#{ref}")
+    def sha(self, github: str, ref: str) -> str | None:
+        return self.github.get(f"{github}#{ref}")
 
-    def resolved_tag(self, repo: str, ref: str) -> str | None:
-        return self.resolved_tags.get(f"{repo}#{ref}")
+    def resolved_tag(self, github: str, ref: str) -> str | None:
+        return self.resolved_tags.get(f"{github}#{ref}")
 
 
 _raw_manifest_adapter = TypeAdapter(RawManifest)
@@ -150,7 +130,7 @@ def load_lock(manifests_dir: Path, variant: str) -> Lock:
 
 def save_lock(lock: Lock, manifests_dir: Path, variant: str) -> None:
     lockfile = manifests_dir / f"{variant}.lock"
-    data: dict[str, object] = {"git": lock.git}
+    data: dict[str, object] = {"github": lock.github}
     if lock.resolved_tags:
         data["resolved_tags"] = lock.resolved_tags
     if lock.manifest_hash is not None:
@@ -175,11 +155,11 @@ def _collect_lock_entries(manifest_path: Path, manifests_dir: Path) -> dict[str,
     raw = _raw_manifest_adapter.validate_python(_load_jsonc_text(manifest_path.read_text()))
     raw = _resolve_extends(raw, manifests_dir)
     for pkg in raw.packages.values():
-        if isinstance(pkg.source.git, GitHubRefSource):
-            key = f"{pkg.source.git.repo}#{pkg.source.git.ref}"
-            entries[key] = pkg.source.git.ref
-        elif isinstance(pkg.source.git, (GitHubTagSource, GitHubReleaseSource)):
-            key = f"{pkg.source.git.repo}#tag"
+        if isinstance(pkg.source, GitHubRefSource):
+            key = f"{pkg.source.github}#{pkg.source.ref}"
+            entries[key] = pkg.source.ref
+        elif isinstance(pkg.source, (GitHubTagSource, GitHubReleaseSource)):
+            key = f"{pkg.source.github}#tag"
             entries[key] = ""
     return entries
 
@@ -192,27 +172,27 @@ def _collect_tag_range_entries(
     raw = _resolve_extends(raw, manifests_dir)
     result: dict[str, tuple[str, str]] = {}
     for name, pkg in raw.packages.items():
-        if isinstance(pkg.source.git, (GitHubTagSource, GitHubReleaseSource)):
-            key = f"{pkg.source.git.repo}#tag"
-            result[name] = (key, pkg.source.git.tag_range)
+        if isinstance(pkg.source, (GitHubTagSource, GitHubReleaseSource)):
+            key = f"{pkg.source.github}#tag"
+            result[name] = (key, pkg.source.tag_range)
     return result
 
 
 def source_identity(pkg: LibInfo) -> str:
-    if isinstance(pkg.source.git, GitHubTagSource):
-        return f"git:{pkg.source.git.repo}#tag={pkg.source.git.tag_range}"
-    if isinstance(pkg.source.git, GitHubReleaseSource):
-        return f"git:{pkg.source.git.repo}#release={pkg.source.git.tag_range}"
-    if isinstance(pkg.source.git, GitHubRefSource):
-        return f"git:{pkg.source.git.repo}#{pkg.source.git.ref}"
-    if pkg.source.url is not None:
-        return f"url:{pkg.source.url.url}"
+    if isinstance(pkg.source, GitHubTagSource):
+        return f"github:{pkg.source.github}#tag={pkg.source.tag_range}"
+    if isinstance(pkg.source, GitHubReleaseSource):
+        return f"github:{pkg.source.github}#release={pkg.source.tag_range}"
+    if isinstance(pkg.source, GitHubRefSource):
+        return f"github:{pkg.source.github}#{pkg.source.ref}"
+    if isinstance(pkg.source, URLSource):
+        return f"url:{pkg.source.url}"
     raise ValueError("Package has no source")
 
 
 def _validate_packages(packages: dict[str, LibInfo]) -> None:
     for name, pkg in packages.items():
-        if pkg.source.url is not None and not pkg.version:
+        if isinstance(pkg.source, URLSource) and not pkg.version:
             raise ValueError(f"Package {name!r} with URL source requires a version")
 
 

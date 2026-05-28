@@ -5,18 +5,14 @@
   "packages": {
     "rtorrent": {
       "source": {
-        "git": {
-          "repo": "rakshasa/rtorrent",
-          "ref": "master"
-        }
+        "github": "rakshasa/rtorrent",
+        "ref": "master"
       }
     },
     "rtorrent-libtorrent": {
       "source": {
-        "git": {
-          "repo": "rakshasa/libtorrent",
-          "ref": "master"
-        }
+        "github": "rakshasa/libtorrent",
+        "ref": "master"
       }
     }
   }

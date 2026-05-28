@@ -12,10 +12,9 @@ from .manifest import (
     GitHubRefSource,
     GitHubReleaseSource,
     GitHubTagSource,
-    GitSource,
     LibInfo,
+    PackageSource,
     ResolvedManifest,
-    Source,
     URLSource,
     _load_jsonc_text,
     _lockfile_adapter,
@@ -80,36 +79,36 @@ def _resolve_ref(owner_repo: str, ref: str) -> str:
     raise ValueError(f"Ref {ref} not found in {owner_repo}")
 
 
-def _resolve_git_source(git: GitSource) -> tuple[str, str]:
-    """Resolve a GitSource to (url, version)."""
-    if isinstance(git, GitHubRefSource):
-        sha = _resolve_ref(git.repo, git.ref)
-        url = f"https://github.com/{git.repo}/archive/{sha}.tar.gz"
+def _resolve_github_source(source: PackageSource) -> tuple[str, str]:
+    """Resolve a GitHub source to (url, version)."""
+    if isinstance(source, GitHubRefSource):
+        sha = _resolve_ref(source.github, source.ref)
+        url = f"https://github.com/{source.github}/archive/{sha}.tar.gz"
         return url, sha[:12]
-    if isinstance(git, (GitHubTagSource, GitHubReleaseSource)):
-        tags = _gh_tags(git.repo)
-        versions = [(t, _extract_version(t, git.repo)) for t in tags]
+    if isinstance(source, (GitHubTagSource, GitHubReleaseSource)):
+        tags = _gh_tags(source.github)
+        versions = [(t, _extract_version(t, source.github)) for t in tags]
         version_strings = [v for _, v in versions if v]
         if not version_strings:
-            raise ValueError(f"No version tags found for {git.repo}")
-        best = resolve_best(version_strings, git.tag_range)
+            raise ValueError(f"No version tags found for {source.github}")
+        best = resolve_best(version_strings, source.tag_range)
         tag = next(t for t, v in versions if v == best)
-        if isinstance(git, GitHubReleaseSource):
-            asset = git.asset.replace("{version}", best)
-            url = f"https://github.com/{git.repo}/releases/download/{tag}/{asset}"
+        if isinstance(source, GitHubReleaseSource):
+            asset = source.asset.format(version=best)
+            url = f"https://github.com/{source.github}/releases/download/{tag}/{asset}"
         else:
-            url = f"https://github.com/{git.repo}/archive/refs/tags/{tag}.tar.gz"
+            url = f"https://github.com/{source.github}/archive/refs/tags/{tag}.tar.gz"
         return url, best
-    raise TypeError(f"Unsupported git source type: {type(git)}")
+    raise TypeError(f"Unsupported git source type: {type(source)}")
 
 
-def _resolve_source(pkg_name: str, lib: LibInfo) -> tuple[Source, str]:
+def _resolve_source(pkg_name: str, lib: LibInfo) -> tuple[URLSource, str]:
     """Resolve a LibInfo's source to (URL-only source, version)."""
-    if lib.source.url is not None:
-        return Source(url=lib.source.url), lib.version
-    if lib.source.git is not None:
-        url, version = _resolve_git_source(lib.source.git)
-        return Source(url=URLSource(url=url)), version
+    if isinstance(lib.source, URLSource):
+        return lib.source, lib.version
+    if isinstance(lib.source, (GitHubRefSource, GitHubTagSource, GitHubReleaseSource)):
+        url, version = _resolve_github_source(lib.source)
+        return URLSource(url=url), version
     raise ValueError(f"Package {pkg_name!r} has no source")
 
 
@@ -128,15 +127,14 @@ def resolve_manifest(variant: str, manifests_dir: Path | None = None) -> None:
 
     resolved_packages: dict[str, dict] = {}
     for name, pkg in raw.packages.items():
-        source, version = _resolve_source(name, pkg)
-        assert source.url is not None
-        entry: dict = {"url": source.url.url}
+        url_source, version = _resolve_source(name, pkg)
+        entry: dict = {"url": url_source.url}
         if version:
             entry["version"] = version
         if pkg.cxx_std:
             entry["cxx_std"] = pkg.cxx_std
         resolved_packages[name] = entry
-        print(f"  {name}: {source.url.url[:60]}...")
+        print(f"  {name}: {url_source.url[:60]}...")
 
     manifest_hash = compute_manifest_hash(manifest_path, manifests_dir)
     lock_data = {

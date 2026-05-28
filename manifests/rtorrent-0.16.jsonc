@@ -5,18 +5,14 @@
   "packages": {
     "rtorrent": {
       "source": {
-        "git": {
-          "repo": "rakshasa/rtorrent",
-          "tag_range": ">=0.16,<0.17"
-        }
+        "github": "rakshasa/rtorrent",
+        "tag_range": ">=0.16,<0.17"
       }
     },
     "rtorrent-libtorrent": {
       "source": {
-        "git": {
-          "repo": "rakshasa/rtorrent",
-          "tag_range": ">=0.16,<0.17"
-        }
+        "github": "rakshasa/rtorrent",
+        "tag_range": ">=0.16,<0.17"
       }
     }
   }

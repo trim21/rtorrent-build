@@ -1,5 +1,5 @@
 {
-  "manifest_hash": "281c12f523e5e660191f49beb9431326be75235ae627df237b5d7d9469b96cb4",
+  "manifest_hash": "5b2dac8800d92c37ebba09d4e73d225249db898e54707b7c753e539e1d44c704",
   "packages": {
     "brotli": {
       "url": "https://github.com/google/brotli/archive/refs/tags/v1.2.0.tar.gz",

@@ -2,8 +2,8 @@
   "$defs": {
     "GitHubRefSource": {
       "properties": {
-        "repo": {
-          "title": "Repo",
+        "github": {
+          "title": "Github",
           "type": "string"
         },
         "ref": {
@@ -12,7 +12,7 @@
         }
       },
       "required": [
-        "repo",
+        "github",
         "ref"
       ],
       "title": "GitHubRefSource",
@@ -20,8 +20,8 @@
     },
     "GitHubReleaseSource": {
       "properties": {
-        "repo": {
-          "title": "Repo",
+        "github": {
+          "title": "Github",
           "type": "string"
         },
         "tag_range": {
@@ -34,7 +34,7 @@
         }
       },
       "required": [
-        "repo",
+        "github",
         "tag_range",
         "asset"
       ],
@@ -43,8 +43,8 @@
     },
     "GitHubTagSource": {
       "properties": {
-        "repo": {
-          "title": "Repo",
+        "github": {
+          "title": "Github",
           "type": "string"
         },
         "tag_range": {
@@ -53,7 +53,7 @@
         }
       },
       "required": [
-        "repo",
+        "github",
         "tag_range"
       ],
       "title": "GitHubTagSource",
@@ -62,7 +62,21 @@
     "LibInfo": {
       "properties": {
         "source": {
-          "$ref": "#/$defs/Source"
+          "anyOf": [
+            {
+              "$ref": "#/$defs/GitHubTagSource"
+            },
+            {
+              "$ref": "#/$defs/GitHubRefSource"
+            },
+            {
+              "$ref": "#/$defs/GitHubReleaseSource"
+            },
+            {
+              "$ref": "#/$defs/URLSource"
+            }
+          ],
+          "title": "Source"
         },
         "version": {
           "default": "",
@@ -86,41 +100,6 @@
         "source"
       ],
       "title": "LibInfo",
-      "type": "object"
-    },
-    "Source": {
-      "properties": {
-        "git": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/GitHubTagSource"
-            },
-            {
-              "$ref": "#/$defs/GitHubRefSource"
-            },
-            {
-              "$ref": "#/$defs/GitHubReleaseSource"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "title": "Git"
-        },
-        "url": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/URLSource"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null
-        }
-      },
-      "title": "Source",
       "type": "object"
     },
     "URLSource": {
