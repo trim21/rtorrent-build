@@ -2,7 +2,7 @@
   "manifest_hash": "00198fa479e1600b0f377192c3435088662daabd2234a1303b7ef94132bb6cdf",
   "packages": {
     "boost": {
-      "url": "https://github.com/boostorg/boost/archive/refs/tags/boost-1.86.0.tar.gz",
+      "url": "https://archives.boost.io/release/1.86.0/source/boost_1_86_0.tar.gz",
       "version": "1.86.0"
     },
     "brotli": {
