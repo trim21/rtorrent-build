@@ -5,19 +5,19 @@
   "packages": {
     "rtorrent": {
       "source": {
-        "url": {
-          "url": "https://github.com/rakshasa/rtorrent/releases/download/v0.16.12/rtorrent-0.16.12.tar.gz"
+        "git": {
+          "repo": "rakshasa/rtorrent",
+          "tag_range": ">=0.16,<0.17"
         }
-      },
-      "version": "0.16.12"
+      }
     },
     "rtorrent-libtorrent": {
       "source": {
-        "url": {
-          "url": "https://github.com/rakshasa/rtorrent/releases/download/v0.16.12/libtorrent-0.16.12.tar.gz"
+        "git": {
+          "repo": "rakshasa/rtorrent",
+          "tag_range": ">=0.16,<0.17"
         }
-      },
-      "version": "0.16.12"
+      }
     }
   }
 }

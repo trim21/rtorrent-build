@@ -6,7 +6,7 @@
     "rtorrent": {
       "source": {
         "git": {
-          "repo": "https://github.com/rakshasa/rtorrent",
+          "repo": "rakshasa/rtorrent",
           "ref": "master"
         }
       }
@@ -14,7 +14,7 @@
     "rtorrent-libtorrent": {
       "source": {
         "git": {
-          "repo": "https://github.com/rakshasa/libtorrent",
+          "repo": "rakshasa/libtorrent",
           "ref": "master"
         }
       }

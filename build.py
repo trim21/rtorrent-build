@@ -1,10 +1,10 @@
 """Entry point script for building static rtorrent binaries.
 
 Usage:
-    python build.py rtorrent-0.9.8
-    python build.py rtorrent-0.9.8 rtorrent-0.16.11 rtorrent-master
-    python build.py                         # builds all variants
-    python build.py --libc musl --arch amd/v2 rtorrent-master
+    python build.py build rtorrent-0.9.8
+    python build.py build rtorrent-master --libc musl --arch amd/v2
+    python build.py lock
+    python build.py lock rtorrent-master
 """
 
 from rtorrent_builder.cli import main  # noqa: E402

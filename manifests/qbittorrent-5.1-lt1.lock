@@ -1,110 +1,58 @@
 {
-  "manifest_hash": "69ee354356ad17130fdb8146ab682600e3403cde1b4dca4dc863685fa60581ad",
+  "manifest_hash": "7b98bcaad1ca5f89a3f635e8827bae4c26d572cea22e0b80709041ddbb2555b1",
   "packages": {
     "boost": {
-      "source": {
-        "url": {
-          "url": "https://github.com/boostorg/boost/releases/download/boost-1.87.0/boost-1.87.0-cmake.tar.gz"
-        }
-      },
-      "version": "1.87.0"
+      "url": "https://github.com/boostorg/boost/archive/refs/tags/boost-1.86.0.tar.gz",
+      "version": "1.86.0"
     },
     "brotli": {
-      "source": {
-        "url": {
-          "url": "https://github.com/google/brotli/archive/refs/tags/v1.2.0.tar.gz"
-        }
-      },
+      "url": "https://github.com/google/brotli/archive/refs/tags/v1.2.0.tar.gz",
       "version": "1.2.0"
     },
     "cares": {
-      "source": {
-        "url": {
-          "url": "https://github.com/c-ares/c-ares/releases/download/v1.34.6/c-ares-1.34.6.tar.gz"
-        }
-      },
+      "url": "https://github.com/c-ares/c-ares/archive/refs/tags/v1.34.6.tar.gz",
       "version": "1.34.6"
     },
     "curl": {
-      "source": {
-        "url": {
-          "url": "https://github.com/curl/curl/releases/download/curl-8_20_0/curl-8.20.0.tar.gz"
-        }
-      },
+      "url": "https://github.com/curl/curl/archive/refs/tags/curl-8_20_0.tar.gz",
       "version": "8.20.0"
     },
     "libtorrent-rasterbar": {
       "cxx_std": "c++14",
-      "source": {
-        "url": {
-          "url": "https://github.com/arvidn/libtorrent/releases/download/v1.2.20/libtorrent-rasterbar-1.2.20.tar.gz"
-        }
-      },
+      "url": "https://github.com/arvidn/libtorrent/archive/refs/tags/v1.2.20.tar.gz",
       "version": "1.2.20"
     },
     "lua": {
-      "source": {
-        "url": {
-          "url": "https://www.lua.org/ftp/lua-5.4.8.tar.gz"
-        }
-      },
+      "url": "https://www.lua.org/ftp/lua-5.4.8.tar.gz",
       "version": "5.4.8"
     },
     "ncurses": {
-      "source": {
-        "url": {
-          "url": "https://ftp.gnu.org/pub/gnu/ncurses/ncurses-6.6.tar.gz"
-        }
-      },
+      "url": "https://ftp.gnu.org/pub/gnu/ncurses/ncurses-6.6.tar.gz",
       "version": "6.6"
     },
     "openssl": {
-      "source": {
-        "url": {
-          "url": "https://github.com/openssl/openssl/releases/download/openssl-3.6.2/openssl-3.6.2.tar.gz"
-        }
-      },
+      "url": "https://github.com/openssl/openssl/archive/refs/tags/openssl-3.6.2.tar.gz",
       "version": "3.6.2"
     },
     "qbittorrent": {
       "cxx_std": "c++20",
-      "source": {
-        "url": {
-          "url": "https://github.com/qbittorrent/qBittorrent/releases/download/release-5.1.4/qbittorrent-5.1.4.tar.xz"
-        }
-      },
+      "url": "https://github.com/qbittorrent/qBittorrent/archive/refs/tags/release-5.1.4.tar.gz",
       "version": "5.1.4"
     },
     "qt": {
-      "source": {
-        "url": {
-          "url": "https://download.qt.io/official_releases/qt/6.8/6.8.3/submodules/qtbase-everywhere-src-6.8.3.tar.xz"
-        }
-      },
+      "url": "https://download.qt.io/official_releases/qt/6.8/6.8.3/submodules/qtbase-everywhere-src-6.8.3.tar.xz",
       "version": "6.8.3"
     },
     "qttools": {
-      "source": {
-        "url": {
-          "url": "https://download.qt.io/official_releases/qt/6.8/6.8.3/submodules/qttools-everywhere-src-6.8.3.tar.xz"
-        }
-      },
+      "url": "https://download.qt.io/official_releases/qt/6.8/6.8.3/submodules/qttools-everywhere-src-6.8.3.tar.xz",
       "version": "6.8.3"
     },
     "zlib": {
-      "source": {
-        "url": {
-          "url": "https://github.com/zlib-ng/zlib-ng/archive/refs/tags/2.3.3.tar.gz"
-        }
-      },
+      "url": "https://github.com/zlib-ng/zlib-ng/archive/refs/tags/2.3.3.tar.gz",
       "version": "2.3.3"
     },
     "zstd": {
-      "source": {
-        "url": {
-          "url": "https://github.com/facebook/zstd/releases/download/v1.5.7/zstd-1.5.7.tar.gz"
-        }
-      },
+      "url": "https://github.com/facebook/zstd/archive/refs/tags/v1.5.7.tar.gz",
       "version": "1.5.7"
     }
   },

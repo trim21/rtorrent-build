@@ -5,19 +5,19 @@
   "packages": {
     "boost": {
       "source": {
-        "url": {
-          "url": "https://github.com/boostorg/boost/releases/download/boost-1.88.0/boost-1.88.0-cmake.tar.gz"
+        "git": {
+          "repo": "boostorg/boost",
+          "tag_range": ">=1.88,<2"
         }
-      },
-      "version": "1.88.0"
+      }
     },
     "libtorrent-rasterbar": {
       "source": {
-        "url": {
-          "url": "https://github.com/arvidn/libtorrent/releases/download/v2.0.12/libtorrent-rasterbar-2.0.12.tar.gz"
+        "git": {
+          "repo": "arvidn/libtorrent",
+          "tag_range": ">=2,<3"
         }
       },
-      "version": "2.0.12",
       "cxx_std": "c++17"
     },
     "qt": {
@@ -38,11 +38,11 @@
     },
     "qbittorrent": {
       "source": {
-        "url": {
-          "url": "https://github.com/qbittorrent/qBittorrent/releases/download/release-5.1.4/qbittorrent-5.1.4.tar.xz"
+        "git": {
+          "repo": "qbittorrent/qBittorrent",
+          "tag_range": ">=5.1,<5.2"
         }
       },
-      "version": "5.1.4",
       "cxx_std": "c++20"
     }
   }

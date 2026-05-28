@@ -1,84 +1,44 @@
 {
-  "manifest_hash": "89849561599bb3bb51b25171083dd3555f2c21f3621be5f3401bde48926a2cad",
+  "manifest_hash": "53655e52f5b9a9d567a69aa814310a849c3cca7f5b65d1b122b3ec74d4c9b8db",
   "packages": {
     "brotli": {
-      "source": {
-        "url": {
-          "url": "https://github.com/google/brotli/archive/refs/tags/v1.2.0.tar.gz"
-        }
-      },
+      "url": "https://github.com/google/brotli/archive/refs/tags/v1.2.0.tar.gz",
       "version": "1.2.0"
     },
     "cares": {
-      "source": {
-        "url": {
-          "url": "https://github.com/c-ares/c-ares/releases/download/v1.34.6/c-ares-1.34.6.tar.gz"
-        }
-      },
+      "url": "https://github.com/c-ares/c-ares/archive/refs/tags/v1.34.6.tar.gz",
       "version": "1.34.6"
     },
     "curl": {
-      "source": {
-        "url": {
-          "url": "https://github.com/curl/curl/releases/download/curl-8_20_0/curl-8.20.0.tar.gz"
-        }
-      },
+      "url": "https://github.com/curl/curl/archive/refs/tags/curl-8_20_0.tar.gz",
       "version": "8.20.0"
     },
     "lua": {
-      "source": {
-        "url": {
-          "url": "https://www.lua.org/ftp/lua-5.4.8.tar.gz"
-        }
-      },
+      "url": "https://www.lua.org/ftp/lua-5.4.8.tar.gz",
       "version": "5.4.8"
     },
     "ncurses": {
-      "source": {
-        "url": {
-          "url": "https://ftp.gnu.org/pub/gnu/ncurses/ncurses-6.6.tar.gz"
-        }
-      },
+      "url": "https://ftp.gnu.org/pub/gnu/ncurses/ncurses-6.6.tar.gz",
       "version": "6.6"
     },
     "openssl": {
-      "source": {
-        "url": {
-          "url": "https://github.com/openssl/openssl/releases/download/openssl-3.6.2/openssl-3.6.2.tar.gz"
-        }
-      },
+      "url": "https://github.com/openssl/openssl/archive/refs/tags/openssl-3.6.2.tar.gz",
       "version": "3.6.2"
     },
     "rtorrent": {
-      "source": {
-        "url": {
-          "url": "https://github.com/rakshasa/rtorrent/releases/download/v0.16.12/rtorrent-0.16.12.tar.gz"
-        }
-      },
+      "url": "https://github.com/rakshasa/rtorrent/archive/refs/tags/v0.16.12.tar.gz",
       "version": "0.16.12"
     },
     "rtorrent-libtorrent": {
-      "source": {
-        "url": {
-          "url": "https://github.com/rakshasa/rtorrent/releases/download/v0.16.12/libtorrent-0.16.12.tar.gz"
-        }
-      },
+      "url": "https://github.com/rakshasa/rtorrent/archive/refs/tags/v0.16.12.tar.gz",
       "version": "0.16.12"
     },
     "zlib": {
-      "source": {
-        "url": {
-          "url": "https://github.com/zlib-ng/zlib-ng/archive/refs/tags/2.3.3.tar.gz"
-        }
-      },
+      "url": "https://github.com/zlib-ng/zlib-ng/archive/refs/tags/2.3.3.tar.gz",
       "version": "2.3.3"
     },
     "zstd": {
-      "source": {
-        "url": {
-          "url": "https://github.com/facebook/zstd/releases/download/v1.5.7/zstd-1.5.7.tar.gz"
-        }
-      },
+      "url": "https://github.com/facebook/zstd/archive/refs/tags/v1.5.7.tar.gz",
       "version": "1.5.7"
     }
   },

@@ -8,8 +8,6 @@ from pathlib import Path
 import json5
 from pydantic import TypeAdapter
 
-from . import PROJECT_ROOT
-
 
 def _load_jsonc_text(text: str) -> object:
     return json5.loads(text)
@@ -27,7 +25,14 @@ class GitHubRefSource:
     ref: str
 
 
-GitSource = GitHubTagSource | GitHubRefSource
+@dataclass(frozen=True, kw_only=True)
+class GitHubReleaseSource:
+    repo: str
+    tag_range: str
+    asset: str
+
+
+GitSource = GitHubTagSource | GitHubRefSource | GitHubReleaseSource
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -79,6 +84,36 @@ class Manifest:
 
 
 @dataclass(frozen=True, kw_only=True)
+class ResolvedPackage:
+    url: str
+    version: str = ""
+    cxx_std: str | None = None
+
+    def to_libinfo(self) -> LibInfo:
+        return LibInfo(
+            source=Source(url=URLSource(url=self.url)),
+            version=self.version,
+            cxx_std=self.cxx_std,
+        )
+
+
+@dataclass(frozen=True, kw_only=True)
+class ResolvedManifest:
+    variant: str
+    packages: dict[str, ResolvedPackage]
+    target_glibc: str
+    toolchain: str
+
+
+@dataclass(frozen=True, kw_only=True)
+class LockFile:
+    manifest_hash: str
+    packages: dict[str, ResolvedPackage]
+    target_glibc: str
+    toolchain: str
+
+
+@dataclass(frozen=True, kw_only=True)
 class Lock:
     git: dict[str, str] = field(default_factory=dict)
     resolved_tags: dict[str, str] = field(default_factory=dict)
@@ -94,6 +129,7 @@ class Lock:
 _raw_manifest_adapter = TypeAdapter(RawManifest)
 _manifest_adapter = TypeAdapter(Manifest)
 _lock_adapter = TypeAdapter(Lock)
+_lockfile_adapter = TypeAdapter(LockFile)
 
 
 def load_lock(manifests_dir: Path, variant: str) -> Lock:
@@ -142,7 +178,7 @@ def _collect_lock_entries(manifest_path: Path, manifests_dir: Path) -> dict[str,
         if isinstance(pkg.source.git, GitHubRefSource):
             key = f"{pkg.source.git.repo}#{pkg.source.git.ref}"
             entries[key] = pkg.source.git.ref
-        elif isinstance(pkg.source.git, GitHubTagSource):
+        elif isinstance(pkg.source.git, (GitHubTagSource, GitHubReleaseSource)):
             key = f"{pkg.source.git.repo}#tag"
             entries[key] = ""
     return entries
@@ -156,7 +192,7 @@ def _collect_tag_range_entries(
     raw = _resolve_extends(raw, manifests_dir)
     result: dict[str, tuple[str, str]] = {}
     for name, pkg in raw.packages.items():
-        if isinstance(pkg.source.git, GitHubTagSource):
+        if isinstance(pkg.source.git, (GitHubTagSource, GitHubReleaseSource)):
             key = f"{pkg.source.git.repo}#tag"
             result[name] = (key, pkg.source.git.tag_range)
     return result
@@ -165,6 +201,8 @@ def _collect_tag_range_entries(
 def source_identity(pkg: LibInfo) -> str:
     if isinstance(pkg.source.git, GitHubTagSource):
         return f"git:{pkg.source.git.repo}#tag={pkg.source.git.tag_range}"
+    if isinstance(pkg.source.git, GitHubReleaseSource):
+        return f"git:{pkg.source.git.repo}#release={pkg.source.git.tag_range}"
     if isinstance(pkg.source.git, GitHubRefSource):
         return f"git:{pkg.source.git.repo}#{pkg.source.git.ref}"
     if pkg.source.url is not None:
@@ -210,61 +248,5 @@ def _resolve_extends(raw: RawManifest, manifests_dir: Path) -> RawManifest:
             "packages": merged_packages,
             "target_glibc": merged_target_glibc,
             "toolchain": merged_toolchain,
-        }
-    )
-
-
-def load_manifest(variant: str, manifests_dir: Path | None = None) -> Manifest:
-    """Load a build manifest for the given variant name.
-
-    If a lock file exists and its manifest_hash matches, the lock file is used
-    (which contains only URL sources). Otherwise, the original manifest is used.
-    """
-    if manifests_dir is None:
-        manifests_dir = PROJECT_ROOT / "manifests"
-
-    lock_path = manifests_dir / f"{variant}.lock"
-    manifest_path = manifests_dir / f"{variant}.jsonc"
-
-    if lock_path.exists():
-        # Verify hash matches
-        lock_data: dict = _load_jsonc_text(lock_path.read_text())  # type: ignore[assignment]
-        lock_hash = lock_data.get("manifest_hash")
-        if lock_hash and manifest_path.exists():
-            current_hash = compute_manifest_hash(manifest_path, manifests_dir)
-            if lock_hash == current_hash:
-                print(f"Loading lock from {lock_path}")
-                return _manifest_adapter.validate_python(
-                    {
-                        "variant": variant,
-                        "packages": lock_data["packages"],
-                        "target_glibc": lock_data["target_glibc"],
-                        "toolchain": lock_data["toolchain"],
-                    }
-                )
-            else:
-                print(f"WARNING: lock hash mismatch for {variant!r}, using manifest")
-
-    if not manifest_path.exists():
-        raise FileNotFoundError(f"Manifest not found: {manifest_path}")
-
-    print(f"Loading manifest from {manifest_path}")
-    raw = _raw_manifest_adapter.validate_python(_load_jsonc_text(manifest_path.read_text()))
-    raw = _resolve_extends(raw, manifests_dir)
-
-    _validate_packages(raw.packages)
-
-    if raw.target_glibc is None:
-        raise ValueError(f"Manifest {variant!r} has no target_glibc")
-
-    if raw.toolchain is None:
-        raise ValueError(f"Manifest {variant!r} has no toolchain")
-
-    return _manifest_adapter.validate_python(
-        {
-            "variant": variant,
-            "packages": raw.packages,
-            "target_glibc": raw.target_glibc,
-            "toolchain": raw.toolchain,
         }
     )

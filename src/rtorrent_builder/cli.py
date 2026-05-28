@@ -12,7 +12,7 @@ from . import PROJECT_ROOT
 from ._types import Arch, Libc
 from .builder import _BUILDER_MAP, _FINAL_PACKAGES, build_rtorrent
 from .docker import DISTROLESS_GLIBC_VERSION, build_docker_image
-from .manifest import load_manifest
+from .lock import load_resolved_manifest, resolve_manifest
 
 
 class CliLibc(Enum):
@@ -42,7 +42,12 @@ def _dep_choices() -> list[str]:
     return sorted(name for name in _BUILDER_MAP if name not in _FINAL_PACKAGES)
 
 
-@click.command()
+@click.group()
+def main() -> None:
+    """Static rtorrent/qbittorrent binary builder."""
+
+
+@main.command()
 @click.argument("variant", nargs=1, type=click.Choice(_variant_choices()))
 @click.option(
     "--work-dir",
@@ -108,7 +113,7 @@ def _dep_choices() -> list[str]:
     default=None,
     help="Write build metadata (docker tag, version, etc.) to a JSON file",
 )
-def main(
+def build(
     variant: str,
     work_dir: Path,
     output_dir: Path,
@@ -121,13 +126,14 @@ def main(
     build_docker: bool,
     build_info: Path | None,
 ) -> None:
+    """Build a variant."""
     output_dir = output_dir.resolve()
 
     variant_work = (work_dir / variant).resolve()
     print(f"Starting rtorrent-static build for {variant}")
     print(f"Work directory: {variant_work}")
 
-    manifest = load_manifest(variant)
+    manifest = load_resolved_manifest(variant)
 
     options: dict[str, str] = {}
     if disguise:
@@ -172,6 +178,18 @@ def main(
     print(f"Build complete for {variant}")
 
 
+@main.command()
+@click.argument("variant", nargs=-1, type=click.Choice(_variant_choices()))
+def lock(variant: tuple[str, ...]) -> None:
+    """Regenerate lock files.
+
+    If no VARIANT is given, regenerates all lock files.
+    """
+    variants = list(variant) if variant else _variant_choices()
+    for v in variants:
+        resolve_manifest(v)
+
+
 def _build_docker(binary_path: Path, *, variant: str, arch: str, disguise: bool) -> str:
     version = variant.removeprefix("rtorrent-")
     arch_safe = Arch(arch).safe
@@ -185,4 +203,4 @@ def _build_docker(binary_path: Path, *, variant: str, arch: str, disguise: bool)
 
 
 if __name__ == "__main__":
-    main()  # pyright: ignore[reportCallIssue] — Click handles argument parsing
+    main()

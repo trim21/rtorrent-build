@@ -68,11 +68,11 @@ jobs:
       - name: Build ${{ matrix.variant }} (${{ matrix.libc }}/${{ matrix.arch.name }})
         env:
           PYTHONUNBUFFERED: "1"
-        run: python build.py "${{ matrix.variant }}" --libc "${{ matrix.libc }}" --arch "${{ matrix.arch.flag }}"
+        run: python build.py build "${{ matrix.variant }}" --libc "${{ matrix.libc }}" --arch "${{ matrix.arch.flag }}"
 
       - name: Tail build log on failure
         if: failure()
-        run: tail -n 200 build/${{ matrix.variant }}/logs/*.log || true
+        run: tail -n 50 build/${{ matrix.variant }}/logs/*.log
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4

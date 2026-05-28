@@ -5,11 +5,11 @@
   "packages": {
     "rtorrent": {
       "source": {
-        "url": {
-          "url": "https://github.com/rakshasa/rtorrent/releases/download/v0.9.8/rtorrent-0.9.8.tar.gz"
+        "git": {
+          "repo": "rakshasa/rtorrent",
+          "tag_range": "==0.9.8"
         }
       },
-      "version": "0.9.8",
       "cxx_std": "c++14"
     },
     "rtorrent-libtorrent": {

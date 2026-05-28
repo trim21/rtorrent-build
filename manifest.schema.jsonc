@@ -1,6 +1,6 @@
 {
   "$defs": {
-    "GitSource": {
+    "GitHubRefSource": {
       "properties": {
         "repo": {
           "title": "Repo",
@@ -9,25 +9,54 @@
         "ref": {
           "title": "Ref",
           "type": "string"
-        },
-        "tag_range": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "title": "Tag Range"
         }
       },
       "required": [
         "repo",
         "ref"
       ],
-      "title": "GitSource",
+      "title": "GitHubRefSource",
+      "type": "object"
+    },
+    "GitHubReleaseSource": {
+      "properties": {
+        "repo": {
+          "title": "Repo",
+          "type": "string"
+        },
+        "tag_range": {
+          "title": "Tag Range",
+          "type": "string"
+        },
+        "asset": {
+          "title": "Asset",
+          "type": "string"
+        }
+      },
+      "required": [
+        "repo",
+        "tag_range",
+        "asset"
+      ],
+      "title": "GitHubReleaseSource",
+      "type": "object"
+    },
+    "GitHubTagSource": {
+      "properties": {
+        "repo": {
+          "title": "Repo",
+          "type": "string"
+        },
+        "tag_range": {
+          "title": "Tag Range",
+          "type": "string"
+        }
+      },
+      "required": [
+        "repo",
+        "tag_range"
+      ],
+      "title": "GitHubTagSource",
       "type": "object"
     },
     "LibInfo": {
@@ -64,13 +93,20 @@
         "git": {
           "anyOf": [
             {
-              "$ref": "#/$defs/GitSource"
+              "$ref": "#/$defs/GitHubTagSource"
+            },
+            {
+              "$ref": "#/$defs/GitHubRefSource"
+            },
+            {
+              "$ref": "#/$defs/GitHubReleaseSource"
             },
             {
               "type": "null"
             }
           ],
-          "default": null
+          "default": null,
+          "title": "Git"
         },
         "url": {
           "anyOf": [
@@ -150,14 +186,18 @@
       ],
       "default": null,
       "title": "Toolchain"
+    },
+    "$schema": {
+      "type": "string",
+      "description": "JSON Schema reference"
     }
   },
   "required": [
     "packages"
   ],
-  "title": "Build Manifest",
   "type": "object",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://rtorrent-static/manifest.schema.jsonc",
+  "title": "Build Manifest",
   "description": "Build manifest for rtorrent-static variants"
 }
