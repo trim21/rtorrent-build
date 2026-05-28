@@ -29,10 +29,10 @@
     },
     "qbittorrent": {
       "source": {
-        "url": "https://github.com/qbittorrent/qBittorrent/releases/download/release-5.2.0/qbittorrent-5.2.0.tar.xz"
+        "url": "https://github.com/qbittorrent/qBittorrent/releases/download/release-5.1.4/qbittorrent-5.1.4.tar.xz"
       },
-      "version": "5.2.0",
-      "cxx_std": "c++17"
+      "version": "5.1.4",
+      "cxx_std": "c++20"
     }
   }
 }

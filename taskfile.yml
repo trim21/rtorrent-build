@@ -16,10 +16,25 @@ tasks:
     cmds:
       - python build.py rtorrent-master {{.CLI_ARGS}}
 
-  qbittorrent-nox:
-    desc: Build qbittorrent-nox
+  qbittorrent-5.2.1-lt2:
+    desc: Build qbittorrent-5.2.1-lt2
     cmds:
-      - python build.py qbittorrent-nox {{.CLI_ARGS}}
+      - python build.py qbittorrent-5.2.1-lt2 {{.CLI_ARGS}}
+
+  qbittorrent-5.2.1-lt1:
+    desc: Build qbittorrent 5.2.1 with libtorrent 1.2.x
+    cmds:
+      - python build.py qbittorrent-5.2.1-lt1 {{.CLI_ARGS}}
+
+  qbittorrent-5.1.4-lt2:
+    desc: Build qbittorrent 5.1.4 with libtorrent 2.0.x
+    cmds:
+      - python build.py qbittorrent-5.1.4-lt2 {{.CLI_ARGS}}
+
+  qbittorrent-5.1.4-lt1:
+    desc: Build qbittorrent 5.1.4 with libtorrent 1.2.x
+    cmds:
+      - python build.py qbittorrent-5.1.4-lt1 {{.CLI_ARGS}}
 
   all:
     desc: Build all variants
@@ -27,4 +42,7 @@ tasks:
       - task: rtorrent-0.9.8
       - task: rtorrent-0.16.11
       - task: rtorrent-master
-      - task: qbittorrent-nox
+      - task: qbittorrent-5.2.1-lt2
+      - task: qbittorrent-5.2.1-lt1
+      - task: qbittorrent-5.1.4-lt2
+      - task: qbittorrent-5.1.4-lt1

@@ -7,8 +7,10 @@ from ._cmake import CMakeBuilder
 
 class LibtorrentRasterbarBuilder(CMakeBuilder):
     def cmake_args(self, prefix: str) -> list[str]:
-        return [
-            "-DCMAKE_CXX_STANDARD=17",
+        args = [
             "-DBUILD_SHARED_LIBS=OFF",
             "-Ddeprecated-functions=OFF",
         ]
+        if self.lib.cxx_std:
+            args.append(f"-DCMAKE_CXX_STANDARD={self.lib.cxx_std.removeprefix('c++')}")
+        return args

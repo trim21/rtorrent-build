@@ -19,7 +19,10 @@ jobs:
         variant:
           - rtorrent-0.9.8
           - rtorrent-0.16.12
-          - qbittorrent-nox
+          - qbittorrent-5.2.1-lt2
+          - qbittorrent-5.2.1-lt1
+          - qbittorrent-5.1.4-lt2
+          - qbittorrent-5.1.4-lt1
         libc: [glibc, musl]
         arch:
           - { flag: amd/v1, name: amd.v1 }

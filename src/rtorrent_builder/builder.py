@@ -327,10 +327,18 @@ def build_rtorrent(
     top_source = resolved[app_name]
     binary = _binary_path(tc, app_name)
 
-    if libc == Libc.musl:
-        output_name = f"{app_name}-{top_source.version}.{arch.safe}-musl"
+    if app_name == "qbittorrent" and "libtorrent-rasterbar" in resolved:
+        lt_version = resolved["libtorrent-rasterbar"].version
+        short_name = "qb"
+        version_tag = f"{top_source.version}-lt-{lt_version}"
     else:
-        output_name = f"{app_name}-{top_source.version}.{arch.safe}.glibc.{glibc_target}"
+        short_name = app_name
+        version_tag = top_source.version
+
+    if libc == Libc.musl:
+        output_name = f"{short_name}-{version_tag}.{arch.safe}-musl"
+    else:
+        output_name = f"{short_name}-{version_tag}.{arch.safe}.glibc.{glibc_target}"
     output_bin = output_dir / output_name
     if not binary.exists():
         raise FileNotFoundError(f"Binary not found: {binary}")
