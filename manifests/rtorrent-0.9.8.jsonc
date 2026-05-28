@@ -1,12 +1,13 @@
 {
+  "$schema": "../manifest.schema.json",
   "extends": "common.jsonc",
   "target_glibc": "2.17",
   "packages": {
     "rtorrent": {
       "source": {
-        "url": "https://github.com/rakshasa/rtorrent/releases/download/v0.9.8/rtorrent-0.9.8.tar.gz"
+        "github": "rakshasa/rtorrent",
+        "tag_range": "==0.9.8"
       },
-      "version": "0.9.8",
       "cxx_std": "c++14"
     },
     "rtorrent-libtorrent": {

@@ -1,9 +1,9 @@
 {
   "$defs": {
-    "GitSource": {
+    "GitHubRefSource": {
       "properties": {
-        "git": {
-          "title": "Git",
+        "github": {
+          "title": "Github",
           "type": "string"
         },
         "ref": {
@@ -12,21 +12,68 @@
         }
       },
       "required": [
-        "git",
+        "github",
         "ref"
       ],
-      "title": "GitSource",
+      "title": "GitHubRefSource",
+      "type": "object"
+    },
+    "GitHubReleaseSource": {
+      "properties": {
+        "github": {
+          "title": "Github",
+          "type": "string"
+        },
+        "tag_range": {
+          "title": "Tag Range",
+          "type": "string"
+        },
+        "asset": {
+          "title": "Asset",
+          "type": "string"
+        }
+      },
+      "required": [
+        "github",
+        "tag_range",
+        "asset"
+      ],
+      "title": "GitHubReleaseSource",
+      "type": "object"
+    },
+    "GitHubTagSource": {
+      "properties": {
+        "github": {
+          "title": "Github",
+          "type": "string"
+        },
+        "tag_range": {
+          "title": "Tag Range",
+          "type": "string"
+        }
+      },
+      "required": [
+        "github",
+        "tag_range"
+      ],
+      "title": "GitHubTagSource",
       "type": "object"
     },
     "LibInfo": {
       "properties": {
         "source": {
-          "oneOf": [
+          "anyOf": [
             {
-              "$ref": "#/$defs/URLSource"
+              "$ref": "#/$defs/GitHubTagSource"
             },
             {
-              "$ref": "#/$defs/GitSource"
+              "$ref": "#/$defs/GitHubRefSource"
+            },
+            {
+              "$ref": "#/$defs/GitHubReleaseSource"
+            },
+            {
+              "$ref": "#/$defs/URLSource"
             }
           ],
           "title": "Source"
@@ -129,7 +176,7 @@
   ],
   "type": "object",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://rtorrent-static/manifest.schema.jsonc",
+  "$id": "https://rtorrent-static/manifest.schema.json",
   "title": "Build Manifest",
   "description": "Build manifest for rtorrent-static variants"
 }

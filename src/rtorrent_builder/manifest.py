@@ -4,12 +4,9 @@ import hashlib
 import json
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
-from typing import Annotated
 
 import json5
-from pydantic import Discriminator, Tag, TypeAdapter
-
-from . import PROJECT_ROOT
+from pydantic import TypeAdapter
 
 
 def _load_jsonc_text(text: str) -> object:
@@ -17,25 +14,35 @@ def _load_jsonc_text(text: str) -> object:
 
 
 @dataclass(frozen=True, kw_only=True)
+class GitHubTagSource:
+    github: str
+    tag_range: str
+
+
+@dataclass(frozen=True, kw_only=True)
+class GitHubRefSource:
+    github: str
+    ref: str
+
+
+@dataclass(frozen=True, kw_only=True)
+class GitHubReleaseSource:
+    github: str
+    tag_range: str
+    asset: str
+
+
+@dataclass(frozen=True, kw_only=True)
 class URLSource:
     url: str
 
 
-@dataclass(frozen=True, kw_only=True)
-class GitSource:
-    git: str
-    ref: str
-
-
-Source = Annotated[
-    Annotated[URLSource, Tag("url")] | Annotated[GitSource, Tag("git")],
-    Discriminator(lambda v: "git" if isinstance(v, dict) and "git" in v else "url"),
-]
+PackageSource = GitHubTagSource | GitHubRefSource | GitHubReleaseSource | URLSource
 
 
 @dataclass(frozen=True, kw_only=True)
 class LibInfo:
-    source: Source
+    source: PackageSource
     version: str = ""
     cxx_std: str | None = None
 
@@ -57,17 +64,52 @@ class Manifest:
 
 
 @dataclass(frozen=True, kw_only=True)
+class ResolvedPackage:
+    url: str
+    version: str = ""
+    cxx_std: str | None = None
+
+    def to_libinfo(self) -> LibInfo:
+        return LibInfo(
+            source=URLSource(url=self.url),
+            version=self.version,
+            cxx_std=self.cxx_std,
+        )
+
+
+@dataclass(frozen=True, kw_only=True)
+class ResolvedManifest:
+    variant: str
+    packages: dict[str, ResolvedPackage]
+    target_glibc: str
+    toolchain: str
+
+
+@dataclass(frozen=True, kw_only=True)
+class LockFile:
+    manifest_hash: str
+    packages: dict[str, ResolvedPackage]
+    target_glibc: str
+    toolchain: str
+
+
+@dataclass(frozen=True, kw_only=True)
 class Lock:
-    git: dict[str, str] = field(default_factory=dict)
+    github: dict[str, str] = field(default_factory=dict)
+    resolved_tags: dict[str, str] = field(default_factory=dict)
     manifest_hash: str | None = None
 
-    def sha(self, git_url: str, ref: str) -> str | None:
-        return self.git.get(f"{git_url}#{ref}")
+    def sha(self, github: str, ref: str) -> str | None:
+        return self.github.get(f"{github}#{ref}")
+
+    def resolved_tag(self, github: str, ref: str) -> str | None:
+        return self.resolved_tags.get(f"{github}#{ref}")
 
 
 _raw_manifest_adapter = TypeAdapter(RawManifest)
 _manifest_adapter = TypeAdapter(Manifest)
 _lock_adapter = TypeAdapter(Lock)
+_lockfile_adapter = TypeAdapter(LockFile)
 
 
 def load_lock(manifests_dir: Path, variant: str) -> Lock:
@@ -88,7 +130,9 @@ def load_lock(manifests_dir: Path, variant: str) -> Lock:
 
 def save_lock(lock: Lock, manifests_dir: Path, variant: str) -> None:
     lockfile = manifests_dir / f"{variant}.lock"
-    data: dict[str, object] = {"git": lock.git}
+    data: dict[str, object] = {"github": lock.github}
+    if lock.resolved_tags:
+        data["resolved_tags"] = lock.resolved_tags
     if lock.manifest_hash is not None:
         data["manifest_hash"] = lock.manifest_hash
     lockfile.write_text(json.dumps(data, indent=2, sort_keys=True) + "\n")
@@ -111,21 +155,44 @@ def _collect_lock_entries(manifest_path: Path, manifests_dir: Path) -> dict[str,
     raw = _raw_manifest_adapter.validate_python(_load_jsonc_text(manifest_path.read_text()))
     raw = _resolve_extends(raw, manifests_dir)
     for pkg in raw.packages.values():
-        if isinstance(pkg.source, GitSource):
-            key = f"{pkg.source.git}#{pkg.source.ref}"
-            entries[key] = entries.get(key, "")
+        if isinstance(pkg.source, GitHubRefSource):
+            key = f"{pkg.source.github}#{pkg.source.ref}"
+            entries[key] = pkg.source.ref
+        elif isinstance(pkg.source, (GitHubTagSource, GitHubReleaseSource)):
+            key = f"{pkg.source.github}#tag"
+            entries[key] = ""
     return entries
 
 
+def _collect_tag_range_entries(
+    manifest_path: Path, manifests_dir: Path
+) -> dict[str, tuple[str, str]]:
+    """Return {pkg_name: (repo#ref, tag_range)} for packages with tag_range."""
+    raw = _raw_manifest_adapter.validate_python(_load_jsonc_text(manifest_path.read_text()))
+    raw = _resolve_extends(raw, manifests_dir)
+    result: dict[str, tuple[str, str]] = {}
+    for name, pkg in raw.packages.items():
+        if isinstance(pkg.source, (GitHubTagSource, GitHubReleaseSource)):
+            key = f"{pkg.source.github}#tag"
+            result[name] = (key, pkg.source.tag_range)
+    return result
+
+
 def source_identity(pkg: LibInfo) -> str:
-    if isinstance(pkg.source, GitSource):
-        return f"git:{pkg.source.git}#{pkg.source.ref}"
-    return f"url:{pkg.source.url}"
+    if isinstance(pkg.source, GitHubTagSource):
+        return f"github:{pkg.source.github}#tag={pkg.source.tag_range}"
+    if isinstance(pkg.source, GitHubReleaseSource):
+        return f"github:{pkg.source.github}#release={pkg.source.tag_range}"
+    if isinstance(pkg.source, GitHubRefSource):
+        return f"github:{pkg.source.github}#{pkg.source.ref}"
+    if isinstance(pkg.source, URLSource):
+        return f"url:{pkg.source.url}"
+    raise ValueError("Package has no source")
 
 
 def _validate_packages(packages: dict[str, LibInfo]) -> None:
     for name, pkg in packages.items():
-        if not isinstance(pkg.source, GitSource) and not pkg.version:
+        if isinstance(pkg.source, URLSource) and not pkg.version:
             raise ValueError(f"Package {name!r} with URL source requires a version")
 
 
@@ -161,37 +228,5 @@ def _resolve_extends(raw: RawManifest, manifests_dir: Path) -> RawManifest:
             "packages": merged_packages,
             "target_glibc": merged_target_glibc,
             "toolchain": merged_toolchain,
-        }
-    )
-
-
-def load_manifest(variant: str, manifests_dir: Path | None = None) -> Manifest:
-    """Load a build manifest for the given variant name."""
-    if manifests_dir is None:
-        manifests_dir = PROJECT_ROOT / "manifests"
-
-    manifest_path = manifests_dir / f"{variant}.jsonc"
-    if not manifest_path.exists():
-        print(f"ERROR: manifest not found: {manifest_path}")
-        raise FileNotFoundError(f"Manifest not found: {manifest_path}")
-
-    print(f"Loading manifest from {manifest_path}")
-    raw = _raw_manifest_adapter.validate_python(_load_jsonc_text(manifest_path.read_text()))
-    raw = _resolve_extends(raw, manifests_dir)
-
-    _validate_packages(raw.packages)
-
-    if raw.target_glibc is None:
-        raise ValueError(f"Manifest {variant!r} has no target_glibc")
-
-    if raw.toolchain is None:
-        raise ValueError(f"Manifest {variant!r} has no toolchain")
-
-    return _manifest_adapter.validate_python(
-        {
-            "variant": variant,
-            "packages": raw.packages,
-            "target_glibc": raw.target_glibc,
-            "toolchain": raw.toolchain,
         }
     )

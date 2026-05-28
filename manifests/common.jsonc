@@ -1,29 +1,30 @@
 {
+  "$schema": "../manifest.schema.json",
   "toolchain": "default",
   "packages": {
     "zlib": {
       "source": {
-        "url": "https://github.com/zlib-ng/zlib-ng/archive/refs/tags/2.3.3.tar.gz"
-      },
-      "version": "2.3.3"
+        "github": "zlib-ng/zlib-ng",
+        "tag_range": ">=2,<3"
+      }
     },
     "brotli": {
       "source": {
-        "url": "https://github.com/google/brotli/archive/refs/tags/v1.2.0.tar.gz"
-      },
-      "version": "1.2.0"
+        "github": "google/brotli",
+        "tag_range": ">=1,<2"
+      }
     },
     "zstd": {
       "source": {
-        "url": "https://github.com/facebook/zstd/releases/download/v1.5.7/zstd-1.5.7.tar.gz"
-      },
-      "version": "1.5.7"
+        "github": "facebook/zstd",
+        "tag_range": ">=1,<2"
+      }
     },
     "openssl": {
       "source": {
-        "url": "https://github.com/openssl/openssl/releases/download/openssl-3.6.2/openssl-3.6.2.tar.gz"
-      },
-      "version": "3.6.2"
+        "github": "openssl/openssl",
+        "tag_range": ">=3,<4"
+      }
     },
     "ncurses": {
       "source": {
@@ -33,15 +34,15 @@
     },
     "curl": {
       "source": {
-        "url": "https://github.com/curl/curl/releases/download/curl-8_20_0/curl-8.20.0.tar.gz"
-      },
-      "version": "8.20.0"
+        "github": "curl/curl",
+        "tag_range": ">=8,<9"
+      }
     },
     "cares": {
       "source": {
-        "url": "https://github.com/c-ares/c-ares/releases/download/v1.34.6/c-ares-1.34.6.tar.gz"
-      },
-      "version": "1.34.6"
+        "github": "c-ares/c-ares",
+        "tag_range": ">=1,<2"
+      }
     },
     "lua": {
       "source": {

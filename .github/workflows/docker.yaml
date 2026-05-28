@@ -22,7 +22,7 @@ jobs:
       matrix:
         variant:
           - rtorrent-0.9.8
-          - rtorrent-0.16.12
+          - rtorrent-0.16
           - rtorrent-master
         libc: [glibc]
         arch:
@@ -79,11 +79,11 @@ jobs:
           if [[ "${{ matrix.disguise }}" == "true" ]]; then
             DISGUISE_FLAG="--disguise"
           fi
-          python build.py "${{ matrix.variant }}" --libc "${{ matrix.libc }}" --arch "${{ matrix.arch.flag }}" --docker --build-info build-info.json $DISGUISE_FLAG
+          python build.py build "${{ matrix.variant }}" --libc "${{ matrix.libc }}" --arch "${{ matrix.arch.flag }}" --docker --build-info build-info.json $DISGUISE_FLAG
 
       - name: Tail build log on failure
         if: failure()
-        run: tail -n 500 "build/${{ matrix.variant }}/build.log"
+        run: tail -n 50 build/${{ matrix.variant }}/logs/*.log
 
       - name: Log in to Container Registry
         if: github.event_name != 'pull_request'

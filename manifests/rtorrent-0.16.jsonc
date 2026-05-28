@@ -6,13 +6,13 @@
     "rtorrent": {
       "source": {
         "github": "rakshasa/rtorrent",
-        "ref": "master"
+        "tag_range": ">=0.16,<0.17"
       }
     },
     "rtorrent-libtorrent": {
       "source": {
-        "github": "rakshasa/libtorrent",
-        "ref": "master"
+        "github": "rakshasa/rtorrent",
+        "tag_range": ">=0.16,<0.17"
       }
     }
   }

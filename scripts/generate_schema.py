@@ -1,11 +1,11 @@
-"""Generate manifest.schema.jsonc from the pydantic RawManifest model."""
+"""Generate manifest.schema.json from the pydantic RawManifest model."""
 
 import json
 from pathlib import Path
 
 from rtorrent_builder.manifest import _raw_manifest_adapter
 
-SCHEMA_PATH = Path(__file__).resolve().parent.parent / "manifest.schema.jsonc"
+SCHEMA_PATH = Path(__file__).resolve().parent.parent / "manifest.schema.json"
 
 
 def generate() -> None:
@@ -16,7 +16,7 @@ def generate() -> None:
 
     schema.pop("title", None)
     schema["$schema"] = "https://json-schema.org/draft/2020-12/schema"
-    schema["$id"] = "https://rtorrent-static/manifest.schema.jsonc"
+    schema["$id"] = "https://rtorrent-static/manifest.schema.json"
     schema["title"] = "Build Manifest"
     schema["description"] = "Build manifest for rtorrent-static variants"
 

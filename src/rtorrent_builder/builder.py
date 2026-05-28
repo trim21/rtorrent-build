@@ -27,7 +27,7 @@ from .deps.qttools import QtToolsBuilder
 from .deps.rtorrent import RtorrentBuilder
 from .deps.zlib import ZlibBuilder
 from .deps.zstd import ZstdBuilder
-from .manifest import Manifest
+from .manifest import ResolvedManifest
 from .toolchain import Builder, ResolvedSource, Toolchain
 
 _BUILDER_MAP: dict[str, type[Builder]] = {
@@ -234,7 +234,7 @@ def _render_timeline_table(timings: list[_Timing], total_elapsed: float) -> None
 def build_rtorrent(
     *,
     variant: str,
-    manifest: Manifest,
+    manifest: ResolvedManifest,
     work_dir: Path,
     output_dir: Path,
     skip_deps: list[str] | None = None,
@@ -286,12 +286,13 @@ def build_rtorrent(
         timings.append(t)
 
         pkg = pkgs[name]
+        lib = pkg.to_libinfo()
         builder_cls = _BUILDER_MAP[name]
         commander = tc.make_commander(name)
 
-        source = tc.prepare_source(name, pkg)
+        source = tc.prepare_source(name, lib)
         resolved[name] = source
-        builder = builder_cls(tc, pkg, source, commander)
+        builder = builder_cls(tc, lib, source, commander)
         features = builder.cache_key_extra
 
         if not no_cache and tc.is_built(name, source.version, features):
@@ -300,10 +301,10 @@ def build_rtorrent(
             t.end = time.monotonic() - build_origin
             return name
 
-        tc.clean_source(name, pkg)
-        source = tc.prepare_source(name, pkg)
+        tc.clean_source(name, lib)
+        source = tc.prepare_source(name, lib)
         resolved[name] = source
-        builder = builder_cls(tc, pkg, source, commander)
+        builder = builder_cls(tc, lib, source, commander)
         t.gen_end = time.monotonic() - build_origin
         builder.build()
         tc.mark_built(name, source.version, features)

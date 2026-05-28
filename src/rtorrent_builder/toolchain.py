@@ -16,7 +16,15 @@ from pathlib import Path
 from . import PROJECT_ROOT as _PROJECT_ROOT
 from ._types import Arch, Libc
 from .download import download_file
-from .manifest import GitSource, LibInfo, Lock, URLSource, load_lock
+from .manifest import (
+    GitHubRefSource,
+    GitHubReleaseSource,
+    GitHubTagSource,
+    LibInfo,
+    Lock,
+    URLSource,
+    load_lock,
+)
 from .run import Commander
 
 
@@ -94,18 +102,26 @@ class Toolchain:
     def _lock(self) -> Lock:
         return load_lock(self._project_root / "manifests", self.variant)
 
-    def _resolve_git_sha(self, source: GitSource) -> str:
-        sha = self._lock.sha(source.git, source.ref)
+    def _resolve_git_sha(self, source: GitHubRefSource) -> str:
+        resolved_tag = self._lock.resolved_tag(source.github, source.ref)
+        if resolved_tag:
+            sha = self._lock.sha(source.github, resolved_tag)
+            if sha:
+                return sha
+        sha = self._lock.sha(source.github, source.ref)
         if sha is None:
             raise RuntimeError(
-                f"Git source {source.git}#{source.ref} not found in lockfile — "
+                f"Git source {source.github}#{source.ref} not found in lockfile — "
                 "run 'uv run python scripts/lock.py' to regenerate"
             )
         return sha
 
     def prepare_source(self, name: str, lib: LibInfo) -> ResolvedSource:
-        if isinstance(lib.source, GitSource):
+        if isinstance(lib.source, GitHubRefSource):
             return self._prepare_git_source(name, lib.source)
+        if isinstance(lib.source, (GitHubTagSource, GitHubReleaseSource)):
+            msg = f"{type(lib.source).__name__} should be resolved to URLSource via lockfile first"
+            raise TypeError(msg)
         if isinstance(lib.source, URLSource):
             return self._prepare_url_source(name, lib.source, lib.version)
         raise TypeError(f"Unsupported source type: {type(lib.source)}")
@@ -127,7 +143,8 @@ class Toolchain:
 
     def clean_source(self, name: str, lib: LibInfo) -> None:
         if isinstance(lib.source, URLSource):
-            tarball = self.package_dir / f"{name}-{lib.version}{self._archive_ext(lib.source.url)}"
+            ext = self._archive_ext(lib.source.url)
+            tarball = self.package_dir / f"{name}-{lib.version}{ext}"
             if not tarball.exists():
                 return
             prefix = self._archive_prefix(tarball)
@@ -135,7 +152,7 @@ class Toolchain:
             if src_dir.exists():
                 print(f"Cleaning source dir: {src_dir}")
                 shutil.rmtree(src_dir)
-        elif isinstance(lib.source, GitSource):
+        elif isinstance(lib.source, (GitHubRefSource, GitHubTagSource, GitHubReleaseSource)):
             for d in self.build_dir.glob(f"{name}-*"):
                 if d.is_dir():
                     print(f"Cleaning source dir: {d}")
@@ -164,7 +181,7 @@ class Toolchain:
 
         return ResolvedSource(name=name, version=version, src_dir=src_dir)
 
-    def _prepare_git_source(self, name: str, source: GitSource) -> ResolvedSource:
+    def _prepare_git_source(self, name: str, source: GitHubRefSource) -> ResolvedSource:
         full_sha = self._resolve_git_sha(source)
         short_sha = full_sha[:7]
 
@@ -172,10 +189,10 @@ class Toolchain:
 
         if not (clone_dir / ".git").exists():
             clone_dir.parent.mkdir(parents=True, exist_ok=True)
-            print(f"Cloning {source.git}...")
-            self._commander.run(["git", "clone", source.git, str(clone_dir)])
+            print(f"Cloning {source.github}...")
+            self._commander.run(["git", "clone", source.github, str(clone_dir)])
 
-        print(f"Fetching {full_sha} from {source.git}...")
+        print(f"Fetching {full_sha} from {source.github}...")
         self._commander.run(["git", "-C", str(clone_dir), "fetch", "--prune", "origin", full_sha])
 
         tarball = self.package_dir / f"{name}-{full_sha}.tar.gz"

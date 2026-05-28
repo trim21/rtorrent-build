@@ -1,26 +1,33 @@
-"""Create a manifest for the latest rtorrent release tag if one doesn't exist."""
+"""Create or update a manifest for the latest rtorrent release."""
 
 from __future__ import annotations
 
 import json
+import os
+import re
 import sys
 from pathlib import Path
 
 import httpx
+from packaging.specifiers import SpecifierSet
+
+from rtorrent_builder.manifest import GitHubTagSource, _load_jsonc_text, _raw_manifest_adapter
 
 _MANIFESTS_DIR = Path("manifests").resolve()
 _REPO = "rakshasa/rtorrent"
+_GIT_URL = f"https://github.com/{_REPO}.git"
 _GLIBC_TARGET = "2.28"
-
-
-def _existing_variants() -> set[str]:
-    return {p.stem for p in _MANIFESTS_DIR.glob("rtorrent-*.jsonc")}
+_VERSION_RE = re.compile(r"^v?(\d+)\.(\d+)(?:\.(\d+))?(.*)")
 
 
 def _fetch_latest_release() -> dict[str, str]:
+    headers: dict[str, str] = {"Accept": "application/vnd.github+json"}
+    token = os.environ.get("GITHUB_TOKEN")
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
     resp = httpx.get(
         f"https://api.github.com/repos/{_REPO}/releases/latest",
-        headers={"Accept": "application/vnd.github+json"},
+        headers=headers,
         follow_redirects=True,
     )
     resp.raise_for_status()
@@ -30,41 +37,69 @@ def _fetch_latest_release() -> dict[str, str]:
     return {"tag": tag, "version": version}
 
 
-def _manifest_content(version: str) -> str:
+def _read_existing_tag_range(manifest_path: Path) -> str | None:
+    if not manifest_path.exists():
+        return None
+    raw = _raw_manifest_adapter.validate_python(_load_jsonc_text(manifest_path.read_text()))
+
+    if isinstance(raw.packages["rtorrent"].source, GitHubTagSource):
+        return raw.packages["rtorrent"].source.tag_range
+    return None
+
+
+def _manifest_content(version_prefix: str) -> str:
+    tag_range = f">={version_prefix},<{_next_minor(version_prefix)}"
     obj = {
+        "$schema": "../manifest.schema.json",
         "extends": "common.jsonc",
         "target_glibc": _GLIBC_TARGET,
         "packages": {
             "rtorrent": {
                 "source": {
-                    "url": f"https://github.com/{_REPO}/releases/download/v{version}/rtorrent-{version}.tar.gz",
+                    "github": _GIT_URL,
+                    "tag_range": tag_range,
                 },
-                "version": version,
             },
             "rtorrent-libtorrent": {
                 "source": {
-                    "url": f"https://github.com/{_REPO}/releases/download/v{version}/libtorrent-{version}.tar.gz",
+                    "github": "https://github.com/rakshasa/libtorrent.git",
+                    "tag_range": tag_range,
                 },
-                "version": version,
             },
         },
     }
     return json.dumps(obj, indent=2) + "\n"
 
 
+def _next_minor(version_prefix: str) -> str:
+    major, minor = version_prefix.split(".")
+    return f"{major}.{int(minor) + 1}"
+
+
 def main() -> None:
     release = _fetch_latest_release()
     version = release["version"]
-    variant = f"rtorrent-{version}"
 
-    if variant in _existing_variants():
-        print(f"Manifest for {variant} already exists, nothing to do")
+    m = _VERSION_RE.match(version)
+    if not m:
+        print(f"Unexpected version format: {version}")
+        sys.exit(1)
+
+    major, minor = m.group(1), m.group(2)
+    version_prefix = f"{major}.{minor}"
+    manifest_path = _MANIFESTS_DIR / f"rtorrent-{version_prefix}.jsonc"
+
+    existing_range = _read_existing_tag_range(manifest_path)
+    if existing_range and version in SpecifierSet(existing_range):
+        print(f"Version {version} covered by existing {manifest_path.name} ({existing_range})")
         return
 
-    path = _MANIFESTS_DIR / f"{variant}.jsonc"
-    path.write_text(_manifest_content(version))
-    print(f"Created {path}")
-    sys.exit(0)
+    if manifest_path.exists():
+        manifest_path.write_text(_manifest_content(version_prefix))
+        print(f"Updated {manifest_path.name} for {version}")
+    else:
+        manifest_path.write_text(_manifest_content(version_prefix))
+        print(f"Created {manifest_path.name} for {version}")
 
 
 if __name__ == "__main__":
