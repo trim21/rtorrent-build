@@ -7,7 +7,7 @@
       "source": {
         "github": "boostorg/boost",
         "tag_range": ">=1.88,<2",
-        "asset": "boost-{version}-cmake.tar.gz"
+        "asset": "{tag}-cmake.tar.gz"
       }
     },
     "libtorrent-rasterbar": {

@@ -1,5 +1,5 @@
 {
-  "manifest_hash": "263f5321ab2a3318be646c56cb0eaffc5d55d3ecf5ee9dd3e6c8c1943835b8dc",
+  "manifest_hash": "27332e0ebcc8a2eb6b4f37de1fddd66e9435f5f89ad159cfa93e620e3350ff34",
   "packages": {
     "boost": {
       "url": "https://github.com/boostorg/boost/releases/download/boost-1.86.0/boost-1.86.0-cmake.tar.gz",

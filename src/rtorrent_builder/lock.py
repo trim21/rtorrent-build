@@ -25,7 +25,7 @@ from .manifest import (
 from .version_range import resolve_best
 
 _VERSION_PATTERNS: dict[str, str] = {
-    "boostorg/boost": r"^boost-(\d+)\.(\d+)\.(\d+)$",
+    "boostorg/boost": r"^boost-(\d+)\.(\d+)\.(\d+)(?:-\d+)?$",
     "curl/curl": r"^curl-(\d+)_(\d+)_(\d+)$",
     "openssl/openssl": r"^openssl-(\d+)\.(\d+)\.(\d+)$",
     "qbittorrent/qBittorrent": r"^release-(\d+)\.(\d+)\.(\d+)$",
@@ -92,9 +92,13 @@ def _resolve_github_source(source: PackageSource) -> tuple[str, str]:
         if not version_strings:
             raise ValueError(f"No version tags found for {source.github}")
         best = resolve_best(version_strings, source.tag_range)
-        tag = next(t for t, v in versions if v == best)
+        matching_tags = [t for t, v in versions if v == best]
+        # When multiple tags map to the same version (e.g., boost-1.91.0 and
+        # boost-1.91.0-1), prefer the longest tag — it typically carries a
+        # build-number suffix and is the one with actual release assets.
+        tag = max(matching_tags, key=len)
         if isinstance(source, GitHubReleaseSource):
-            asset = source.asset.format(version=best)
+            asset = source.asset.format(tag=tag)
             url = f"https://github.com/{source.github}/releases/download/{tag}/{asset}"
         else:
             url = f"https://github.com/{source.github}/archive/refs/tags/{tag}.tar.gz"

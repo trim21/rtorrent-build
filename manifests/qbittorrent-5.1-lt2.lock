@@ -1,8 +1,8 @@
 {
-  "manifest_hash": "eb1fa6144d6c776b92d1c74fba0f109ca0afc11fdd21c4ba46358a6ca996e4b1",
+  "manifest_hash": "5e2c87ba9db7d1a651068b9326b5ad877cdb5e2c0a9f916389038248037249ef",
   "packages": {
     "boost": {
-      "url": "https://github.com/boostorg/boost/releases/download/boost-1.91.0/boost-1.91.0-cmake.tar.gz",
+      "url": "https://github.com/boostorg/boost/releases/download/boost-1.91.0-1/boost-1.91.0-1-cmake.tar.gz",
       "version": "1.91.0"
     },
     "brotli": {
