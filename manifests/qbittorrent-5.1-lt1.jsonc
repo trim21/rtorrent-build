@@ -6,10 +6,10 @@
     "boost": {
       "source": {
         "url": {
-          "url": "https://github.com/boostorg/boost/releases/download/boost-1.88.0/boost-1.88.0-cmake.tar.gz"
+          "url": "https://github.com/boostorg/boost/releases/download/boost-1.87.0/boost-1.87.0-cmake.tar.gz"
         }
       },
-      "version": "1.88.0"
+      "version": "1.87.0"
     },
     "libtorrent-rasterbar": {
       "source": {

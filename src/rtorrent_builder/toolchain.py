@@ -16,7 +16,7 @@ from pathlib import Path
 from . import PROJECT_ROOT as _PROJECT_ROOT
 from ._types import Arch, Libc
 from .download import download_file
-from .manifest import GitSource, LibInfo, Lock, URLSource, load_lock
+from .manifest import GitHubRefSource, GitHubTagSource, LibInfo, Lock, URLSource, load_lock
 from .run import Commander
 
 
@@ -94,7 +94,7 @@ class Toolchain:
     def _lock(self) -> Lock:
         return load_lock(self._project_root / "manifests", self.variant)
 
-    def _resolve_git_sha(self, source: GitSource) -> str:
+    def _resolve_git_sha(self, source: GitHubRefSource) -> str:
         resolved_tag = self._lock.resolved_tag(source.repo, source.ref)
         if resolved_tag:
             sha = self._lock.sha(source.repo, resolved_tag)
@@ -109,8 +109,10 @@ class Toolchain:
         return sha
 
     def prepare_source(self, name: str, lib: LibInfo) -> ResolvedSource:
-        if lib.source.git is not None:
+        if isinstance(lib.source.git, GitHubRefSource):
             return self._prepare_git_source(name, lib.source.git)
+        if isinstance(lib.source.git, GitHubTagSource):
+            raise TypeError("GitHubTagSource should be resolved to URLSource via lockfile first")
         if lib.source.url is not None:
             return self._prepare_url_source(name, lib.source.url, lib.version)
         raise TypeError(f"Unsupported source type: {type(lib.source)}")
@@ -170,7 +172,7 @@ class Toolchain:
 
         return ResolvedSource(name=name, version=version, src_dir=src_dir)
 
-    def _prepare_git_source(self, name: str, source: GitSource) -> ResolvedSource:
+    def _prepare_git_source(self, name: str, source: GitHubRefSource) -> ResolvedSource:
         full_sha = self._resolve_git_sha(source)
         short_sha = full_sha[:7]
 

@@ -16,10 +16,18 @@ def _load_jsonc_text(text: str) -> object:
 
 
 @dataclass(frozen=True, kw_only=True)
-class GitSource:
+class GitHubTagSource:
+    repo: str
+    tag_range: str
+
+
+@dataclass(frozen=True, kw_only=True)
+class GitHubRefSource:
     repo: str
     ref: str
-    tag_range: str | None = None
+
+
+GitSource = GitHubTagSource | GitHubRefSource
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -131,9 +139,12 @@ def _collect_lock_entries(manifest_path: Path, manifests_dir: Path) -> dict[str,
     raw = _raw_manifest_adapter.validate_python(_load_jsonc_text(manifest_path.read_text()))
     raw = _resolve_extends(raw, manifests_dir)
     for pkg in raw.packages.values():
-        if pkg.source.git is not None:
+        if isinstance(pkg.source.git, GitHubRefSource):
             key = f"{pkg.source.git.repo}#{pkg.source.git.ref}"
-            entries[key] = entries.get(key, "")
+            entries[key] = pkg.source.git.ref
+        elif isinstance(pkg.source.git, GitHubTagSource):
+            key = f"{pkg.source.git.repo}#tag"
+            entries[key] = ""
     return entries
 
 
@@ -145,14 +156,16 @@ def _collect_tag_range_entries(
     raw = _resolve_extends(raw, manifests_dir)
     result: dict[str, tuple[str, str]] = {}
     for name, pkg in raw.packages.items():
-        if pkg.source.git is not None and pkg.source.git.tag_range:
-            key = f"{pkg.source.git.repo}#{pkg.source.git.ref}"
+        if isinstance(pkg.source.git, GitHubTagSource):
+            key = f"{pkg.source.git.repo}#tag"
             result[name] = (key, pkg.source.git.tag_range)
     return result
 
 
 def source_identity(pkg: LibInfo) -> str:
-    if pkg.source.git is not None:
+    if isinstance(pkg.source.git, GitHubTagSource):
+        return f"git:{pkg.source.git.repo}#tag={pkg.source.git.tag_range}"
+    if isinstance(pkg.source.git, GitHubRefSource):
         return f"git:{pkg.source.git.repo}#{pkg.source.git.ref}"
     if pkg.source.url is not None:
         return f"url:{pkg.source.url.url}"

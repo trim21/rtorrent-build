@@ -21,19 +21,21 @@ jobs:
         with:
           activate-environment: "true"
 
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
       - name: Install dependencies
         run: uv sync --frozen
 
       - name: Check for new release
         id: check
         run: uv run python scripts/new-rtorrent-release.py
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Run pre-commit
-        run: uvx pre-commit run --all-files || true
+        run: uvx prek run --all-files || true
 
       - name: Create pull request
         uses: peter-evans/create-pull-request@v7

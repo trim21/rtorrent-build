@@ -10,6 +10,8 @@ from pathlib import Path
 import json5
 
 from rtorrent_builder.manifest import (
+    GitHubRefSource,
+    GitHubTagSource,
     GitSource,
     LibInfo,
     Source,
@@ -65,14 +67,13 @@ def _resolve_ref(git_url: str, ref: str) -> str:
     raise ValueError(f"Ref {ref} not found in {git_url}")
 
 
-def _resolve_git_source(git: GitSource) -> tuple[str, str]:
+def _resolve_git_source(git: GitSource) -> tuple[str, str]:  # noqa: C901
     """Resolve a GitSource to (url, version)."""
     owner_repo = _gh_repo_from_url(git.repo)
     if not owner_repo:
         raise ValueError(f"Cannot parse GitHub repo from URL: {git.repo}")
 
-    if git.tag_range:
-        # Resolve tag_range to best matching tag
+    if isinstance(git, GitHubTagSource):
         tags = _gh_tags(owner_repo)
         versions = [(t, _extract_version(t)) for t in tags]
         version_strings = [v for _, v in versions if v]
@@ -82,17 +83,17 @@ def _resolve_git_source(git: GitSource) -> tuple[str, str]:
         tag = next(t for t, v in versions if v == best)
         url = f"https://github.com/{owner_repo}/archive/refs/tags/{tag}.tar.gz"
         return url, best
-    else:
-        # Resolve ref to SHA, use archive URL
+    if isinstance(git, GitHubRefSource):
         sha = _resolve_ref(git.repo, git.ref)
         url = f"https://github.com/{owner_repo}/archive/{sha}.tar.gz"
         return url, sha[:12]
+    raise TypeError(f"Unsupported git source type: {type(git)}")
 
 
 def _resolve_source(pkg_name: str, lib: LibInfo) -> tuple[Source, str]:
     """Resolve a LibInfo's source to (URL-only source, version)."""
     if lib.source.url is not None:
-        return lib.source, lib.version
+        return Source(url=lib.source.url), lib.version
     if lib.source.git is not None:
         url, version = _resolve_git_source(lib.source.git)
         return Source(url=URLSource(url=url)), version
@@ -115,12 +116,14 @@ def resolve_manifest(variant: str, manifests_dir: Path | None = None) -> None:
     resolved_packages: dict[str, dict] = {}
     for name, pkg in raw.packages.items():
         source, version = _resolve_source(name, pkg)
+        assert source.url is not None
         entry: dict = {"source": {"url": {"url": source.url.url}}}
         if version:
             entry["version"] = version
         if pkg.cxx_std:
             entry["cxx_std"] = pkg.cxx_std
         resolved_packages[name] = entry
+        assert source.url is not None
         print(f"  {name}: {source.url.url[:60]}...")
 
     manifest_hash = compute_manifest_hash(manifest_path, manifests_dir)
