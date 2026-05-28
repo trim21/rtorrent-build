@@ -1,0 +1,49 @@
+{
+  "$schema": "../manifest.schema.jsonc",
+  "extends": "common.jsonc",
+  "target_glibc": "2.34",
+  "packages": {
+    "boost": {
+      "source": {
+        "url": {
+          "url": "https://github.com/boostorg/boost/releases/download/boost-1.88.0/boost-1.88.0-cmake.tar.gz"
+        }
+      },
+      "version": "1.88.0"
+    },
+    "libtorrent-rasterbar": {
+      "source": {
+        "url": {
+          "url": "https://github.com/arvidn/libtorrent/releases/download/v2.0.12/libtorrent-rasterbar-2.0.12.tar.gz"
+        }
+      },
+      "version": "2.0.12",
+      "cxx_std": "c++17"
+    },
+    "qt": {
+      "source": {
+        "url": {
+          "url": "https://download.qt.io/official_releases/qt/6.8/6.8.3/submodules/qtbase-everywhere-src-6.8.3.tar.xz"
+        }
+      },
+      "version": "6.8.3"
+    },
+    "qttools": {
+      "source": {
+        "url": {
+          "url": "https://download.qt.io/official_releases/qt/6.8/6.8.3/submodules/qttools-everywhere-src-6.8.3.tar.xz"
+        }
+      },
+      "version": "6.8.3"
+    },
+    "qbittorrent": {
+      "source": {
+        "url": {
+          "url": "https://github.com/qbittorrent/qBittorrent/releases/download/release-5.1.4/qbittorrent-5.1.4.tar.xz"
+        }
+      },
+      "version": "5.1.4",
+      "cxx_std": "c++20"
+    }
+  }
+}

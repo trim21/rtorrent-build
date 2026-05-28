@@ -95,19 +95,24 @@ class Toolchain:
         return load_lock(self._project_root / "manifests", self.variant)
 
     def _resolve_git_sha(self, source: GitSource) -> str:
-        sha = self._lock.sha(source.git, source.ref)
+        resolved_tag = self._lock.resolved_tag(source.repo, source.ref)
+        if resolved_tag:
+            sha = self._lock.sha(source.repo, resolved_tag)
+            if sha:
+                return sha
+        sha = self._lock.sha(source.repo, source.ref)
         if sha is None:
             raise RuntimeError(
-                f"Git source {source.git}#{source.ref} not found in lockfile — "
+                f"Git source {source.repo}#{source.ref} not found in lockfile — "
                 "run 'uv run python scripts/lock.py' to regenerate"
             )
         return sha
 
     def prepare_source(self, name: str, lib: LibInfo) -> ResolvedSource:
-        if isinstance(lib.source, GitSource):
-            return self._prepare_git_source(name, lib.source)
-        if isinstance(lib.source, URLSource):
-            return self._prepare_url_source(name, lib.source, lib.version)
+        if lib.source.git is not None:
+            return self._prepare_git_source(name, lib.source.git)
+        if lib.source.url is not None:
+            return self._prepare_url_source(name, lib.source.url, lib.version)
         raise TypeError(f"Unsupported source type: {type(lib.source)}")
 
     @staticmethod
@@ -126,8 +131,9 @@ class Toolchain:
             return os.path.commonpath(tf.getnames())
 
     def clean_source(self, name: str, lib: LibInfo) -> None:
-        if isinstance(lib.source, URLSource):
-            tarball = self.package_dir / f"{name}-{lib.version}{self._archive_ext(lib.source.url)}"
+        if lib.source.url is not None:
+            ext = self._archive_ext(lib.source.url.url)
+            tarball = self.package_dir / f"{name}-{lib.version}{ext}"
             if not tarball.exists():
                 return
             prefix = self._archive_prefix(tarball)
@@ -135,7 +141,7 @@ class Toolchain:
             if src_dir.exists():
                 print(f"Cleaning source dir: {src_dir}")
                 shutil.rmtree(src_dir)
-        elif isinstance(lib.source, GitSource):
+        elif lib.source.git is not None:
             for d in self.build_dir.glob(f"{name}-*"):
                 if d.is_dir():
                     print(f"Cleaning source dir: {d}")
@@ -172,10 +178,10 @@ class Toolchain:
 
         if not (clone_dir / ".git").exists():
             clone_dir.parent.mkdir(parents=True, exist_ok=True)
-            print(f"Cloning {source.git}...")
-            self._commander.run(["git", "clone", source.git, str(clone_dir)])
+            print(f"Cloning {source.repo}...")
+            self._commander.run(["git", "clone", source.repo, str(clone_dir)])
 
-        print(f"Fetching {full_sha} from {source.git}...")
+        print(f"Fetching {full_sha} from {source.repo}...")
         self._commander.run(["git", "-C", str(clone_dir), "fetch", "--prune", "origin", full_sha])
 
         tarball = self.package_dir / f"{name}-{full_sha}.tar.gz"

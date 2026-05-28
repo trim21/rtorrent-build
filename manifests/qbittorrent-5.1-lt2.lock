@@ -1,6 +1,14 @@
 {
-  "manifest_hash": "a408aeaad8c356ab37950bd58ace6a1bc0c0fbd1f36f16948ed485add5ddef02",
+  "manifest_hash": "8fe68add8aa5f9a7d43cc5386ebab18510f5af675a023578ff2ecc34b04b886f",
   "packages": {
+    "boost": {
+      "source": {
+        "url": {
+          "url": "https://github.com/boostorg/boost/releases/download/boost-1.88.0/boost-1.88.0-cmake.tar.gz"
+        }
+      },
+      "version": "1.88.0"
+    },
     "brotli": {
       "source": {
         "url": {
@@ -24,6 +32,15 @@
         }
       },
       "version": "8.20.0"
+    },
+    "libtorrent-rasterbar": {
+      "cxx_std": "c++17",
+      "source": {
+        "url": {
+          "url": "https://github.com/arvidn/libtorrent/releases/download/v2.0.12/libtorrent-rasterbar-2.0.12.tar.gz"
+        }
+      },
+      "version": "2.0.12"
     },
     "lua": {
       "source": {
@@ -49,21 +66,30 @@
       },
       "version": "3.6.2"
     },
-    "rtorrent": {
+    "qbittorrent": {
+      "cxx_std": "c++20",
       "source": {
         "url": {
-          "url": "https://github.com/rakshasa/rtorrent/archive/880510073ae142706aeb778e883f86789b425ae3.tar.gz"
+          "url": "https://github.com/qbittorrent/qBittorrent/releases/download/release-5.1.4/qbittorrent-5.1.4.tar.xz"
         }
       },
-      "version": "880510073ae1"
+      "version": "5.1.4"
     },
-    "rtorrent-libtorrent": {
+    "qt": {
       "source": {
         "url": {
-          "url": "https://github.com/rakshasa/libtorrent/archive/effbe17318f55c78f4c1f1c60b18c5822c7d20b2.tar.gz"
+          "url": "https://download.qt.io/official_releases/qt/6.8/6.8.3/submodules/qtbase-everywhere-src-6.8.3.tar.xz"
         }
       },
-      "version": "effbe17318f5"
+      "version": "6.8.3"
+    },
+    "qttools": {
+      "source": {
+        "url": {
+          "url": "https://download.qt.io/official_releases/qt/6.8/6.8.3/submodules/qttools-everywhere-src-6.8.3.tar.xz"
+        }
+      },
+      "version": "6.8.3"
     },
     "zlib": {
       "source": {
@@ -82,6 +108,6 @@
       "version": "1.5.7"
     }
   },
-  "target_glibc": "2.28",
+  "target_glibc": "2.34",
   "toolchain": "default"
 }

@@ -18,11 +18,11 @@ jobs:
       matrix:
         variant:
           - rtorrent-0.9.8
-          - rtorrent-0.16.12
-          - qbittorrent-5.2.1-lt2
-          - qbittorrent-5.2.1-lt1
-          - qbittorrent-5.1.4-lt2
-          - qbittorrent-5.1.4-lt1
+          - rtorrent-0.16
+          - qbittorrent-5.2-lt2
+          - qbittorrent-5.2-lt1
+          - qbittorrent-5.1-lt2
+          - qbittorrent-5.1-lt1
         libc: [glibc, musl]
         arch:
           - { flag: amd/v1, name: amd.v1 }
@@ -47,18 +47,23 @@ jobs:
       - name: Install main dependencies
         run: uv sync --frozen
 
+      - name: Cache toolchain
+        uses: actions/cache@v4
+        with:
+          path: toolchains/default/.venv
+          key: toolchain-${{ hashFiles('toolchains/default/pyproject.toml') }}
+
       - name: Cache downloaded sources
         uses: actions/cache@v4
         with:
           path: assets/
-          key: sources-${{ hashFiles('manifests/*.jsonc') }}
+          key: sources-${{ hashFiles('manifests/*.lock') }}
 
       - name: Cache build prefix
         uses: actions/cache@v4
         with:
-          path: |
-            build/
-          key: build-${{ matrix.variant }}-${{ matrix.libc }}-${{ matrix.arch.name }}-${{ hashFiles(format('manifests/{0}.*', matrix.variant)) }}
+          path: build/
+          key: build-${{ matrix.variant }}-${{ matrix.libc }}-${{ matrix.arch.name }}-${{ hashFiles(format('manifests/{0}.lock', matrix.variant)) }}
 
       - name: Build ${{ matrix.variant }} (${{ matrix.libc }}/${{ matrix.arch.name }})
         env:
