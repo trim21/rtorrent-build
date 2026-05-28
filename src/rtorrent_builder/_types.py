@@ -19,11 +19,17 @@ class Arch(Enum):
     v1 = "amd/v1"
     v2 = "amd/v2"
     v3 = "amd/v3"
+    v4 = "amd/v4"
 
     @property
     def march(self) -> str:
         """GCC/clang ``-march`` flag value (LLVM underscore form)."""
-        return {Arch.v1: "x86_64", Arch.v2: "x86_64_v2", Arch.v3: "x86_64_v3"}[self]
+        return {
+            Arch.v1: "x86_64",
+            Arch.v2: "x86_64_v2",
+            Arch.v3: "x86_64_v3",
+            Arch.v4: "x86_64_v4",
+        }[self]
 
     @property
     def safe(self) -> str:
