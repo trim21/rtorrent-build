@@ -1,5 +1,5 @@
 {
-  "manifest_hash": "ba932ddefe60fde87cffc1e913899935f41e32a8f05a7a602ee794a7d5897291",
+  "manifest_hash": "4342c693dc3aac963c6208dac5fb3163a47a6c704e6493d65db8b15fab711c0a",
   "packages": {
     "boost": {
       "url": "https://github.com/boostorg/boost/releases/download/boost-1.91.0-1/boost-1.91.0-1-cmake.tar.gz",
@@ -19,7 +19,7 @@
     },
     "libtorrent-rasterbar": {
       "cxx_std": "c++17",
-      "url": "https://github.com/arvidn/libtorrent/archive/refs/tags/v2.0.12.tar.gz",
+      "url": "https://github.com/arvidn/libtorrent/releases/download/v2.0.12/libtorrent-rasterbar-2.0.12.tar.gz",
       "version": "2.0.12"
     },
     "lua": {

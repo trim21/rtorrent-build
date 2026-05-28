@@ -98,7 +98,7 @@ def _resolve_github_source(source: PackageSource) -> tuple[str, str]:
         # build-number suffix and is the one with actual release assets.
         tag = max(matching_tags, key=len)
         if isinstance(source, GitHubReleaseSource):
-            asset = source.asset.format(tag=tag)
+            asset = source.asset.format(tag=tag, version=best)
             url = f"https://github.com/{source.github}/releases/download/{tag}/{asset}"
         else:
             url = f"https://github.com/{source.github}/archive/refs/tags/{tag}.tar.gz"

@@ -13,7 +13,8 @@
     "libtorrent-rasterbar": {
       "source": {
         "github": "arvidn/libtorrent",
-        "tag_range": ">=2,<3"
+        "tag_range": ">=2,<3",
+        "asset": "libtorrent-rasterbar-{version}.tar.gz"
       },
       "cxx_std": "c++17"
     },

@@ -36,7 +36,7 @@ jobs:
             disguise: true
           - variant: rtorrent-master
             libc: glibc
-            arch: { flag: amd/v1, name: amd.v1 }
+            arch: { flag: amd/v4, name: amd.v4 }
             disguise: true
     runs-on: ubuntu-latest
     permissions:
