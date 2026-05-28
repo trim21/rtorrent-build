@@ -72,7 +72,7 @@ jobs:
 
       - name: Tail build log on failure
         if: failure()
-        run: tail -n 500 "build/${{ matrix.variant }}/build.log"
+        run: tail -n 200 build/${{ matrix.variant }}/logs/*.log || true
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
