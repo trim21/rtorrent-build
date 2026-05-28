@@ -31,12 +31,6 @@ _VERSION_PATTERNS: dict[str, str] = {
     "qbittorrent/qBittorrent": r"^release-(\d+)\.(\d+)\.(\d+)$",
 }
 
-# GitHub archives don't include git submodules. For repos that need them,
-# use an alternative download URL template instead.
-_DOWNLOAD_URL_TEMPLATES: dict[str, str] = {
-    "boostorg/boost": "https://archives.boost.io/release/{version}/source/boost_{version_underscore}.tar.gz",
-}
-
 
 def _gh_tags(owner_repo: str) -> list[str]:
     """Fetch tags from GitHub using git ls-remote (no API token needed)."""
@@ -102,11 +96,6 @@ def _resolve_github_source(source: PackageSource) -> tuple[str, str]:
         if isinstance(source, GitHubReleaseSource):
             asset = source.asset.format(version=best)
             url = f"https://github.com/{source.github}/releases/download/{tag}/{asset}"
-        elif source.github in _DOWNLOAD_URL_TEMPLATES:
-            url = _DOWNLOAD_URL_TEMPLATES[source.github].format(
-                version=best,
-                version_underscore=best.replace(".", "_"),
-            )
         else:
             url = f"https://github.com/{source.github}/archive/refs/tags/{tag}.tar.gz"
         return url, best

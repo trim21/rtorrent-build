@@ -1,8 +1,8 @@
 {
-  "manifest_hash": "00198fa479e1600b0f377192c3435088662daabd2234a1303b7ef94132bb6cdf",
+  "manifest_hash": "abd25707273c67546636faefc93ff199131764a82105d4d7c36aa3a794c42762",
   "packages": {
     "boost": {
-      "url": "https://archives.boost.io/release/1.86.0/source/boost_1_86_0.tar.gz",
+      "url": "https://github.com/boostorg/boost/releases/download/boost-1.86.0/boost-1.86.0-cmake.tar.gz",
       "version": "1.86.0"
     },
     "brotli": {
