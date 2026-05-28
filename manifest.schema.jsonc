@@ -2,29 +2,17 @@
   "$defs": {
     "GitSource": {
       "properties": {
-        "repo": {
-          "title": "Repo",
+        "git": {
+          "title": "Git",
           "type": "string"
         },
         "ref": {
           "title": "Ref",
           "type": "string"
-        },
-        "tag_range": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "title": "Tag Range"
         }
       },
       "required": [
-        "repo",
+        "git",
         "ref"
       ],
       "title": "GitSource",
@@ -33,7 +21,15 @@
     "LibInfo": {
       "properties": {
         "source": {
-          "$ref": "#/$defs/Source"
+          "oneOf": [
+            {
+              "$ref": "#/$defs/URLSource"
+            },
+            {
+              "$ref": "#/$defs/GitSource"
+            }
+          ],
+          "title": "Source"
         },
         "version": {
           "default": "",
@@ -57,34 +53,6 @@
         "source"
       ],
       "title": "LibInfo",
-      "type": "object"
-    },
-    "Source": {
-      "properties": {
-        "git": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/GitSource"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null
-        },
-        "url": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/URLSource"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null
-        }
-      },
-      "title": "Source",
       "type": "object"
     },
     "URLSource": {
@@ -150,14 +118,18 @@
       ],
       "default": null,
       "title": "Toolchain"
+    },
+    "$schema": {
+      "type": "string",
+      "description": "JSON Schema reference"
     }
   },
   "required": [
     "packages"
   ],
-  "title": "Build Manifest",
   "type": "object",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://rtorrent-static/manifest.schema.jsonc",
+  "title": "Build Manifest",
   "description": "Build manifest for rtorrent-static variants"
 }

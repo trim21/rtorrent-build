@@ -14,7 +14,6 @@ dependencies = [
   "json5>=0.14.0",
   "pydantic>=2.10.0",
   "tqdm>=4.67.0",
-  "packaging>=24.0",
 ]
 
 [project.scripts]
