@@ -1,0 +1,23 @@
+{
+  "$schema": "../manifest.schema.jsonc",
+  "extends": "common.jsonc",
+  "target_glibc": "2.28",
+  "packages": {
+    "rtorrent": {
+      "source": {
+        "url": {
+          "url": "https://github.com/rakshasa/rtorrent/releases/download/v0.16.12/rtorrent-0.16.12.tar.gz"
+        }
+      },
+      "version": "0.16.12"
+    },
+    "rtorrent-libtorrent": {
+      "source": {
+        "url": {
+          "url": "https://github.com/rakshasa/rtorrent/releases/download/v0.16.12/libtorrent-0.16.12.tar.gz"
+        }
+      },
+      "version": "0.16.12"
+    }
+  }
+}

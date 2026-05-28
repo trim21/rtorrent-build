@@ -1,5 +1,5 @@
 {
-  "manifest_hash": "a408aeaad8c356ab37950bd58ace6a1bc0c0fbd1f36f16948ed485add5ddef02",
+  "manifest_hash": "89849561599bb3bb51b25171083dd3555f2c21f3621be5f3401bde48926a2cad",
   "packages": {
     "brotli": {
       "source": {
@@ -52,18 +52,18 @@
     "rtorrent": {
       "source": {
         "url": {
-          "url": "https://github.com/rakshasa/rtorrent/archive/880510073ae142706aeb778e883f86789b425ae3.tar.gz"
+          "url": "https://github.com/rakshasa/rtorrent/releases/download/v0.16.12/rtorrent-0.16.12.tar.gz"
         }
       },
-      "version": "880510073ae1"
+      "version": "0.16.12"
     },
     "rtorrent-libtorrent": {
       "source": {
         "url": {
-          "url": "https://github.com/rakshasa/libtorrent/archive/effbe17318f55c78f4c1f1c60b18c5822c7d20b2.tar.gz"
+          "url": "https://github.com/rakshasa/rtorrent/releases/download/v0.16.12/libtorrent-0.16.12.tar.gz"
         }
       },
-      "version": "effbe17318f5"
+      "version": "0.16.12"
     },
     "zlib": {
       "source": {

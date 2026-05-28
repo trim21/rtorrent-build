@@ -1,5 +1,5 @@
 {
-  "manifest_hash": "a408aeaad8c356ab37950bd58ace6a1bc0c0fbd1f36f16948ed485add5ddef02",
+  "manifest_hash": "83a8033d4f1c403eb004ebcd4f093b4486c1be5d74ae38a0d48db26b555bd734",
   "packages": {
     "brotli": {
       "source": {
@@ -20,10 +20,10 @@
     "curl": {
       "source": {
         "url": {
-          "url": "https://github.com/curl/curl/releases/download/curl-8_20_0/curl-8.20.0.tar.gz"
+          "url": "https://github.com/curl/curl/releases/download/curl-7_88_1/curl-7.88.1.tar.gz"
         }
       },
-      "version": "8.20.0"
+      "version": "7.88.1"
     },
     "lua": {
       "source": {
@@ -44,26 +44,28 @@
     "openssl": {
       "source": {
         "url": {
-          "url": "https://github.com/openssl/openssl/releases/download/openssl-3.6.2/openssl-3.6.2.tar.gz"
+          "url": "https://www.openssl.org/source/openssl-1.1.1w.tar.gz"
         }
       },
-      "version": "3.6.2"
+      "version": "1.1.1w"
     },
     "rtorrent": {
+      "cxx_std": "c++14",
       "source": {
         "url": {
-          "url": "https://github.com/rakshasa/rtorrent/archive/880510073ae142706aeb778e883f86789b425ae3.tar.gz"
+          "url": "https://github.com/rakshasa/rtorrent/releases/download/v0.9.8/rtorrent-0.9.8.tar.gz"
         }
       },
-      "version": "880510073ae1"
+      "version": "0.9.8"
     },
     "rtorrent-libtorrent": {
+      "cxx_std": "c++14",
       "source": {
         "url": {
-          "url": "https://github.com/rakshasa/libtorrent/archive/effbe17318f55c78f4c1f1c60b18c5822c7d20b2.tar.gz"
+          "url": "https://github.com/rakshasa/rtorrent/releases/download/v0.9.8/libtorrent-0.13.8.tar.gz"
         }
       },
-      "version": "effbe17318f5"
+      "version": "0.13.8"
     },
     "zlib": {
       "source": {
@@ -82,6 +84,6 @@
       "version": "1.5.7"
     }
   },
-  "target_glibc": "2.28",
+  "target_glibc": "2.17",
   "toolchain": "default"
 }
