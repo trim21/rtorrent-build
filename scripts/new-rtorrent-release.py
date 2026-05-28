@@ -48,7 +48,7 @@ def _read_existing_tag_range(manifest_path: Path) -> str | None:
 def _manifest_content(version_prefix: str) -> str:
     tag_range = f">={version_prefix},<{_next_minor(version_prefix)}"
     obj = {
-        "$schema": "../manifest.schema.jsonc",
+        "$schema": "../manifest.schema.json",
         "extends": "common.jsonc",
         "target_glibc": _GLIBC_TARGET,
         "packages": {
