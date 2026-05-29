@@ -6,13 +6,15 @@
     "rtorrent": {
       "source": {
         "github": "rakshasa/rtorrent",
-        "tag_range": ">=0.16,<0.17"
+        "tag_range": ">=0.16,<0.17",
+        "asset": "rtorrent-{version}.tar.gz"
       }
     },
     "rtorrent-libtorrent": {
       "source": {
         "github": "rakshasa/rtorrent",
-        "tag_range": ">=0.16,<0.17"
+        "tag_range": ">=0.16,<0.17",
+        "asset": "libtorrent-{version}.tar.gz"
       }
     }
   }
