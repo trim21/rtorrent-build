@@ -17,6 +17,7 @@ def _load_jsonc_text(text: str) -> object:
 class GitHubTagSource:
     github: str
     tag_range: str
+    url_template: str | None = None
 
 
 @dataclass(frozen=True, kw_only=True)

@@ -59,7 +59,8 @@
     "libidn2": {
       "source": {
         "github": "libidn/libidn2",
-        "tag_range": ">=2,<3"
+        "tag_range": ">=2,<3",
+        "url_template": "https://ftp.gnu.org/gnu/libidn/libidn2-{version}.tar.gz"
       }
     },
     "lua": {

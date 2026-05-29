@@ -102,6 +102,8 @@ def _resolve_github_source(source: PackageSource) -> tuple[str, str]:
         if isinstance(source, GitHubReleaseSource):
             asset = source.asset.format(tag=tag, version=best)
             url = f"https://github.com/{source.github}/releases/download/{tag}/{asset}"
+        elif isinstance(source, GitHubTagSource) and source.url_template:
+            url = source.url_template.format(tag=tag, version=best)
         else:
             url = f"https://github.com/{source.github}/archive/refs/tags/{tag}.tar.gz"
         return url, best
