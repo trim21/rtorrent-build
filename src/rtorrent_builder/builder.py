@@ -66,7 +66,7 @@ _DEPENDENCIES: dict[str, list[str]] = {
     "ncurses": [],
     "lua": [],
     "luajit": [],
-    "nghttp2": [],
+    "nghttp2": ["zlib"],
     "libunistring": [],
     "libidn2": ["libunistring"],
     "curl": ["zlib", "openssl", "brotli", "cares", "zstd", "nghttp2", "libidn2"],
