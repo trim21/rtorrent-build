@@ -39,10 +39,20 @@
       "version": "3.6.2"
     },
     "rtorrent": {
+      "requires": [
+        "rtorrent-libtorrent",
+        "ncurses",
+        "lua"
+      ],
       "url": "https://github.com/rakshasa/rtorrent/archive/880510073ae142706aeb778e883f86789b425ae3.tar.gz",
       "version": "880510073ae1"
     },
     "rtorrent-libtorrent": {
+      "requires": [
+        "openssl",
+        "zlib",
+        "curl"
+      ],
       "url": "https://github.com/rakshasa/libtorrent/archive/effbe17318f55c78f4c1f1c60b18c5822c7d20b2.tar.gz",
       "version": "effbe17318f5"
     },

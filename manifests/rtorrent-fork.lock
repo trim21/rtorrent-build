@@ -43,10 +43,19 @@
       "version": "3.6.2"
     },
     "rtorrent": {
+      "requires": [
+        "rtorrent-libtorrent",
+        "luajit"
+      ],
       "url": "https://github.com/trim21/rtorrent/archive/8eb0e61ceb85952614e039756d1f4653e38f1d7a.tar.gz",
       "version": "8eb0e61ceb85"
     },
     "rtorrent-libtorrent": {
+      "requires": [
+        "openssl",
+        "zlib",
+        "curl"
+      ],
       "url": "https://github.com/rakshasa/libtorrent/archive/effbe17318f55c78f4c1f1c60b18c5822c7d20b2.tar.gz",
       "version": "effbe17318f5"
     },

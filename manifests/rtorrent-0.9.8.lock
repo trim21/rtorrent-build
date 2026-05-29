@@ -40,6 +40,11 @@
     },
     "rtorrent": {
       "cxx_std": "c++14",
+      "requires": [
+        "rtorrent-libtorrent",
+        "curl",
+        "ncurses"
+      ],
       "url": "https://github.com/rakshasa/rtorrent/archive/refs/tags/v0.9.8.tar.gz",
       "version": "0.9.8"
     },

@@ -140,6 +140,8 @@ def resolve_manifest(variant: str, manifests_dir: Path | None = None) -> None:
             entry["version"] = version
         if pkg.cxx_std:
             entry["cxx_std"] = pkg.cxx_std
+        if pkg.requires is not None:
+            entry["requires"] = pkg.requires
         resolved_packages[name] = entry
         print(f"  {name}: {url_source.url[:60]}...")
 

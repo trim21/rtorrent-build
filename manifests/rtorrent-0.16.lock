@@ -39,10 +39,20 @@
       "version": "3.6.2"
     },
     "rtorrent": {
+      "requires": [
+        "rtorrent-libtorrent",
+        "ncurses",
+        "lua"
+      ],
       "url": "https://github.com/rakshasa/rtorrent/releases/download/v0.16.12/rtorrent-0.16.12.tar.gz",
       "version": "0.16.12"
     },
     "rtorrent-libtorrent": {
+      "requires": [
+        "openssl",
+        "zlib",
+        "curl"
+      ],
       "url": "https://github.com/rakshasa/rtorrent/releases/download/v0.16.12/libtorrent-0.16.12.tar.gz",
       "version": "0.16.12"
     },
