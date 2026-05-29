@@ -1,24 +1,19 @@
 {
   "$schema": "../manifest.schema.json",
-  "extends": "base/common.jsonc",
-  "executable_package": "rtorrent",
+  "extends": "common.jsonc",
   "target_glibc": "2.28",
   "packages": {
     "rtorrent": {
       "source": {
-        "github": "rakshasa/rtorrent",
-        "tag_range": ">=0.16,<0.17",
-        "asset": "rtorrent-{version}.tar.gz"
-      },
-      "requires": ["rtorrent-libtorrent", "ncurses", "lua"]
+        "github": "https://github.com/rakshasa/rtorrent.git",
+        "tag_range": ">=0.16,<0.17"
+      }
     },
     "rtorrent-libtorrent": {
       "source": {
-        "github": "rakshasa/rtorrent",
-        "tag_range": ">=0.16,<0.17",
-        "asset": "libtorrent-{version}.tar.gz"
-      },
-      "requires": ["openssl", "zlib", "curl"]
+        "github": "https://github.com/rakshasa/libtorrent.git",
+        "tag_range": ">=0.16,<0.17"
+      }
     }
   }
 }
