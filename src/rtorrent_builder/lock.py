@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import re
 import subprocess
+from functools import cache
 from pathlib import Path
 
 from . import PROJECT_ROOT
@@ -32,6 +33,7 @@ _VERSION_PATTERNS: dict[str, str] = {
 }
 
 
+@cache
 def _gh_tags(owner_repo: str) -> list[str]:
     """Fetch tags from GitHub using git ls-remote (no API token needed)."""
     url = f"https://github.com/{owner_repo}.git"
@@ -64,6 +66,7 @@ def _extract_version(tag: str, repo: str | None = None) -> str | None:
     return m.group(1) if m else None
 
 
+@cache
 def _resolve_ref(owner_repo: str, ref: str) -> str:
     url = f"https://github.com/{owner_repo}.git"
     result = subprocess.run(
