@@ -44,6 +44,24 @@
         "tag_range": ">=1,<2"
       }
     },
+    "nghttp2": {
+      "source": {
+        "github": "nghttp2/nghttp2",
+        "tag_range": ">=1,<2"
+      }
+    },
+    "libunistring": {
+      "source": {
+        "url": "https://ftp.gnu.org/gnu/libunistring/libunistring-1.4.tar.gz"
+      },
+      "version": "1.4"
+    },
+    "libidn2": {
+      "source": {
+        "github": "libidn/libidn2",
+        "tag_range": ">=2,<3"
+      }
+    },
     "lua": {
       "source": {
         "url": "https://www.lua.org/ftp/lua-5.4.8.tar.gz"

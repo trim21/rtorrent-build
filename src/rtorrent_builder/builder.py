@@ -16,11 +16,14 @@ from .deps.boost import BoostBuilder
 from .deps.brotli import BrotliBuilder
 from .deps.cares import CaresBuilder
 from .deps.curl import CurlBuilder
+from .deps.libidn2 import Libidn2Builder
 from .deps.libtorrent import LibtorrentBuilder
 from .deps.libtorrent_rasterbar import LibtorrentRasterbarBuilder
+from .deps.libunistring import LibunistringBuilder
 from .deps.lua import LuaBuilder
 from .deps.luajit import LuaJITBuilder
 from .deps.ncurses import NcursesBuilder
+from .deps.nghttp2 import Nghttp2Builder
 from .deps.openssl import OpensslBuilder
 from .deps.qbittorrent import QbittorrentBuilder
 from .deps.qt import QtBuilder
@@ -40,6 +43,9 @@ _BUILDER_MAP: dict[str, type[Builder]] = {
     "curl": CurlBuilder,
     "lua": LuaBuilder,
     "luajit": LuaJITBuilder,
+    "nghttp2": Nghttp2Builder,
+    "libunistring": LibunistringBuilder,
+    "libidn2": Libidn2Builder,
     "rtorrent-libtorrent": LibtorrentBuilder,
     "boost": BoostBuilder,
     "libtorrent-rasterbar": LibtorrentRasterbarBuilder,
@@ -60,7 +66,10 @@ _DEPENDENCIES: dict[str, list[str]] = {
     "ncurses": [],
     "lua": [],
     "luajit": [],
-    "curl": ["zlib", "openssl", "brotli", "cares", "zstd"],
+    "nghttp2": [],
+    "libunistring": [],
+    "libidn2": ["libunistring"],
+    "curl": ["zlib", "openssl", "brotli", "cares", "zstd", "nghttp2", "libidn2"],
     "rtorrent-libtorrent": ["openssl", "zlib"],
     "boost": [],
     "libtorrent-rasterbar": ["boost", "openssl"],

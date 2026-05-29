@@ -1,6 +1,6 @@
 {
   "executable_package": "rtorrent",
-  "manifest_hash": "08ffc60d6a17b7c9c0c2624f5a611abbd3b0af8da69c7c1f77d5d5668a976f3e",
+  "manifest_hash": "cea412d60707ea89daa49a3d16712683f39b99834d95a05a423c28294b0d53b8",
   "packages": {
     "brotli": {
       "url": "https://github.com/google/brotli/archive/refs/tags/v1.2.0.tar.gz",
@@ -14,6 +14,14 @@
       "url": "https://github.com/curl/curl/archive/refs/tags/curl-8_20_0.tar.gz",
       "version": "8.20.0"
     },
+    "libidn2": {
+      "url": "https://github.com/libidn/libidn2/archive/refs/tags/v2.3.8.tar.gz",
+      "version": "2.3.8"
+    },
+    "libunistring": {
+      "url": "https://ftp.gnu.org/gnu/libunistring/libunistring-1.4.tar.gz",
+      "version": "1.4"
+    },
     "lua": {
       "url": "https://www.lua.org/ftp/lua-5.4.8.tar.gz",
       "version": "5.4.8"
@@ -21,6 +29,10 @@
     "ncurses": {
       "url": "https://ftp.gnu.org/pub/gnu/ncurses/ncurses-6.6.tar.gz",
       "version": "6.6"
+    },
+    "nghttp2": {
+      "url": "https://github.com/nghttp2/nghttp2/archive/refs/tags/v1.69.0.tar.gz",
+      "version": "1.69.0"
     },
     "openssl": {
       "url": "https://github.com/openssl/openssl/archive/refs/tags/openssl-3.6.2.tar.gz",

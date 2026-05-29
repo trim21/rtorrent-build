@@ -1,6 +1,6 @@
 {
   "executable_package": "qbittorrent",
-  "manifest_hash": "cd3d263f4831d822e2e22264bc2df65f9bbe0d475da35d7172e7a6c4a22a86fe",
+  "manifest_hash": "d7cc732c4dc59e6492e5d2ce0340bdf59c2cbd0fb6c0ae73c8ba8c4c1c8573e8",
   "packages": {
     "boost": {
       "url": "https://github.com/boostorg/boost/releases/download/boost-1.91.0-1/boost-1.91.0-1-cmake.tar.gz",
@@ -18,10 +18,18 @@
       "url": "https://github.com/curl/curl/archive/refs/tags/curl-8_20_0.tar.gz",
       "version": "8.20.0"
     },
+    "libidn2": {
+      "url": "https://github.com/libidn/libidn2/archive/refs/tags/v2.3.8.tar.gz",
+      "version": "2.3.8"
+    },
     "libtorrent-rasterbar": {
       "cxx_std": "c++17",
       "url": "https://github.com/arvidn/libtorrent/releases/download/v2.0.12/libtorrent-rasterbar-2.0.12.tar.gz",
       "version": "2.0.12"
+    },
+    "libunistring": {
+      "url": "https://ftp.gnu.org/gnu/libunistring/libunistring-1.4.tar.gz",
+      "version": "1.4"
     },
     "lua": {
       "url": "https://www.lua.org/ftp/lua-5.4.8.tar.gz",
@@ -30,6 +38,10 @@
     "ncurses": {
       "url": "https://ftp.gnu.org/pub/gnu/ncurses/ncurses-6.6.tar.gz",
       "version": "6.6"
+    },
+    "nghttp2": {
+      "url": "https://github.com/nghttp2/nghttp2/archive/refs/tags/v1.69.0.tar.gz",
+      "version": "1.69.0"
     },
     "openssl": {
       "url": "https://github.com/openssl/openssl/archive/refs/tags/openssl-3.6.2.tar.gz",
