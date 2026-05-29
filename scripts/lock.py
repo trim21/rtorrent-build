@@ -11,8 +11,6 @@ _MANIFESTS_DIR = Path("manifests").resolve()
 
 def main() -> None:
     for manifest_path in sorted(_MANIFESTS_DIR.glob("*.jsonc")):
-        if manifest_path.stem == "common":
-            continue
         resolve_manifest(manifest_path)
 
 
