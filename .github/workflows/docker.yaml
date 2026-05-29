@@ -102,10 +102,11 @@ jobs:
       - name: Push Docker image
         if: github.event_name != 'pull_request'
         run: |
-          TAG="$(jq -r .tag build-info.json)"
-          LOCAL_TAG="rtorrent:${TAG}"
-          GHCR_TAG="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${TAG}"
-
-          docker tag "$LOCAL_TAG" "$GHCR_TAG"
-          docker push "$GHCR_TAG"
-          echo "Pushed $GHCR_TAG"
+          TAGS="$(jq -r '.tags[]' build-info.json)"
+          for TAG in $TAGS; do
+            LOCAL_TAG="rtorrent:${TAG}"
+            GHCR_TAG="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${TAG}"
+            docker tag "$LOCAL_TAG" "$GHCR_TAG"
+            docker push "$GHCR_TAG"
+            echo "Pushed $GHCR_TAG"
+          done

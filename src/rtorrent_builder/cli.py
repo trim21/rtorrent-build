@@ -14,6 +14,7 @@ from ._types import Arch, Libc
 from .builder import _BUILDER_MAP, _FINAL_PACKAGES, build_rtorrent
 from .docker import DISTROLESS_GLIBC_VERSION, build_docker_image
 from .lock import load_resolved_manifest, resolve_manifest
+from .manifest import GitHubRefSource, ResolvedManifest, _load_jsonc_text, _raw_manifest_adapter
 from .run import CmdError
 
 
@@ -181,9 +182,16 @@ def build(
             ) from None
 
         if build_docker:
-            tag = _build_docker(output_bin, variant=variant, arch=arch, disguise=disguise)
+            tags = _build_docker(
+                output_bin,
+                variant=variant,
+                arch=arch,
+                disguise=disguise,
+                resolved=resolved,
+                manifest_path=manifest_path,
+            )
             if build_info:
-                info = {"tag": tag}
+                info = {"tags": tags}
                 build_info.parent.mkdir(parents=True, exist_ok=True)
                 build_info.write_text(json.dumps(info, indent=2) + "\n")
                 print(f"Build info written to {build_info}")
@@ -207,16 +215,56 @@ def lock(manifest: tuple[str, ...]) -> None:
             resolve_manifest(p)
 
 
-def _build_docker(binary_path: Path, *, variant: str, arch: str, disguise: bool) -> str:
-    version = variant.removeprefix("rtorrent-")
+def _docker_version_tags(
+    version: str, variant_name: str, arch_safe: str, *, is_ref: bool
+) -> list[str]:
+    """Generate version-based Docker tags."""
+    if is_ref:
+        return [f"{variant_name}.{arch_safe}", f"{variant_name}-{version}.{arch_safe}"]
+    parts = version.split(".")
+    prefixes: list[str] = []
+    for i in range(1, len(parts) + 1):
+        prefix = ".".join(parts[:i])
+        if prefix not in prefixes:
+            prefixes.append(prefix)
+    return [f"{p}.{arch_safe}" for p in prefixes]
+
+
+def _build_docker(
+    binary_path: Path,
+    *,
+    variant: str,
+    arch: str,
+    disguise: bool,
+    resolved: ResolvedManifest,
+    manifest_path: Path,
+) -> list[str]:
+    variant_name = variant.removeprefix("rtorrent-")
     arch_safe = Arch(arch).safe
     suffix = "-disguised" if disguise else ""
-    tag = f"{version}{suffix}.{arch_safe}"
-    image_ref = f"rtorrent:{tag}"
+    pkg = resolved.packages[resolved.executable_package]
+    assert pkg.version, f"executable package {resolved.executable_package!r} has no version"
+    full_version = pkg.version
+    raw = _raw_manifest_adapter.validate_python(_load_jsonc_text(manifest_path.read_text()))
+    exe_pkg = raw.packages[resolved.executable_package]
+    is_ref = isinstance(exe_pkg.source, GitHubRefSource) if exe_pkg else False
+    tags = _docker_version_tags(full_version, variant_name, arch_safe, is_ref=is_ref)
+    if suffix:
+        tags = [f"{t}{suffix}" for t in tags]
+    # include variant-derived tag if not already present
+    variant_tag = f"{variant_name}{suffix}.{arch_safe}"
+    if variant_tag not in tags:
+        tags.insert(0, variant_tag)
+    primary = tags[0]
+    image_ref = f"rtorrent:{primary}"
     output_name = binary_path.stem
     print(f"Building Docker image: {image_ref}")
     build_docker_image(binary_path, output_name, image_ref)
-    return tag
+    for extra in tags[1:]:
+        extra_ref = f"rtorrent:{extra}"
+        print(f"Tagging: {extra_ref}")
+        subprocess.run(["docker", "tag", image_ref, extra_ref], check=True)
+    return tags
 
 
 if __name__ == "__main__":
