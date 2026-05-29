@@ -1,5 +1,6 @@
 {
-  "manifest_hash": "5b2dac8800d92c37ebba09d4e73d225249db898e54707b7c753e539e1d44c704",
+  "executable_package": "rtorrent",
+  "manifest_hash": "ef7b8ae2eabbf133882e529b0384e2f4fe475af4ef3fd977248a1ee513e945bf",
   "packages": {
     "brotli": {
       "url": "https://github.com/google/brotli/archive/refs/tags/v1.2.0.tar.gz",

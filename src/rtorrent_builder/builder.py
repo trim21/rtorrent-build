@@ -19,6 +19,7 @@ from .deps.curl import CurlBuilder
 from .deps.libtorrent import LibtorrentBuilder
 from .deps.libtorrent_rasterbar import LibtorrentRasterbarBuilder
 from .deps.lua import LuaBuilder
+from .deps.luajit import LuaJITBuilder
 from .deps.ncurses import NcursesBuilder
 from .deps.openssl import OpensslBuilder
 from .deps.qbittorrent import QbittorrentBuilder
@@ -38,6 +39,7 @@ _BUILDER_MAP: dict[str, type[Builder]] = {
     "ncurses": NcursesBuilder,
     "curl": CurlBuilder,
     "lua": LuaBuilder,
+    "luajit": LuaJITBuilder,
     "rtorrent-libtorrent": LibtorrentBuilder,
     "boost": BoostBuilder,
     "libtorrent-rasterbar": LibtorrentRasterbarBuilder,
@@ -57,8 +59,9 @@ _DEPENDENCIES: dict[str, list[str]] = {
     "cares": [],
     "ncurses": [],
     "lua": [],
+    "luajit": [],
     "curl": ["zlib", "openssl", "brotli", "cares", "zstd"],
-    "rtorrent-libtorrent": ["openssl", "curl", "zlib"],
+    "rtorrent-libtorrent": ["openssl", "zlib"],
     "boost": [],
     "libtorrent-rasterbar": ["boost", "openssl"],
     "zstd": [],
@@ -73,44 +76,30 @@ _DEPENDENCIES: dict[str, list[str]] = {
         "qttools",
     ],
     "rtorrent": [
-        "zlib",
-        "openssl",
-        "brotli",
-        "cares",
-        "ncurses",
-        "curl",
         "rtorrent-libtorrent",
-        "lua",
     ],
 }
 
 
-def _reachable_packages(pkgs: dict) -> set[str]:
-    top = _top_package(pkgs)
+def _deps_for(name: str, pkgs: dict) -> list[str]:
+    pkg = pkgs.get(name)
+    if pkg is not None and pkg.requires is not None:
+        return pkg.requires
+    return _DEPENDENCIES.get(name, [])
+
+
+def _reachable_packages(pkgs: dict, executable_package: str) -> set[str]:
     reachable: set[str] = set()
-    stack = [top]
+    stack = [executable_package]
     while stack:
         name = stack.pop()
         if name in reachable:
             continue
         reachable.add(name)
-        for dep in _DEPENDENCIES.get(name, []):
+        for dep in _deps_for(name, pkgs):
             if dep in pkgs and dep not in reachable:
                 stack.append(dep)
     return reachable
-
-
-def _top_package(pkgs: dict) -> str:
-    dependents: set[str] = set()
-    for name in pkgs:
-        for dep in _DEPENDENCIES.get(name, []):
-            if dep in pkgs:
-                dependents.add(dep)
-    candidates = [n for n in pkgs if n not in dependents]
-    finals = [n for n in candidates if n in _FINAL_PACKAGES]
-    if len(finals) != 1:
-        raise ValueError(f"Expected exactly one top-level final package, got: {finals}")
-    return finals[0]
 
 
 _ALLOWED_SOS = frozenset(
@@ -271,10 +260,12 @@ def build_rtorrent(
     tc.setup()
 
     pkgs = manifest.packages
-    needed = _reachable_packages(pkgs)
+    needed = _reachable_packages(pkgs, manifest.executable_package)
     names = [n for n in _BUILDER_MAP if n in needed]
 
-    ts = TopologicalSorter({name: [d for d in _DEPENDENCIES[name] if d in pkgs] for name in names})
+    ts = TopologicalSorter(
+        {name: [d for d in _deps_for(name, pkgs) if d in pkgs] for name in names}
+    )
     ts.prepare()
 
     resolved: dict[str, ResolvedSource] = {}
@@ -324,7 +315,7 @@ def build_rtorrent(
     total_elapsed = time.monotonic() - build_origin
     _render_timeline_table(timings, total_elapsed)
 
-    app_name = _top_package(pkgs)
+    app_name = manifest.executable_package
     top_source = resolved[app_name]
     binary = _binary_path(tc, app_name)
 

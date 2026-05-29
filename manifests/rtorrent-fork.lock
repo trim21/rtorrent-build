@@ -1,6 +1,6 @@
 {
   "executable_package": "rtorrent",
-  "manifest_hash": "febc93c5184118f472f2a23742ecb37d603fe52cd2975fec5269566080dbf4d0",
+  "manifest_hash": "9c8f9c3ab722f751ffa9301b6751a719d869ae443b163bc82a30ccb8fbc317d3",
   "packages": {
     "brotli": {
       "url": "https://github.com/google/brotli/archive/refs/tags/v1.2.0.tar.gz",
@@ -18,6 +18,10 @@
       "url": "https://www.lua.org/ftp/lua-5.4.8.tar.gz",
       "version": "5.4.8"
     },
+    "luajit": {
+      "url": "https://github.com/LuaJIT/LuaJIT/archive/refs/tags/v2.0.5.tar.gz",
+      "version": "2.0.5"
+    },
     "ncurses": {
       "url": "https://ftp.gnu.org/pub/gnu/ncurses/ncurses-6.6.tar.gz",
       "version": "6.6"
@@ -27,8 +31,8 @@
       "version": "3.6.2"
     },
     "rtorrent": {
-      "url": "https://github.com/rakshasa/rtorrent/archive/880510073ae142706aeb778e883f86789b425ae3.tar.gz",
-      "version": "880510073ae1"
+      "url": "https://github.com/trim21/rtorrent/archive/8eb0e61ceb85952614e039756d1f4653e38f1d7a.tar.gz",
+      "version": "8eb0e61ceb85"
     },
     "rtorrent-libtorrent": {
       "url": "https://github.com/rakshasa/libtorrent/archive/effbe17318f55c78f4c1f1c60b18c5822c7d20b2.tar.gz",

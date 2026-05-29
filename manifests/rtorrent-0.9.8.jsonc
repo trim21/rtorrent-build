@@ -1,6 +1,7 @@
 {
   "$schema": "../manifest.schema.json",
   "extends": "common.jsonc",
+  "executable_package": "rtorrent",
   "target_glibc": "2.17",
   "packages": {
     "rtorrent": {
@@ -8,7 +9,8 @@
         "github": "rakshasa/rtorrent",
         "tag_range": "==0.9.8"
       },
-      "cxx_std": "c++14"
+      "cxx_std": "c++14",
+      "requires": ["rtorrent-libtorrent", "curl", "ncurses"]
     },
     "rtorrent-libtorrent": {
       "source": {

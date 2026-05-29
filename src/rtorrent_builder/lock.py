@@ -141,12 +141,14 @@ def resolve_manifest(variant: str, manifests_dir: Path | None = None) -> None:
         print(f"  {name}: {url_source.url[:60]}...")
 
     manifest_hash = compute_manifest_hash(manifest_path, manifests_dir)
-    lock_data = {
+    lock_data: dict[str, object] = {
         "packages": resolved_packages,
         "target_glibc": raw.target_glibc,
         "toolchain": raw.toolchain,
         "manifest_hash": manifest_hash,
     }
+    if raw.executable_package is not None:
+        lock_data["executable_package"] = raw.executable_package
 
     lock_path = manifests_dir / f"{variant}.lock"
     lock_path.write_text(json.dumps(lock_data, indent=2, sort_keys=True) + "\n")
@@ -192,4 +194,5 @@ def load_resolved_manifest(
         packages=lockfile.packages,
         target_glibc=lockfile.target_glibc,
         toolchain=lockfile.toolchain,
+        executable_package=lockfile.executable_package,
     )

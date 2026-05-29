@@ -45,12 +45,14 @@ class LibInfo:
     source: PackageSource
     version: str = ""
     cxx_std: str | None = None
+    requires: list[str] | None = None
 
 
 @dataclass(frozen=True, kw_only=True)
 class RawManifest:
     packages: dict[str, LibInfo]
     extends: str | list[str] | None = None
+    executable_package: str | None = None
     target_glibc: str | None = None
     toolchain: str | None = None
 
@@ -68,12 +70,14 @@ class ResolvedPackage:
     url: str
     version: str = ""
     cxx_std: str | None = None
+    requires: list[str] | None = None
 
     def to_libinfo(self) -> LibInfo:
         return LibInfo(
             source=URLSource(url=self.url),
             version=self.version,
             cxx_std=self.cxx_std,
+            requires=self.requires,
         )
 
 
@@ -81,6 +85,7 @@ class ResolvedPackage:
 class ResolvedManifest:
     variant: str
     packages: dict[str, ResolvedPackage]
+    executable_package: str
     target_glibc: str
     toolchain: str
 
@@ -89,6 +94,7 @@ class ResolvedManifest:
 class LockFile:
     manifest_hash: str
     packages: dict[str, ResolvedPackage]
+    executable_package: str
     target_glibc: str
     toolchain: str
 
@@ -141,11 +147,13 @@ def save_lock(lock: Lock, manifests_dir: Path, variant: str) -> None:
 def compute_manifest_hash(manifest_path: Path, manifests_dir: Path) -> str:
     raw = _raw_manifest_adapter.validate_python(_load_jsonc_text(manifest_path.read_text()))
     raw = _resolve_extends(raw, manifests_dir)
-    payload = {
+    payload: dict[str, object] = {
         "packages": asdict(raw)["packages"],
         "target_glibc": raw.target_glibc,
         "toolchain": raw.toolchain,
     }
+    if raw.executable_package is not None:
+        payload["executable_package"] = raw.executable_package
     content = json.dumps(payload, sort_keys=True, indent=None, ensure_ascii=False)
     return hashlib.sha256(content.encode()).hexdigest()
 
@@ -206,6 +214,7 @@ def _resolve_extends(raw: RawManifest, manifests_dir: Path) -> RawManifest:
     merged_packages: dict[str, LibInfo] = {}
     merged_target_glibc: str | None = None
     merged_toolchain: str | None = None
+    merged_executable_package: str | None = None
 
     for rel_path in extends:
         base_path = manifests_dir / rel_path
@@ -216,17 +225,22 @@ def _resolve_extends(raw: RawManifest, manifests_dir: Path) -> RawManifest:
             merged_target_glibc = base_raw.target_glibc
         if base_raw.toolchain is not None:
             merged_toolchain = base_raw.toolchain
+        if base_raw.executable_package is not None:
+            merged_executable_package = base_raw.executable_package
 
     merged_packages |= raw.packages
     if raw.target_glibc is not None:
         merged_target_glibc = raw.target_glibc
     if raw.toolchain is not None:
         merged_toolchain = raw.toolchain
+    if raw.executable_package is not None:
+        merged_executable_package = raw.executable_package
 
-    return _raw_manifest_adapter.validate_python(
-        {
-            "packages": merged_packages,
-            "target_glibc": merged_target_glibc,
-            "toolchain": merged_toolchain,
-        }
-    )
+    result_data: dict[str, object] = {
+        "packages": merged_packages,
+        "executable_package": merged_executable_package,
+        "target_glibc": merged_target_glibc,
+        "toolchain": merged_toolchain,
+    }
+
+    return _raw_manifest_adapter.validate_python(result_data)

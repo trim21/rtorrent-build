@@ -1,5 +1,6 @@
 {
-  "manifest_hash": "4342c693dc3aac963c6208dac5fb3163a47a6c704e6493d65db8b15fab711c0a",
+  "executable_package": "qbittorrent",
+  "manifest_hash": "21858a0bf62905116f3233d85b89f732cccad3a411607ab51551a7573b2ea996",
   "packages": {
     "boost": {
       "url": "https://github.com/boostorg/boost/releases/download/boost-1.91.0-1/boost-1.91.0-1-cmake.tar.gz",
