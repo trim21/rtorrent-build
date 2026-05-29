@@ -13,6 +13,7 @@ from ._types import Arch, Libc
 from .builder import _BUILDER_MAP, _FINAL_PACKAGES, build_rtorrent
 from .docker import DISTROLESS_GLIBC_VERSION, build_docker_image
 from .lock import load_resolved_manifest, resolve_manifest
+from .run import CmdError
 
 
 class CliLibc(Enum):
@@ -153,19 +154,26 @@ def build(
         if build_docker:
             glibc_override = DISTROLESS_GLIBC_VERSION
 
-    output_bin = build_rtorrent(
-        variant=variant,
-        manifest=manifest,
-        work_dir=variant_work,
-        output_dir=output_dir,
-        skip_deps=list(skip_deps) if skip_deps else [],
-        clean=clean,
-        no_cache=no_cache,
-        options=options,
-        libc=resolved_libc,
-        arch=Arch(arch),
-        docker_target_glibc=glibc_override,
-    )
+    try:
+        output_bin = build_rtorrent(
+            variant=variant,
+            manifest=manifest,
+            work_dir=variant_work,
+            output_dir=output_dir,
+            skip_deps=list(skip_deps) if skip_deps else [],
+            clean=clean,
+            no_cache=no_cache,
+            options=options,
+            libc=resolved_libc,
+            arch=Arch(arch),
+            docker_target_glibc=glibc_override,
+        )
+    except CmdError as e:
+        log_path = variant_work / "logs"
+        raise SystemExit(
+            f"\nBuild failed: {e.cmd[0] if e.cmd else '?'} exited with {e.returncode}\n"
+            f"Full log: {log_path}"
+        ) from None
 
     if build_docker:
         tag = _build_docker(output_bin, variant=variant, arch=arch, disguise=disguise)
