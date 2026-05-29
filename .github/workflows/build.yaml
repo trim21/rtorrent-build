@@ -26,7 +26,6 @@ jobs:
         libc: [glibc, musl]
         arch:
           - { flag: amd/v1, name: amd.v1 }
-          - { flag: amd/v3, name: amd.v3 }
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
