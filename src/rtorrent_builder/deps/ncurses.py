@@ -24,6 +24,8 @@ class NcursesBuilder(MakeBuilder):
             [
                 "./configure",
                 f"--prefix={self.tc.install_prefix}",
+                "--with-build-cc=cc",
+                "--with-build-cflags=-O2",
                 "--enable-static",
                 "--disable-shared",
                 "--with-termlib",
