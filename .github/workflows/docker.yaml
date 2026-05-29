@@ -38,6 +38,14 @@ jobs:
             libc: glibc
             arch: { flag: amd/v4, name: amd.v4 }
             disguise: true
+          - variant: rtorrent-trim21-fork
+            libc: glibc
+            arch: { flag: amd/v3, name: amd.v3 }
+            disguise: true
+          - variant: rtorrent-trim21-fork
+            libc: glibc
+            arch: { flag: amd/v4, name: amd.v4 }
+            disguise: true
     runs-on: ubuntu-latest
     permissions:
       contents: read
