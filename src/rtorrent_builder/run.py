@@ -3,7 +3,6 @@
 import os
 import shlex
 import subprocess
-import sys
 from collections.abc import Sequence
 from datetime import UTC, datetime
 from pathlib import Path
@@ -72,9 +71,6 @@ class Commander:
             for chunk in proc.stdout:
                 chunks.append(chunk)
                 f.write(chunk.decode())
-                f.flush()
-                sys.stderr.buffer.write(chunk)
-                sys.stderr.buffer.flush()
 
             proc.stdout.close()
             proc.wait()

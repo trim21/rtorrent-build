@@ -1,6 +1,6 @@
 {
   "$schema": "../manifest.schema.json",
-  "extends": "common.jsonc",
+  "extends": "base/common.jsonc",
   "executable_package": "qbittorrent",
   "target_glibc": "2.34",
   "packages": {

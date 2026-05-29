@@ -118,24 +118,24 @@ _lock_adapter = TypeAdapter(Lock)
 _lockfile_adapter = TypeAdapter(LockFile)
 
 
-def load_lock(manifests_dir: Path, variant: str) -> Lock:
-    lockfile = manifests_dir / f"{variant}.lock"
+def load_lock(manifest_path: Path) -> Lock:
+    lockfile = manifest_path.with_suffix(".lock")
     if lockfile.is_file():
         lock = _lock_adapter.validate_json(lockfile.read_text())
         if lock.manifest_hash is not None:
-            manifest_path = manifests_dir / f"{variant}.jsonc"
-            current_hash = compute_manifest_hash(manifest_path, manifests_dir)
+            current_hash = compute_manifest_hash(manifest_path)
             if lock.manifest_hash != current_hash:
                 raise RuntimeError(
-                    f"Manifest hash mismatch for {variant!r}: manifest changed since lock was "
-                    f"generated. Run 'uv run python scripts/lock.py' to regenerate."
+                    f"Manifest hash mismatch for {manifest_path.stem!r}: "
+                    f"manifest changed since lock was generated. "
+                    f"Run 'uv run python scripts/lock.py' to regenerate."
                 )
         return lock
     return Lock()
 
 
-def save_lock(lock: Lock, manifests_dir: Path, variant: str) -> None:
-    lockfile = manifests_dir / f"{variant}.lock"
+def save_lock(lock: Lock, manifest_path: Path) -> None:
+    lockfile = manifest_path.with_suffix(".lock")
     data: dict[str, object] = {"github": lock.github}
     if lock.resolved_tags:
         data["resolved_tags"] = lock.resolved_tags
@@ -144,9 +144,9 @@ def save_lock(lock: Lock, manifests_dir: Path, variant: str) -> None:
     lockfile.write_text(json.dumps(data, indent=2, sort_keys=True) + "\n")
 
 
-def compute_manifest_hash(manifest_path: Path, manifests_dir: Path) -> str:
+def compute_manifest_hash(manifest_path: Path) -> str:
     raw = _raw_manifest_adapter.validate_python(_load_jsonc_text(manifest_path.read_text()))
-    raw = _resolve_extends(raw, manifests_dir)
+    raw = _resolve_extends(raw, manifest_path.parent)
     payload: dict[str, object] = {
         "packages": asdict(raw)["packages"],
         "target_glibc": raw.target_glibc,
@@ -158,10 +158,10 @@ def compute_manifest_hash(manifest_path: Path, manifests_dir: Path) -> str:
     return hashlib.sha256(content.encode()).hexdigest()
 
 
-def _collect_lock_entries(manifest_path: Path, manifests_dir: Path) -> dict[str, str]:
+def _collect_lock_entries(manifest_path: Path) -> dict[str, str]:
     entries: dict[str, str] = {}
     raw = _raw_manifest_adapter.validate_python(_load_jsonc_text(manifest_path.read_text()))
-    raw = _resolve_extends(raw, manifests_dir)
+    raw = _resolve_extends(raw, manifest_path.parent)
     for pkg in raw.packages.values():
         if isinstance(pkg.source, GitHubRefSource):
             key = f"{pkg.source.github}#{pkg.source.ref}"
@@ -173,11 +173,11 @@ def _collect_lock_entries(manifest_path: Path, manifests_dir: Path) -> dict[str,
 
 
 def _collect_tag_range_entries(
-    manifest_path: Path, manifests_dir: Path
+    manifest_path: Path,
 ) -> dict[str, tuple[str, str]]:
     """Return {pkg_name: (repo#ref, tag_range)} for packages with tag_range."""
     raw = _raw_manifest_adapter.validate_python(_load_jsonc_text(manifest_path.read_text()))
-    raw = _resolve_extends(raw, manifests_dir)
+    raw = _resolve_extends(raw, manifest_path.parent)
     result: dict[str, tuple[str, str]] = {}
     for name, pkg in raw.packages.items():
         if isinstance(pkg.source, (GitHubTagSource, GitHubReleaseSource)):

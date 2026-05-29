@@ -3,6 +3,7 @@
 import json
 import re
 import subprocess
+import sys
 from enum import Enum
 from pathlib import Path
 
@@ -49,7 +50,7 @@ def main() -> None:
 
 
 @main.command()
-@click.argument("variant", nargs=1, type=click.Choice(_variant_choices()))
+@click.argument("manifest", nargs=-1, required=True, type=click.Path(exists=True, path_type=Path))
 @click.option(
     "--work-dir",
     type=click.Path(path_type=Path),
@@ -115,7 +116,7 @@ def main() -> None:
     help="Write build metadata (docker tag, version, etc.) to a JSON file",
 )
 def build(
-    variant: str,
+    manifest: tuple[Path, ...],
     work_dir: Path,
     output_dir: Path,
     skip_deps: tuple[str, ...],
@@ -127,14 +128,8 @@ def build(
     build_docker: bool,
     build_info: Path | None,
 ) -> None:
-    """Build a variant."""
+    """Build one or more variants from manifest files."""
     output_dir = output_dir.resolve()
-
-    variant_work = (work_dir / variant).resolve()
-    print(f"Starting rtorrent-static build for {variant}")
-    print(f"Work directory: {variant_work}")
-
-    manifest = load_resolved_manifest(variant)
 
     options: dict[str, str] = {}
     if disguise:
@@ -154,48 +149,62 @@ def build(
         if build_docker:
             glibc_override = DISTROLESS_GLIBC_VERSION
 
-    try:
-        output_bin = build_rtorrent(
-            variant=variant,
-            manifest=manifest,
-            work_dir=variant_work,
-            output_dir=output_dir,
-            skip_deps=list(skip_deps) if skip_deps else [],
-            clean=clean,
-            no_cache=no_cache,
-            options=options,
-            libc=resolved_libc,
-            arch=Arch(arch),
-            docker_target_glibc=glibc_override,
-        )
-    except CmdError as e:
-        log_path = variant_work / "logs"
-        raise SystemExit(
-            f"\nBuild failed: {e.cmd[0] if e.cmd else '?'} exited with {e.returncode}\n"
-            f"Full log: {log_path}"
-        ) from None
+    for manifest_path in manifest:
+        variant = manifest_path.stem
+        variant_work = (work_dir / variant).resolve()
+        print(f"Starting rtorrent-static build for {variant}")
+        print(f"Work directory: {variant_work}")
 
-    if build_docker:
-        tag = _build_docker(output_bin, variant=variant, arch=arch, disguise=disguise)
-        if build_info:
-            info = {"tag": tag}
-            build_info.parent.mkdir(parents=True, exist_ok=True)
-            build_info.write_text(json.dumps(info, indent=2) + "\n")
-            print(f"Build info written to {build_info}")
+        resolved = load_resolved_manifest(manifest_path)
 
-    print(f"Build complete for {variant}")
+        try:
+            output_bin = build_rtorrent(
+                variant=variant,
+                manifest=resolved,
+                work_dir=variant_work,
+                output_dir=output_dir,
+                skip_deps=list(skip_deps) if skip_deps else [],
+                clean=clean,
+                no_cache=no_cache,
+                options=options,
+                libc=resolved_libc,
+                arch=Arch(arch),
+                docker_target_glibc=glibc_override,
+            )
+        except CmdError as e:
+            log_path = variant_work / "logs"
+            if e.output:
+                sys.stderr.write(e.output)
+            raise SystemExit(
+                f"\nBuild failed: {e.cmd[0] if e.cmd else '?'} exited with {e.returncode}\n"
+                f"Full log: {log_path}"
+            ) from None
+
+        if build_docker:
+            tag = _build_docker(output_bin, variant=variant, arch=arch, disguise=disguise)
+            if build_info:
+                info = {"tag": tag}
+                build_info.parent.mkdir(parents=True, exist_ok=True)
+                build_info.write_text(json.dumps(info, indent=2) + "\n")
+                print(f"Build info written to {build_info}")
+
+        print(f"Build complete for {variant}")
 
 
 @main.command()
-@click.argument("variant", nargs=-1, type=click.Choice(_variant_choices()))
-def lock(variant: tuple[str, ...]) -> None:
+@click.argument("manifest", nargs=-1)
+def lock(manifest: tuple[str, ...]) -> None:
     """Regenerate lock files.
 
-    If no VARIANT is given, regenerates all lock files.
+    Accepts manifest paths like manifests/rtorrent-fork.jsonc.
+    If no MANIFEST is given, regenerates all lock files.
     """
-    variants = list(variant) if variant else _variant_choices()
-    for v in variants:
-        resolve_manifest(v)
+    if manifest:
+        for m in manifest:
+            resolve_manifest(Path(m))
+    else:
+        for p in sorted(_MANIFESTS_DIR.glob("*.jsonc")):
+            resolve_manifest(p)
 
 
 def _build_docker(binary_path: Path, *, variant: str, arch: str, disguise: bool) -> str:
