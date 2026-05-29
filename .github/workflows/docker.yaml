@@ -30,14 +30,6 @@ jobs:
           - { flag: amd/v3, name: amd.v3 }
         disguise: [false]
         include:
-          - variant: rtorrent-master
-            libc: glibc
-            arch: { flag: amd/v3, name: amd.v3 }
-            disguise: true
-          - variant: rtorrent-master
-            libc: glibc
-            arch: { flag: amd/v4, name: amd.v4 }
-            disguise: true
           - variant: rtorrent-trim21-fork
             libc: glibc
             arch: { flag: amd/v3, name: amd.v3 }
@@ -69,12 +61,18 @@ jobs:
       - name: Install main dependencies
         run: uv sync --frozen
 
+      - name: Cache downloaded sources
+        uses: actions/cache@v4
+        with:
+          path: assets/
+          key: docker-sources-${{ hashFiles('manifests/*.lock') }}
+
       - name: Cache build prefix
         uses: actions/cache@v4
         with:
           path: |
-            assets/
-            build/
+            build/${{ matrix.variant }}/install
+            build/${{ matrix.variant }}/.markers/
           key: docker-${{ matrix.variant }}-${{ matrix.libc }}-${{ matrix.arch.name }}-${{ hashFiles(format('manifests/{0}.*', matrix.variant)) }}-${{ matrix.disguise }}
           restore-keys: |
             docker-${{ matrix.variant }}-${{ matrix.libc }}-${{ matrix.arch.name }}-${{ hashFiles(format('manifests/{0}.*', matrix.variant)) }}

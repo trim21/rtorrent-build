@@ -62,7 +62,9 @@ jobs:
       - name: Cache build prefix
         uses: actions/cache@v4
         with:
-          path: build/
+          path: |
+            build/${{ matrix.variant }}/install
+            build/${{ matrix.variant }}/.markers/
           key: build-${{ matrix.variant }}-${{ matrix.libc }}-${{ matrix.arch.name }}-${{ hashFiles(format('manifests/{0}.lock', matrix.variant)) }}
 
       - name: Build ${{ matrix.variant }} (${{ matrix.libc }}/${{ matrix.arch.name }})
