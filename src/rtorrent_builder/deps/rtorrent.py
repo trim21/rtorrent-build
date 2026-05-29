@@ -55,8 +55,17 @@ class RtorrentBuilder(Builder):
             "--disable-shared",
             "--enable-static",
             "--disable-debug",
-            "--with-ncursesw",
         ]
+
+        has_curses_stub = (self.src_dir / "src" / "display" / "curses_stub.h").exists()
+        wants_ncurses = self.lib.requires is not None and "ncurses" in self.lib.requires
+
+        if wants_ncurses:
+            configure_args.append("--with-ncursesw")
+        elif has_curses_stub:
+            configure_args.append("--without-ncurses")
+        else:
+            configure_args.append("--with-ncursesw")
 
         v = _semver(self.version)
         if v >= (0, 16):
@@ -67,9 +76,13 @@ class RtorrentBuilder(Builder):
 
         lua_prefix = self.tc.dep_prefix("lua")
 
+        cppflags = env["CPPFLAGS"]
+        if wants_ncurses:
+            cppflags += " -DNCURSES_WIDECHAR"
+
         make_env = {
             **env,
-            "CPPFLAGS": f"{env['CPPFLAGS']} -DNCURSES_WIDECHAR",
+            "CPPFLAGS": cppflags,
             "PATH": f"{lua_prefix}/bin:{env['PATH']}",
         }
 

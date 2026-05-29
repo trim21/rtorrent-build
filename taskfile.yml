@@ -1,48 +1,28 @@
 version: "3"
 
+vars:
+  VARIANTS:
+    - rtorrent-0.9.8
+    - rtorrent-0.16
+    - rtorrent-master
+    - rtorrent-fork
+    - qbittorrent-5.2-lt2
+    - qbittorrent-5.2-lt1
+    - qbittorrent-5.1-lt2
+    - qbittorrent-5.1-lt1
+
 tasks:
-  rtorrent-0.9.8:
-    desc: Build rtorrent 0.9.8
+  build:
+    desc: "Build a variant (e.g. task build VARIANT=rtorrent-0.16)"
     cmds:
-      - python build.py rtorrent-0.9.8 {{.CLI_ARGS}}
-
-  rtorrent-0.16.11:
-    desc: Build rtorrent 0.16.11
-    cmds:
-      - python build.py rtorrent-0.16.11 {{.CLI_ARGS}}
-
-  rtorrent-master:
-    desc: Build rtorrent master
-    cmds:
-      - python build.py rtorrent-master {{.CLI_ARGS}}
-
-  qbittorrent-5.2-lt2:
-    desc: Build qbittorrent-5.2-lt2
-    cmds:
-      - python build.py qbittorrent-5.2-lt2 {{.CLI_ARGS}}
-
-  qbittorrent-5.2-lt1:
-    desc: Build qbittorrent 5.2.1 with libtorrent 1.2.x
-    cmds:
-      - python build.py qbittorrent-5.2-lt1 {{.CLI_ARGS}}
-
-  qbittorrent-5.1-lt2:
-    desc: Build qbittorrent 5.1.4 with libtorrent 2.0.x
-    cmds:
-      - python build.py qbittorrent-5.1-lt2 {{.CLI_ARGS}}
-
-  qbittorrent-5.1-lt1:
-    desc: Build qbittorrent 5.1.4 with libtorrent 1.2.x
-    cmds:
-      - python build.py qbittorrent-5.1-lt1 {{.CLI_ARGS}}
+      - python build.py {{.VARIANT}} {{.CLI_ARGS}}
+    requires:
+      vars: [VARIANT]
 
   all:
     desc: Build all variants
     cmds:
-      - task: rtorrent-0.9.8
-      - task: rtorrent-0.16.11
-      - task: rtorrent-master
-      - task: qbittorrent-5.2-lt2
-      - task: qbittorrent-5.2-lt1
-      - task: qbittorrent-5.1-lt2
-      - task: qbittorrent-5.1-lt1
+      - for: { var: VARIANTS }
+        task: build
+        vars:
+          VARIANT: "{{.ITEM}}"

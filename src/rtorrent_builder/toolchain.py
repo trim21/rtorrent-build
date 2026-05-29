@@ -100,7 +100,7 @@ class Toolchain:
 
     @cached_property
     def _lock(self) -> Lock:
-        return load_lock(self._project_root / "manifests", self.variant)
+        return load_lock(self._project_root / "manifests" / f"{self.variant}.jsonc")
 
     def _resolve_git_sha(self, source: GitHubRefSource) -> str:
         resolved_tag = self._lock.resolved_tag(source.github, source.ref)

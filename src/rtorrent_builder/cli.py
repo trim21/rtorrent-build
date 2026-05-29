@@ -3,6 +3,7 @@
 import json
 import re
 import subprocess
+import sys
 from enum import Enum
 from pathlib import Path
 
@@ -13,6 +14,8 @@ from ._types import Arch, Libc
 from .builder import _BUILDER_MAP, _FINAL_PACKAGES, build_rtorrent
 from .docker import DISTROLESS_GLIBC_VERSION, build_docker_image
 from .lock import load_resolved_manifest, resolve_manifest
+from .manifest import GitHubRefSource, ResolvedManifest, _load_jsonc_text, _raw_manifest_adapter
+from .run import CmdError
 
 
 class CliLibc(Enum):
@@ -48,7 +51,7 @@ def main() -> None:
 
 
 @main.command()
-@click.argument("variant", nargs=1, type=click.Choice(_variant_choices()))
+@click.argument("manifest", nargs=-1, required=True, type=click.Path(exists=True, path_type=Path))
 @click.option(
     "--work-dir",
     type=click.Path(path_type=Path),
@@ -114,7 +117,7 @@ def main() -> None:
     help="Write build metadata (docker tag, version, etc.) to a JSON file",
 )
 def build(
-    variant: str,
+    manifest: tuple[Path, ...],
     work_dir: Path,
     output_dir: Path,
     skip_deps: tuple[str, ...],
@@ -126,14 +129,8 @@ def build(
     build_docker: bool,
     build_info: Path | None,
 ) -> None:
-    """Build a variant."""
+    """Build one or more variants from manifest files."""
     output_dir = output_dir.resolve()
-
-    variant_work = (work_dir / variant).resolve()
-    print(f"Starting rtorrent-static build for {variant}")
-    print(f"Work directory: {variant_work}")
-
-    manifest = load_resolved_manifest(variant)
 
     options: dict[str, str] = {}
     if disguise:
@@ -153,53 +150,121 @@ def build(
         if build_docker:
             glibc_override = DISTROLESS_GLIBC_VERSION
 
-    output_bin = build_rtorrent(
-        variant=variant,
-        manifest=manifest,
-        work_dir=variant_work,
-        output_dir=output_dir,
-        skip_deps=list(skip_deps) if skip_deps else [],
-        clean=clean,
-        no_cache=no_cache,
-        options=options,
-        libc=resolved_libc,
-        arch=Arch(arch),
-        docker_target_glibc=glibc_override,
-    )
+    for manifest_path in manifest:
+        variant = manifest_path.stem
+        variant_work = (work_dir / variant).resolve()
+        print(f"Starting rtorrent-static build for {variant}")
+        print(f"Work directory: {variant_work}")
 
-    if build_docker:
-        tag = _build_docker(output_bin, variant=variant, arch=arch, disguise=disguise)
-        if build_info:
-            info = {"tag": tag}
-            build_info.parent.mkdir(parents=True, exist_ok=True)
-            build_info.write_text(json.dumps(info, indent=2) + "\n")
-            print(f"Build info written to {build_info}")
+        resolved = load_resolved_manifest(manifest_path)
 
-    print(f"Build complete for {variant}")
+        try:
+            output_bin = build_rtorrent(
+                variant=variant,
+                manifest=resolved,
+                work_dir=variant_work,
+                output_dir=output_dir,
+                skip_deps=list(skip_deps) if skip_deps else [],
+                clean=clean,
+                no_cache=no_cache,
+                options=options,
+                libc=resolved_libc,
+                arch=Arch(arch),
+                docker_target_glibc=glibc_override,
+            )
+        except CmdError as e:
+            log_path = variant_work / "logs"
+            if e.output:
+                sys.stderr.write(e.output)
+            raise SystemExit(
+                f"\nBuild failed: {e.cmd[0] if e.cmd else '?'} exited with {e.returncode}\n"
+                f"Full log: {log_path}"
+            ) from None
+
+        if build_docker:
+            tags = _build_docker(
+                output_bin,
+                variant=variant,
+                arch=arch,
+                disguise=disguise,
+                resolved=resolved,
+                manifest_path=manifest_path,
+            )
+            if build_info:
+                info = {"tags": tags}
+                build_info.parent.mkdir(parents=True, exist_ok=True)
+                build_info.write_text(json.dumps(info, indent=2) + "\n")
+                print(f"Build info written to {build_info}")
+
+        print(f"Build complete for {variant}")
 
 
 @main.command()
-@click.argument("variant", nargs=-1, type=click.Choice(_variant_choices()))
-def lock(variant: tuple[str, ...]) -> None:
+@click.argument("manifest", nargs=-1)
+def lock(manifest: tuple[str, ...]) -> None:
     """Regenerate lock files.
 
-    If no VARIANT is given, regenerates all lock files.
+    Accepts manifest paths like manifests/rtorrent-fork.jsonc.
+    If no MANIFEST is given, regenerates all lock files.
     """
-    variants = list(variant) if variant else _variant_choices()
-    for v in variants:
-        resolve_manifest(v)
+    if manifest:
+        for m in manifest:
+            resolve_manifest(Path(m))
+    else:
+        for p in sorted(_MANIFESTS_DIR.glob("*.jsonc")):
+            resolve_manifest(p)
 
 
-def _build_docker(binary_path: Path, *, variant: str, arch: str, disguise: bool) -> str:
-    version = variant.removeprefix("rtorrent-")
+def _docker_version_tags(
+    version: str, variant_name: str, arch_safe: str, *, is_ref: bool
+) -> list[str]:
+    """Generate version-based Docker tags."""
+    if is_ref:
+        return [f"{variant_name}.{arch_safe}", f"{variant_name}-{version}.{arch_safe}"]
+    parts = version.split(".")
+    prefixes: list[str] = []
+    for i in range(1, len(parts) + 1):
+        prefix = ".".join(parts[:i])
+        if prefix not in prefixes:
+            prefixes.append(prefix)
+    return [f"{p}.{arch_safe}" for p in prefixes]
+
+
+def _build_docker(
+    binary_path: Path,
+    *,
+    variant: str,
+    arch: str,
+    disguise: bool,
+    resolved: ResolvedManifest,
+    manifest_path: Path,
+) -> list[str]:
+    variant_name = variant.removeprefix("rtorrent-")
     arch_safe = Arch(arch).safe
     suffix = "-disguised" if disguise else ""
-    tag = f"{version}{suffix}.{arch_safe}"
-    image_ref = f"rtorrent:{tag}"
+    pkg = resolved.packages[resolved.executable_package]
+    assert pkg.version, f"executable package {resolved.executable_package!r} has no version"
+    full_version = pkg.version
+    raw = _raw_manifest_adapter.validate_python(_load_jsonc_text(manifest_path.read_text()))
+    exe_pkg = raw.packages[resolved.executable_package]
+    is_ref = isinstance(exe_pkg.source, GitHubRefSource) if exe_pkg else False
+    tags = _docker_version_tags(full_version, variant_name, arch_safe, is_ref=is_ref)
+    if suffix:
+        tags = [f"{t}{suffix}" for t in tags]
+    # include variant-derived tag if not already present
+    variant_tag = f"{variant_name}{suffix}.{arch_safe}"
+    if variant_tag not in tags:
+        tags.insert(0, variant_tag)
+    primary = tags[0]
+    image_ref = f"rtorrent:{primary}"
     output_name = binary_path.stem
     print(f"Building Docker image: {image_ref}")
     build_docker_image(binary_path, output_name, image_ref)
-    return tag
+    for extra in tags[1:]:
+        extra_ref = f"rtorrent:{extra}"
+        print(f"Tagging: {extra_ref}")
+        subprocess.run(["docker", "tag", image_ref, extra_ref], check=True)
+    return tags
 
 
 if __name__ == "__main__":

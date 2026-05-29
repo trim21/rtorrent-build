@@ -26,8 +26,6 @@ jobs:
         libc: [glibc, musl]
         arch:
           - { flag: amd/v1, name: amd.v1 }
-          - { flag: amd/v3, name: amd.v3 }
-          - { flag: amd/v4, name: amd.v4 }
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -63,13 +61,15 @@ jobs:
       - name: Cache build prefix
         uses: actions/cache@v4
         with:
-          path: build/
+          path: |
+            build/${{ matrix.variant }}/install
+            build/${{ matrix.variant }}/.markers/
           key: build-${{ matrix.variant }}-${{ matrix.libc }}-${{ matrix.arch.name }}-${{ hashFiles(format('manifests/{0}.lock', matrix.variant)) }}
 
       - name: Build ${{ matrix.variant }} (${{ matrix.libc }}/${{ matrix.arch.name }})
         env:
           PYTHONUNBUFFERED: "1"
-        run: python build.py build "${{ matrix.variant }}" --libc "${{ matrix.libc }}" --arch "${{ matrix.arch.flag }}"
+        run: python build.py build "manifests/${{ matrix.variant }}.jsonc" --libc "${{ matrix.libc }}" --arch "${{ matrix.arch.flag }}"
 
       - name: Tail build log on failure
         if: failure()

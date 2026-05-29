@@ -5,9 +5,9 @@ from __future__ import annotations
 import json
 import re
 import subprocess
+from functools import cache
 from pathlib import Path
 
-from . import PROJECT_ROOT
 from .manifest import (
     GitHubRefSource,
     GitHubReleaseSource,
@@ -32,6 +32,7 @@ _VERSION_PATTERNS: dict[str, str] = {
 }
 
 
+@cache
 def _gh_tags(owner_repo: str) -> list[str]:
     """Fetch tags from GitHub using git ls-remote (no API token needed)."""
     url = f"https://github.com/{owner_repo}.git"
@@ -64,6 +65,7 @@ def _extract_version(tag: str, repo: str | None = None) -> str | None:
     return m.group(1) if m else None
 
 
+@cache
 def _resolve_ref(owner_repo: str, ref: str) -> str:
     url = f"https://github.com/{owner_repo}.git"
     result = subprocess.run(
@@ -100,6 +102,8 @@ def _resolve_github_source(source: PackageSource) -> tuple[str, str]:
         if isinstance(source, GitHubReleaseSource):
             asset = source.asset.format(tag=tag, version=best)
             url = f"https://github.com/{source.github}/releases/download/{tag}/{asset}"
+        elif isinstance(source, GitHubTagSource) and source.url_template:
+            url = source.url_template.format(tag=tag, version=best)
         else:
             url = f"https://github.com/{source.github}/archive/refs/tags/{tag}.tar.gz"
         return url, best
@@ -116,14 +120,14 @@ def _resolve_source(pkg_name: str, lib: LibInfo) -> tuple[URLSource, str]:
     raise ValueError(f"Package {pkg_name!r} has no source")
 
 
-def resolve_manifest(variant: str, manifests_dir: Path | None = None) -> None:
+def resolve_manifest(manifest_path: Path) -> None:
     """Resolve a manifest to a URL-only lock file."""
-    if manifests_dir is None:
-        manifests_dir = PROJECT_ROOT / "manifests"
-
-    manifest_path = manifests_dir / f"{variant}.jsonc"
+    manifest_path = Path(manifest_path)
     if not manifest_path.exists():
         raise FileNotFoundError(f"Manifest not found: {manifest_path}")
+
+    variant = manifest_path.stem
+    manifests_dir = manifest_path.parent
 
     print(f"Resolving {variant}...")
     raw = _raw_manifest_adapter.validate_python(_load_jsonc_text(manifest_path.read_text()))
@@ -137,26 +141,29 @@ def resolve_manifest(variant: str, manifests_dir: Path | None = None) -> None:
             entry["version"] = version
         if pkg.cxx_std:
             entry["cxx_std"] = pkg.cxx_std
+        if pkg.requires is not None:
+            entry["requires"] = pkg.requires
         resolved_packages[name] = entry
         print(f"  {name}: {url_source.url[:60]}...")
 
-    manifest_hash = compute_manifest_hash(manifest_path, manifests_dir)
-    lock_data = {
+    manifest_hash = compute_manifest_hash(manifest_path)
+    lock_data: dict[str, object] = {
         "packages": resolved_packages,
         "target_glibc": raw.target_glibc,
         "toolchain": raw.toolchain,
         "manifest_hash": manifest_hash,
     }
+    if raw.executable_package is not None:
+        lock_data["executable_package"] = raw.executable_package
 
-    lock_path = manifests_dir / f"{variant}.lock"
+    lock_path = manifest_path.with_suffix(".lock")
     lock_path.write_text(json.dumps(lock_data, indent=2, sort_keys=True) + "\n")
     print(f"Wrote {lock_path}\n")
 
 
-def _validate_lock(variant: str, manifests_dir: Path) -> None:
+def _validate_lock(manifest_path: Path) -> None:
     """Validate that the lock file exists and matches the manifest hash."""
-    lock_path = manifests_dir / f"{variant}.lock"
-    manifest_path = manifests_dir / f"{variant}.jsonc"
+    lock_path = manifest_path.with_suffix(".lock")
 
     if not manifest_path.exists():
         raise FileNotFoundError(f"Manifest not found: {manifest_path}")
@@ -167,29 +174,25 @@ def _validate_lock(variant: str, manifests_dir: Path) -> None:
         )
 
     lockfile = _lockfile_adapter.validate_json(lock_path.read_text())
-    current_hash = compute_manifest_hash(manifest_path, manifests_dir)
+    current_hash = compute_manifest_hash(manifest_path)
     if lockfile.manifest_hash != current_hash:
         raise RuntimeError(
-            f"Lock file hash mismatch for {variant!r}: manifest changed since lock was "
+            f"Lock file hash mismatch for {manifest_path.stem!r}: manifest changed since lock was "
             f"generated. Run 'build.py lock' to regenerate."
         )
 
 
-def load_resolved_manifest(
-    variant: str,
-    manifests_dir: Path | None = None,
-) -> ResolvedManifest:
+def load_resolved_manifest(manifest_path: Path) -> ResolvedManifest:
     """Load a resolved manifest from lock file."""
-    if manifests_dir is None:
-        manifests_dir = PROJECT_ROOT / "manifests"
+    manifest_path = Path(manifest_path)
+    _validate_lock(manifest_path)
 
-    _validate_lock(variant, manifests_dir)
-
-    lock_path = manifests_dir / f"{variant}.lock"
+    lock_path = manifest_path.with_suffix(".lock")
     lockfile = _lockfile_adapter.validate_json(lock_path.read_text())
     return ResolvedManifest(
-        variant=variant,
+        variant=manifest_path.stem,
         packages=lockfile.packages,
         target_glibc=lockfile.target_glibc,
         toolchain=lockfile.toolchain,
+        executable_package=lockfile.executable_package,
     )

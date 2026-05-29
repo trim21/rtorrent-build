@@ -30,11 +30,11 @@ jobs:
           - { flag: amd/v3, name: amd.v3 }
         disguise: [false]
         include:
-          - variant: rtorrent-master
+          - variant: rtorrent-trim21-fork
             libc: glibc
             arch: { flag: amd/v3, name: amd.v3 }
             disguise: true
-          - variant: rtorrent-master
+          - variant: rtorrent-trim21-fork
             libc: glibc
             arch: { flag: amd/v4, name: amd.v4 }
             disguise: true
@@ -61,12 +61,18 @@ jobs:
       - name: Install main dependencies
         run: uv sync --frozen
 
+      - name: Cache downloaded sources
+        uses: actions/cache@v4
+        with:
+          path: assets/
+          key: docker-sources-${{ hashFiles('manifests/*.lock') }}
+
       - name: Cache build prefix
         uses: actions/cache@v4
         with:
           path: |
-            assets/
-            build/
+            build/${{ matrix.variant }}/install
+            build/${{ matrix.variant }}/.markers/
           key: docker-${{ matrix.variant }}-${{ matrix.libc }}-${{ matrix.arch.name }}-${{ hashFiles(format('manifests/{0}.*', matrix.variant)) }}-${{ matrix.disguise }}
           restore-keys: |
             docker-${{ matrix.variant }}-${{ matrix.libc }}-${{ matrix.arch.name }}-${{ hashFiles(format('manifests/{0}.*', matrix.variant)) }}
@@ -79,7 +85,7 @@ jobs:
           if [[ "${{ matrix.disguise }}" == "true" ]]; then
             DISGUISE_FLAG="--disguise"
           fi
-          python build.py build "${{ matrix.variant }}" --libc "${{ matrix.libc }}" --arch "${{ matrix.arch.flag }}" --docker --build-info build-info.json $DISGUISE_FLAG
+          python build.py build "manifests/${{ matrix.variant }}.jsonc" --libc "${{ matrix.libc }}" --arch "${{ matrix.arch.flag }}" --docker --build-info build-info.json $DISGUISE_FLAG
 
       - name: Tail build log on failure
         if: failure()
@@ -96,10 +102,11 @@ jobs:
       - name: Push Docker image
         if: github.event_name != 'pull_request'
         run: |
-          TAG="$(jq -r .tag build-info.json)"
-          LOCAL_TAG="rtorrent:${TAG}"
-          GHCR_TAG="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${TAG}"
-
-          docker tag "$LOCAL_TAG" "$GHCR_TAG"
-          docker push "$GHCR_TAG"
-          echo "Pushed $GHCR_TAG"
+          TAGS="$(jq -r '.tags[]' build-info.json)"
+          for TAG in $TAGS; do
+            LOCAL_TAG="rtorrent:${TAG}"
+            GHCR_TAG="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${TAG}"
+            docker tag "$LOCAL_TAG" "$GHCR_TAG"
+            docker push "$GHCR_TAG"
+            echo "Pushed $GHCR_TAG"
+          done
