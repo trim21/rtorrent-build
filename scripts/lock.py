@@ -13,7 +13,7 @@ def main() -> None:
     for manifest_path in sorted(_MANIFESTS_DIR.glob("*.jsonc")):
         if manifest_path.stem == "common":
             continue
-        resolve_manifest(manifest_path.stem)
+        resolve_manifest(manifest_path)
 
 
 if __name__ == "__main__":

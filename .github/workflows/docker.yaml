@@ -79,7 +79,7 @@ jobs:
           if [[ "${{ matrix.disguise }}" == "true" ]]; then
             DISGUISE_FLAG="--disguise"
           fi
-          python build.py build "${{ matrix.variant }}" --libc "${{ matrix.libc }}" --arch "${{ matrix.arch.flag }}" --docker --build-info build-info.json $DISGUISE_FLAG
+          python build.py build "manifests/${{ matrix.variant }}.jsonc" --libc "${{ matrix.libc }}" --arch "${{ matrix.arch.flag }}" --docker --build-info build-info.json $DISGUISE_FLAG
 
       - name: Tail build log on failure
         if: failure()

@@ -6,18 +6,18 @@ Build orchestrator that produces statically-linked rtorrent and qbittorrent bina
 
 ```bash
 # Build variants
-python build.py rtorrent-0.9.8
-python build.py rtorrent-0.16.12
-python build.py rtorrent-master
-python build.py qbittorrent-5.2.1-lt2
+python build.py build manifests/rtorrent-0.9.8.jsonc
+python build.py build manifests/rtorrent-0.16.jsonc
+python build.py build manifests/rtorrent-master.jsonc
+python build.py build manifests/qbittorrent-5.2-lt2.jsonc
 
 # With options
-python build.py rtorrent-master --libc musl --arch amd/v2
-python build.py rtorrent-master --disguise
-python build.py rtorrent-master --libc current        # target host glibc version
-python build.py rtorrent-master --docker               # build distroless Docker image
-python build.py rtorrent-master --skip-deps openssl    # skip already-built deps
-python build.py rtorrent-master --no-cache             # disable build cache
+python build.py build manifests/rtorrent-master.jsonc --libc musl --arch amd/v2
+python build.py build manifests/rtorrent-master.jsonc --disguise
+python build.py build manifests/rtorrent-master.jsonc --libc current        # target host glibc version
+python build.py build manifests/rtorrent-master.jsonc --docker               # build distroless Docker image
+python build.py build manifests/rtorrent-master.jsonc --skip-deps openssl    # skip already-built deps
+python build.py build manifests/rtorrent-master.jsonc --no-cache             # disable build cache
 ```
 
 CI: `.github/workflows/build.yml` — matrix of variants × 2 libc × 3 arch, triggered on push to master, tags (`v*`), PRs, and manual dispatch.
@@ -46,7 +46,7 @@ No test suite exists. Validation is CI build success.
 ```
 build.py                    → entry point, calls rtorrent_builder.cli:main
 src/rtorrent_builder/       → Python package
-  cli.py                    → Click CLI (variant, --libc, --arch, --docker, --disguise, etc.)
+  cli.py                    → Click CLI (manifest path, --libc, --arch, --docker, --disguise, etc.)
   builder.py                → orchestrator (topological sort, incremental builds, build timeline)
   toolchain.py              → Zig + CMake toolchain setup, Builder ABC
   manifest.py               → Pydantic manifest loader (JSONC, extends, lockfiles)
