@@ -1,6 +1,6 @@
 {
   "executable_package": "qbittorrent",
-  "manifest_hash": "19e753c41fd475c94b53a9116382cab0efdb1f4d8b15f701db6a9d8d7cc1ef19",
+  "manifest_hash": "5dfcd1e5fd0f2e6fea46dbde41d0a14b1108dce1c128c3101944e37995960813",
   "packages": {
     "boost": {
       "url": "https://github.com/boostorg/boost/releases/download/boost-1.91.0-1/boost-1.91.0-1-cmake.tar.gz",
@@ -19,7 +19,7 @@
       "version": "8.20.0"
     },
     "libidn2": {
-      "url": "https://github.com/libidn/libidn2/archive/refs/tags/v2.3.8.tar.gz",
+      "url": "https://ftp.gnu.org/gnu/libidn/libidn2-2.3.8.tar.gz",
       "version": "2.3.8"
     },
     "libtorrent-rasterbar": {

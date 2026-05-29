@@ -1,6 +1,6 @@
 {
   "executable_package": "rtorrent",
-  "manifest_hash": "2d37ed5309663e2b11d20350b71fa18807f0f323971d143be29e546d74ad9719",
+  "manifest_hash": "23fc4eede2c600591a9ac390ba72a489892c3ca3f68e10b2ec95286f54393331",
   "packages": {
     "brotli": {
       "url": "https://github.com/google/brotli/archive/refs/tags/v1.2.0.tar.gz",
@@ -15,7 +15,7 @@
       "version": "8.20.0"
     },
     "libidn2": {
-      "url": "https://github.com/libidn/libidn2/archive/refs/tags/v2.3.8.tar.gz",
+      "url": "https://ftp.gnu.org/gnu/libidn/libidn2-2.3.8.tar.gz",
       "version": "2.3.8"
     },
     "libunistring": {
