@@ -11,11 +11,15 @@ from pathlib import Path
 import httpx
 from packaging.specifiers import SpecifierSet
 
-from rtorrent_builder.manifest import GitHubTagSource, _load_jsonc_text, _raw_manifest_adapter
+from rtorrent_builder.manifest import (
+    GitHubReleaseSource,
+    GitHubTagSource,
+    _load_jsonc_text,
+    _raw_manifest_adapter,
+)
 
 _MANIFESTS_DIR = Path("manifests").resolve()
 _REPO = "rakshasa/rtorrent"
-_GIT_URL = f"https://github.com/{_REPO}.git"
 _GLIBC_TARGET = "2.28"
 _VERSION_RE = re.compile(r"^v?(\d+)\.(\d+)(?:\.(\d+))?(.*)")
 
@@ -42,7 +46,7 @@ def _read_existing_tag_range(manifest_path: Path) -> str | None:
         return None
     raw = _raw_manifest_adapter.validate_python(_load_jsonc_text(manifest_path.read_text()))
 
-    if isinstance(raw.packages["rtorrent"].source, GitHubTagSource):
+    if isinstance(raw.packages["rtorrent"].source, (GitHubTagSource, GitHubReleaseSource)):
         return raw.packages["rtorrent"].source.tag_range
     return None
 
@@ -51,20 +55,25 @@ def _manifest_content(version_prefix: str) -> str:
     tag_range = f">={version_prefix},<{_next_minor(version_prefix)}"
     obj = {
         "$schema": "../manifest.schema.json",
-        "extends": "common.jsonc",
+        "extends": "base/common.jsonc",
+        "executable_package": "rtorrent",
         "target_glibc": _GLIBC_TARGET,
         "packages": {
             "rtorrent": {
                 "source": {
-                    "github": _GIT_URL,
+                    "github": _REPO,
                     "tag_range": tag_range,
+                    "asset": "rtorrent-{version}.tar.gz",
                 },
+                "requires": ["rtorrent-libtorrent", "ncurses", "lua"],
             },
             "rtorrent-libtorrent": {
                 "source": {
-                    "github": "https://github.com/rakshasa/libtorrent.git",
+                    "github": _REPO,
                     "tag_range": tag_range,
+                    "asset": "libtorrent-{version}.tar.gz",
                 },
+                "requires": ["openssl", "zlib", "curl"],
             },
         },
     }
