@@ -30,11 +30,11 @@ jobs:
           - { flag: amd/v3, name: amd.v3 }
         disguise: [false]
         include:
-          - variant: rtorrent-trim21-fork
+          - variant: rtorrent-master
             libc: glibc
             arch: { flag: amd/v3, name: amd.v3 }
             disguise: true
-          - variant: rtorrent-trim21-fork
+          - variant: rtorrent-master
             libc: glibc
             arch: { flag: amd/v4, name: amd.v4 }
             disguise: true

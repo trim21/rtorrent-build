@@ -1,6 +1,6 @@
 {
   "executable_package": "rtorrent",
-  "manifest_hash": "23fc4eede2c600591a9ac390ba72a489892c3ca3f68e10b2ec95286f54393331",
+  "manifest_hash": "3676f95c91f166360f9dd6d2aab1061fc7f72d714b4c459ffcb8f06b3eeef329",
   "packages": {
     "brotli": {
       "url": "https://github.com/google/brotli/archive/refs/tags/v1.2.0.tar.gz",
@@ -41,11 +41,10 @@
     "rtorrent": {
       "requires": [
         "rtorrent-libtorrent",
-        "ncurses",
         "lua"
       ],
-      "url": "https://github.com/rakshasa/rtorrent/archive/880510073ae142706aeb778e883f86789b425ae3.tar.gz",
-      "version": "880510073ae1"
+      "url": "https://github.com/rakshasa/rtorrent/archive/5725eb3773b5abf1db8a28c65d9d518937b31027.tar.gz",
+      "version": "5725eb3773b5"
     },
     "rtorrent-libtorrent": {
       "requires": [
@@ -53,8 +52,8 @@
         "zlib",
         "curl"
       ],
-      "url": "https://github.com/rakshasa/libtorrent/archive/effbe17318f55c78f4c1f1c60b18c5822c7d20b2.tar.gz",
-      "version": "effbe17318f5"
+      "url": "https://github.com/rakshasa/libtorrent/archive/032d8cf69170a724e7014377d5cc460ca9fd13a3.tar.gz",
+      "version": "032d8cf69170"
     },
     "zlib": {
       "url": "https://github.com/zlib-ng/zlib-ng/archive/refs/tags/2.3.3.tar.gz",

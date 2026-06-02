@@ -9,7 +9,7 @@
         "github": "rakshasa/rtorrent",
         "ref": "master"
       },
-      "requires": ["rtorrent-libtorrent", "ncurses", "lua"]
+      "requires": ["rtorrent-libtorrent", "lua"]
     },
     "rtorrent-libtorrent": {
       "source": {
