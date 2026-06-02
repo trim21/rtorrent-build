@@ -32,6 +32,10 @@ jobs:
         include:
           - variant: rtorrent-master
             libc: glibc
+            arch: { flag: amd/v1, name: amd.v1 }
+            disguise: true
+          - variant: rtorrent-master
+            libc: glibc
             arch: { flag: amd/v3, name: amd.v3 }
             disguise: true
           - variant: rtorrent-master
