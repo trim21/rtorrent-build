@@ -11,7 +11,7 @@ import click
 
 from . import PROJECT_ROOT
 from ._types import Arch, Libc
-from .builder import _BUILDER_MAP, _FINAL_PACKAGES, build_rtorrent
+from .builder import build_rtorrent
 from .docker import DISTROLESS_GLIBC_VERSION, build_docker_image
 from .lock import load_resolved_manifest, resolve_manifest
 from .manifest import GitHubRefSource, ResolvedManifest, _load_jsonc_text, _raw_manifest_adapter
@@ -41,10 +41,6 @@ def _variant_choices() -> list[str]:
     return sorted(p.stem for p in _MANIFESTS_DIR.glob("*.jsonc") if p.stem != "common")
 
 
-def _dep_choices() -> list[str]:
-    return sorted(name for name in _BUILDER_MAP if name not in _FINAL_PACKAGES)
-
-
 @click.group()
 def main() -> None:
     """Static rtorrent/qbittorrent binary builder."""
@@ -69,7 +65,6 @@ def main() -> None:
 @click.option(
     "--skip-deps",
     multiple=True,
-    type=click.Choice(_dep_choices()),
     help="Skip building specific dependencies (must already be installed)",
 )
 @click.option(

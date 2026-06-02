@@ -22,10 +22,6 @@
       "url": "https://ftp.gnu.org/gnu/libunistring/libunistring-1.4.tar.gz",
       "version": "1.4"
     },
-    "lua": {
-      "url": "https://www.lua.org/ftp/lua-5.4.8.tar.gz",
-      "version": "5.4.8"
-    },
     "ncurses": {
       "url": "https://ftp.gnu.org/pub/gnu/ncurses/ncurses-6.6.tar.gz",
       "version": "6.6"

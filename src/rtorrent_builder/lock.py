@@ -21,6 +21,7 @@ from .manifest import (
     _raw_manifest_adapter,
     _resolve_extends,
     compute_manifest_hash,
+    reachable_packages,
 )
 from .version_range import resolve_best
 
@@ -133,8 +134,15 @@ def resolve_manifest(manifest_path: Path) -> None:
     raw = _raw_manifest_adapter.validate_python(_load_jsonc_text(manifest_path.read_text()))
     raw = _resolve_extends(raw, manifests_dir)
 
+    if raw.executable_package:
+        reachable = reachable_packages(raw.packages, raw.executable_package)
+    else:
+        reachable = set(raw.packages)
+
     resolved_packages: dict[str, dict] = {}
     for name, pkg in raw.packages.items():
+        if name not in reachable:
+            continue
         url_source, version = _resolve_source(name, pkg)
         entry: dict = {"url": url_source.url}
         if version:

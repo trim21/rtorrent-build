@@ -31,7 +31,7 @@ from .deps.qttools import QtToolsBuilder
 from .deps.rtorrent import RtorrentBuilder
 from .deps.zlib import ZlibBuilder
 from .deps.zstd import ZstdBuilder
-from .manifest import ResolvedManifest
+from .manifest import ResolvedManifest, deps_for, reachable_packages
 from .toolchain import Builder, ResolvedSource, Toolchain
 
 _BUILDER_MAP: dict[str, type[Builder]] = {
@@ -55,61 +55,6 @@ _BUILDER_MAP: dict[str, type[Builder]] = {
     "qbittorrent": QbittorrentBuilder,
     "rtorrent": RtorrentBuilder,
 }
-
-_FINAL_PACKAGES: set[str] = {"rtorrent", "qbittorrent"}
-
-_DEPENDENCIES: dict[str, list[str]] = {
-    "zlib": [],
-    "openssl": [],
-    "brotli": [],
-    "cares": [],
-    "ncurses": [],
-    "lua": [],
-    "luajit": [],
-    "nghttp2": ["zlib"],
-    "libunistring": [],
-    "libidn2": ["libunistring"],
-    "curl": ["zlib", "openssl", "brotli", "cares", "zstd", "nghttp2", "libidn2"],
-    "rtorrent-libtorrent": ["openssl", "zlib"],
-    "boost": [],
-    "libtorrent-rasterbar": ["boost", "openssl"],
-    "zstd": [],
-    "qt": ["zlib", "openssl", "zstd", "brotli"],
-    "qttools": ["qt"],
-    "qbittorrent": [
-        "zlib",
-        "openssl",
-        "boost",
-        "libtorrent-rasterbar",
-        "qt",
-        "qttools",
-    ],
-    "rtorrent": [
-        "rtorrent-libtorrent",
-    ],
-}
-
-
-def _deps_for(name: str, pkgs: dict) -> list[str]:
-    pkg = pkgs.get(name)
-    if pkg is not None and pkg.requires is not None:
-        return pkg.requires
-    return _DEPENDENCIES.get(name, [])
-
-
-def _reachable_packages(pkgs: dict, executable_package: str) -> set[str]:
-    reachable: set[str] = set()
-    stack = [executable_package]
-    while stack:
-        name = stack.pop()
-        if name in reachable:
-            continue
-        reachable.add(name)
-        for dep in _deps_for(name, pkgs):
-            if dep in pkgs and dep not in reachable:
-                stack.append(dep)
-    return reachable
-
 
 _ALLOWED_SOS = frozenset(
     {
@@ -269,12 +214,10 @@ def build_rtorrent(
     tc.setup()
 
     pkgs = manifest.packages
-    needed = _reachable_packages(pkgs, manifest.executable_package)
+    needed = reachable_packages(pkgs, manifest.executable_package)
     names = [n for n in _BUILDER_MAP if n in needed]
 
-    ts = TopologicalSorter(
-        {name: [d for d in _deps_for(name, pkgs) if d in pkgs] for name in names}
-    )
+    ts = TopologicalSorter({name: [d for d in deps_for(name, pkgs) if d in pkgs] for name in names})
     ts.prepare()
 
     resolved: dict[str, ResolvedSource] = {}

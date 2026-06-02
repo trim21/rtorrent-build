@@ -1,7 +1,10 @@
 """Manifest loading for rtorrent build variants using pydantic."""
 
+from __future__ import annotations
+
 import hashlib
 import json
+from collections.abc import Mapping
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 
@@ -245,3 +248,57 @@ def _resolve_extends(raw: RawManifest, manifests_dir: Path) -> RawManifest:
     }
 
     return _raw_manifest_adapter.validate_python(result_data)
+
+
+_DEPENDENCIES: dict[str, list[str]] = {
+    "zlib": [],
+    "openssl": [],
+    "brotli": [],
+    "cares": [],
+    "ncurses": [],
+    "lua": [],
+    "luajit": [],
+    "nghttp2": ["zlib"],
+    "libunistring": [],
+    "libidn2": ["libunistring"],
+    "curl": ["zlib", "openssl", "brotli", "cares", "zstd", "nghttp2", "libidn2"],
+    "rtorrent-libtorrent": ["openssl", "zlib"],
+    "boost": [],
+    "libtorrent-rasterbar": ["boost", "openssl", "curl"],
+    "zstd": [],
+    "qt": ["zlib", "openssl", "zstd", "brotli"],
+    "qttools": ["qt"],
+    "qbittorrent": [
+        "zlib",
+        "openssl",
+        "boost",
+        "libtorrent-rasterbar",
+        "qt",
+        "qttools",
+    ],
+    "rtorrent": [
+        "rtorrent-libtorrent",
+    ],
+}
+
+
+def deps_for(name: str, packages: Mapping[str, LibInfo | ResolvedPackage]) -> list[str]:
+    pkg = packages.get(name)
+    if pkg and pkg.requires is not None:
+        return pkg.requires
+    return _DEPENDENCIES.get(name, [])
+
+
+def reachable_packages(packages: Mapping[str, LibInfo | ResolvedPackage], root: str) -> set[str]:
+    """Collect packages reachable from *root* via requires edges."""
+    visited: set[str] = set()
+    queue = [root]
+    while queue:
+        name = queue.pop()
+        if name in visited:
+            continue
+        visited.add(name)
+        for dep in deps_for(name, packages):
+            if dep not in visited:
+                queue.append(dep)
+    return visited
