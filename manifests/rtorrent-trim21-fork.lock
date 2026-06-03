@@ -1,0 +1,65 @@
+{
+  "executable_package": "rtorrent",
+  "manifest_hash": "0d0da21ebffe2c88efe9be67995dc68a8e9a285da5547f35dbe23db5a32d95c2",
+  "packages": {
+    "brotli": {
+      "url": "https://github.com/google/brotli/archive/refs/tags/v1.2.0.tar.gz",
+      "version": "1.2.0"
+    },
+    "cares": {
+      "url": "https://github.com/c-ares/c-ares/archive/refs/tags/v1.34.6.tar.gz",
+      "version": "1.34.6"
+    },
+    "curl": {
+      "url": "https://github.com/curl/curl/archive/refs/tags/curl-8_20_0.tar.gz",
+      "version": "8.20.0"
+    },
+    "libidn2": {
+      "url": "https://ftp.gnu.org/gnu/libidn/libidn2-2.3.8.tar.gz",
+      "version": "2.3.8"
+    },
+    "libunistring": {
+      "url": "https://ftp.gnu.org/gnu/libunistring/libunistring-1.4.tar.gz",
+      "version": "1.4"
+    },
+    "lua": {
+      "url": "https://www.lua.org/ftp/lua-5.4.8.tar.gz",
+      "version": "5.4.8"
+    },
+    "nghttp2": {
+      "url": "https://github.com/nghttp2/nghttp2/archive/refs/tags/v1.69.0.tar.gz",
+      "version": "1.69.0"
+    },
+    "openssl": {
+      "url": "https://github.com/openssl/openssl/archive/refs/tags/openssl-3.6.2.tar.gz",
+      "version": "3.6.2"
+    },
+    "rtorrent": {
+      "requires": [
+        "rtorrent-libtorrent",
+        "lua"
+      ],
+      "url": "https://github.com/trim21/rtorrent-upstream/archive/967dd69afddd6eebf569ac2f0dfb5b529b4fd7ca.tar.gz",
+      "version": "967dd69afddd"
+    },
+    "rtorrent-libtorrent": {
+      "requires": [
+        "openssl",
+        "zlib",
+        "curl"
+      ],
+      "url": "https://github.com/trim21/libtorrent/archive/43e30e1179c0b7260848b15e640ef47ef5c9f25f.tar.gz",
+      "version": "43e30e1179c0"
+    },
+    "zlib": {
+      "url": "https://github.com/zlib-ng/zlib-ng/archive/refs/tags/2.3.3.tar.gz",
+      "version": "2.3.3"
+    },
+    "zstd": {
+      "url": "https://github.com/facebook/zstd/archive/refs/tags/v1.5.7.tar.gz",
+      "version": "1.5.7"
+    }
+  },
+  "target_glibc": "2.28",
+  "toolchain": "default"
+}
