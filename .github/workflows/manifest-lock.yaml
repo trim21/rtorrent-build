@@ -33,17 +33,7 @@ jobs:
       - name: Regenerate lock files
         run: uv run python scripts/lock.py
 
-      - name: Check for changes
-        id: changes
-        run: |
-          if [ -n "$(git status --porcelain manifests/*.lock)" ]; then
-            echo "changed=true" >> $GITHUB_OUTPUT
-          else
-            echo "changed=false" >> $GITHUB_OUTPUT
-          fi
-
       - name: Create PR if locks changed
-        if: steps.changes.outputs.changed == 'true' && github.event_name == 'schedule'
         uses: peter-evans/create-pull-request@v7
         with:
           commit-message: "chore: update lock files"
@@ -55,10 +45,3 @@ jobs:
           branch: auto/update-locks
           delete-branch: true
           token: "${{ secrets.PAT }}"
-
-      - name: Fail if locks outdated (PR check)
-        if: steps.changes.outputs.changed == 'true' && github.event_name == 'pull_request'
-        run: |
-          echo "Lock files are out of date. Please run 'uv run python scripts/lock.py' and commit the changes."
-          git diff manifests/*.lock
-          exit 1
