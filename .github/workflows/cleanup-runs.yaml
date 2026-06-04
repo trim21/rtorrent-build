@@ -1,0 +1,21 @@
+name: cleanup runs
+
+on:
+  pull_request:
+    types: [closed]
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: "Branch name to clean up runs for"
+        required: true
+
+jobs:
+  cancel:
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - uses: styfle/cancel-workflow-action@0.13.1
+        with:
+          workflow_id: all
+          ignore_sha: true
+          access_token: ${{ secrets.GITHUB_TOKEN }}
