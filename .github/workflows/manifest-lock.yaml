@@ -54,6 +54,7 @@ jobs:
             This PR was created automatically by the daily lock refresh workflow.
           branch: auto/update-locks
           delete-branch: true
+          token: "${{ secrets.PAT }}"
 
       - name: Fail if locks outdated (PR check)
         if: steps.changes.outputs.changed == 'true' && github.event_name == 'pull_request'
