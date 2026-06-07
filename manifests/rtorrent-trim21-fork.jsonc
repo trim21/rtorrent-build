@@ -9,16 +9,14 @@
         "github": "trim21/rtorrent-upstream",
         "ref": "fix/resume-flags-initial-value"
       },
-      "requires": [
-        "rtorrent-libtorrent",
-        "lua"
-      ]
+      "requires": ["rtorrent-libtorrent", "lua"]
     },
     "rtorrent-libtorrent": {
       "source": {
         "github": "rakshasa/libtorrent",
         "ref": "master"
-      }
+      },
+      "requires": ["openssl", "zlib", "curl"]
     }
   }
 }
