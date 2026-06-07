@@ -13,8 +13,8 @@
     },
     "rtorrent-libtorrent": {
       "source": {
-        "github": "rakshasa/libtorrent",
-        "ref": "master"
+        "github": "trim21/libtorrent",
+        "ref": "fix/fallocate-respect-file-priority"
       },
       "requires": ["openssl", "zlib", "curl"]
     }
