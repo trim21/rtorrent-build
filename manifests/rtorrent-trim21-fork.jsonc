@@ -7,16 +7,18 @@
     "rtorrent": {
       "source": {
         "github": "trim21/rtorrent-upstream",
-        "ref": "feat/hash-error-message"
+        "ref": "fix/resume-flags-initial-value"
       },
-      "requires": ["rtorrent-libtorrent", "lua"]
+      "requires": [
+        "rtorrent-libtorrent",
+        "lua"
+      ]
     },
     "rtorrent-libtorrent": {
       "source": {
-        "github": "trim21/libtorrent",
-        "ref": "feat/hash-error-number"
-      },
-      "requires": ["openssl", "zlib", "curl"]
+        "github": "rakshasa/libtorrent",
+        "ref": "master"
+      }
     }
   }
 }

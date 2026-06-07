@@ -12,6 +12,11 @@ vars:
     - qbittorrent-5.1-lt1
 
 tasks:
+  lock:
+    desc: "Lock the build environment (e.g. task lock)"
+    cmds:
+      - python scripts/lock.py {{.CLI_ARGS}}
+
   build:
     desc: "Build a variant (e.g. task build VARIANT=rtorrent-0.16)"
     cmds:
