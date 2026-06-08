@@ -14,5 +14,13 @@
     "ci:auto-merge",
     "dependencies"
   ],
-  "prConcurrentLimit": 3
+  "prConcurrentLimit": 3,
+  "packageRules": [
+    {
+      "matchPackageNames": [
+        "cmake"
+      ],
+      "enabled": false
+    }
+  ]
 }
