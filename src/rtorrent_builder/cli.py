@@ -117,6 +117,13 @@ def main() -> None:
     envvar="RTORRENT_BUILD_DEBUG",
     help="Debug build: -g -O0, no LTO, enable debug in rtorrent/libtorrent",
 )
+@click.option(
+    "--cache-dir",
+    type=click.Path(path_type=Path),
+    default=None,
+    envvar="RTORRENT_CACHE_DIR",
+    help="Persistent cache directory for build artifacts (Merkle-tree keyed)",
+)
 def build(
     manifest: tuple[Path, ...],
     work_dir: Path,
@@ -130,6 +137,7 @@ def build(
     build_docker: bool,
     build_info: Path | None,
     debug: bool,
+    cache_dir: Path | None,
 ) -> None:
     """Build one or more variants from manifest files."""
     output_dir = output_dir.resolve()
@@ -174,6 +182,7 @@ def build(
                 arch=Arch(arch),
                 docker_target_glibc=glibc_override,
                 debug=debug,
+                cache_dir=cache_dir,
             )
         except CmdError as e:
             log_path = variant_work / "logs"

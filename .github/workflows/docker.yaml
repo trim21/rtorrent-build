@@ -85,21 +85,20 @@ jobs:
           path: assets/
           key: docker-sources-${{ hashFiles('manifests/*.lock') }}
 
-      - name: Cache build prefix
+      - name: Cache build artifacts (Merkle tree)
         uses: actions/cache@v5
         with:
-          path: |
-            build/${{ matrix.variant }}/install
-            build/${{ matrix.variant }}/.markers/
-          key: docker-${{ matrix.variant }}-${{ matrix.libc }}-${{ matrix.arch.name }}-${{ hashFiles(format('manifests/{0}.*', matrix.variant)) }}-${{ matrix.disguise }}-debug-${{ matrix.debug }}
+          path: .rtorrent-cache/
+          key: rtorrent-cache-v1-${{ matrix.variant }}-${{ matrix.libc }}-${{ matrix.arch.name }}-d${{ matrix.disguise }}-g${{ matrix.debug }}-${{ github.run_id }}
           restore-keys: |
-            docker-${{ matrix.variant }}-${{ matrix.libc }}-${{ matrix.arch.name }}-${{ hashFiles(format('manifests/{0}.*', matrix.variant)) }}
+            rtorrent-cache-v1-${{ matrix.variant }}-${{ matrix.libc }}-${{ matrix.arch.name }}-d${{ matrix.disguise }}-g${{ matrix.debug }}-
 
       - name: Build ${{ matrix.variant }} (${{ matrix.libc }}/${{ matrix.arch.name }})${{ matrix.disguise && ' disguised' || '' }}${{ matrix.debug && ' debug' || '' }}
         env:
           PYTHONUNBUFFERED: "1"
           RTORRENT_BUILD_DEBUG: "${{ matrix.debug }}"
           RTORRENT_BUILD_DISGUISE: "${{ matrix.disguise }}"
+          RTORRENT_CACHE_DIR: ${{ github.workspace }}/.rtorrent-cache
         run: |
           python build.py build "manifests/${{ matrix.variant }}.jsonc" \
             --libc "${{ matrix.libc }}" \

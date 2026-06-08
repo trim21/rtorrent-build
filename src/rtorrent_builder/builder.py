@@ -12,6 +12,7 @@ from pathlib import Path
 
 from . import PROJECT_ROOT
 from ._types import Arch, Libc
+from .cache import CacheStore, compute_merkle_hash
 from .deps.boost import BoostBuilder
 from .deps.brotli import BrotliBuilder
 from .deps.cares import CaresBuilder
@@ -175,6 +176,12 @@ def _render_timeline_table(timings: list[_Timing], total_elapsed: float) -> None
             f.write(out)
 
 
+def _list_prefix_files(prefix: Path) -> set[Path]:
+    if not prefix.exists():
+        return set()
+    return {p.relative_to(prefix) for p in prefix.rglob("*") if p.is_file()}
+
+
 def build_rtorrent(
     *,
     variant: str,
@@ -189,6 +196,7 @@ def build_rtorrent(
     arch: Arch = Arch.v1,
     docker_target_glibc: str | None = None,
     debug: bool = False,
+    cache_dir: Path | None = None,
 ) -> Path:
     skip_deps = skip_deps or []
 
@@ -226,6 +234,8 @@ def build_rtorrent(
     resolved: dict[str, ResolvedSource] = {}
     timings: list[_Timing] = []
     build_origin = time.monotonic()
+    _pkg_hashes: dict[str, str] = {}
+    _cache_store = CacheStore(cache_dir) if cache_dir else None
 
     def _build_pkg(name: str) -> str:
         t = _Timing(name=name, start=time.monotonic() - build_origin)
@@ -241,11 +251,38 @@ def build_rtorrent(
         builder = builder_cls(tc, lib, source, commander)
         features = builder.cache_key_extra
 
+        dep_hashes = {d: _pkg_hashes[d] for d in deps_for(name, pkgs) if d in _pkg_hashes}
+        merkle_hash = compute_merkle_hash(
+            name=name,
+            version=source.version,
+            url=pkg.url,
+            options=features,
+            toolchain_name=tc._toolchain_name,
+            zig_version=tc.zig_version,
+            libc=tc.libc.value,
+            arch=tc.arch.safe,
+            glibc_target=tc._glibc_target,
+            debug=tc.debug,
+            install_prefix=str(tc.install_prefix.resolve()),
+            dep_hashes=dep_hashes,
+        )
+        _pkg_hashes[name] = merkle_hash
+
         if not no_cache and tc.is_built(name, source.version, features):
             print(f"Already built {name} {source.version}")
             t.gen_end = time.monotonic() - build_origin
             t.end = time.monotonic() - build_origin
             return name
+
+        if _cache_store and _cache_store.has(merkle_hash):
+            print(f"Persistent cache hit for {name}")
+            _cache_store.restore(merkle_hash, tc.install_prefix, name)
+            tc.mark_built(name, source.version, features)
+            t.gen_end = time.monotonic() - build_origin
+            t.end = time.monotonic() - build_origin
+            return name
+
+        before_files = _list_prefix_files(tc.install_prefix)
 
         tc.clean_source(name, lib)
         source = tc.prepare_source(name, lib)
@@ -255,6 +292,13 @@ def build_rtorrent(
         builder.build()
         tc.mark_built(name, source.version, features)
         t.end = time.monotonic() - build_origin
+
+        if _cache_store:
+            after_files = _list_prefix_files(tc.install_prefix)
+            new_files = after_files - before_files
+            if new_files:
+                _cache_store.store_files(merkle_hash, tc.install_prefix, new_files, name)
+
         return name
 
     while ts.is_active():
