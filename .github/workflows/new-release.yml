@@ -38,7 +38,7 @@ jobs:
         run: uvx prek run --all-files || true
 
       - name: Create pull request
-        uses: peter-evans/create-pull-request@v7
+        uses: peter-evans/create-pull-request@v8
         with:
           commit-message: "feat: add manifest for latest rtorrent release"
           token: "${{ secrets.PAT }}"
