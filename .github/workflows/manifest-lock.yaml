@@ -34,7 +34,7 @@ jobs:
         run: uv run python scripts/lock.py
 
       - name: Create PR if locks changed
-        uses: peter-evans/create-pull-request@v7
+        uses: peter-evans/create-pull-request@v8
         with:
           commit-message: "chore: update lock files"
           title: "chore: update lock files"
