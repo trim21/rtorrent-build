@@ -80,13 +80,13 @@ jobs:
         run: uv sync --frozen
 
       - name: Cache downloaded sources
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: assets/
           key: docker-sources-${{ hashFiles('manifests/*.lock') }}
 
       - name: Cache build prefix
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             build/${{ matrix.variant }}/install
