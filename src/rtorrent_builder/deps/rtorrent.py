@@ -54,8 +54,11 @@ class RtorrentBuilder(Builder):
             f"--prefix={self.tc.install_prefix}",
             "--disable-shared",
             "--enable-static",
-            "--disable-debug",
         ]
+        if self.tc.debug:
+            configure_args.append("--enable-debug")
+        else:
+            configure_args.append("--disable-debug")
 
         has_curses_stub = (self.src_dir / "src" / "display" / "curses_stub.h").exists()
         wants_ncurses = self.lib.requires is not None and "ncurses" in self.lib.requires
