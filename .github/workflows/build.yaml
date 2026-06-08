@@ -47,19 +47,19 @@ jobs:
         run: uv sync --frozen
 
       - name: Cache toolchain
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: toolchains/default/.venv
           key: toolchain-${{ hashFiles('toolchains/default/pyproject.toml') }}
 
       - name: Cache downloaded sources
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: assets/
           key: sources-${{ hashFiles('manifests/*.lock') }}
 
       - name: Cache build prefix
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             build/${{ matrix.variant }}/install
