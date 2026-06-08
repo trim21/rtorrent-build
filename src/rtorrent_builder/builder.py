@@ -58,6 +58,7 @@ _BUILDER_MAP: dict[str, type[Builder]] = {
 
 _ALLOWED_SOS = frozenset(
     {
+        "ld-linux-x86-64.so.2",
         "libc.so.6",
         "libm.so.6",
         "libdl.so.2",
