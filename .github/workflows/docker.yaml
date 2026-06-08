@@ -98,15 +98,14 @@ jobs:
       - name: Build ${{ matrix.variant }} (${{ matrix.libc }}/${{ matrix.arch.name }})${{ matrix.disguise && ' disguised' || '' }}${{ matrix.debug && ' debug' || '' }}
         env:
           PYTHONUNBUFFERED: "1"
+          RTORRENT_BUILD_DEBUG: "${{ matrix.debug }}"
+          RTORRENT_BUILD_DISGUISE: "${{ matrix.disguise }}"
         run: |
-          EXTRA_FLAGS=""
-          if [[ "${{ matrix.disguise }}" == "true" ]]; then
-            EXTRA_FLAGS="$EXTRA_FLAGS --disguise"
-          fi
-          if [[ "${{ matrix.debug }}" == "true" ]]; then
-            EXTRA_FLAGS="$EXTRA_FLAGS --debug"
-          fi
-          python build.py build "manifests/${{ matrix.variant }}.jsonc" --libc "${{ matrix.libc }}" --arch "${{ matrix.arch.flag }}" --docker --build-info build-info.json $EXTRA_FLAGS
+          python build.py build "manifests/${{ matrix.variant }}.jsonc" \
+            --libc "${{ matrix.libc }}" \
+            --arch "${{ matrix.arch.flag }}" \
+            --docker \
+            --build-info build-info.json
 
       - name: Tail build log on failure
         if: failure()

@@ -79,9 +79,9 @@ def main() -> None:
     help="Disable build cache — rebuild all packages",
 )
 @click.option(
-    "--disguise",
-    is_flag=True,
+    "--disguise/--no-disguise",
     default=False,
+    envvar="RTORRENT_BUILD_DISGUISE",
     help="Disguise as rtorrent/0.9.8/0.13.8",
 )
 @click.option(
@@ -112,9 +112,9 @@ def main() -> None:
     help="Write build metadata (docker tag, version, etc.) to a JSON file",
 )
 @click.option(
-    "--debug",
-    is_flag=True,
+    "--debug/--no-debug",
     default=False,
+    envvar="RTORRENT_BUILD_DEBUG",
     help="Debug build: -g -O0, no LTO, enable debug in rtorrent/libtorrent",
 )
 def build(
