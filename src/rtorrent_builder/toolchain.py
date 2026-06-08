@@ -60,6 +60,7 @@ class Toolchain:
         options: dict[str, str] | None = None,
         libc: Libc = Libc.glibc,
         arch: Arch = Arch.v1,
+        debug: bool = False,
     ) -> None:
         self.variant = variant
         self._toolchain_name = toolchain
@@ -69,6 +70,7 @@ class Toolchain:
         self.options: dict[str, str] = options or {}
         self.libc = libc
         self.arch = arch
+        self.debug = debug
 
         self.install_prefix = work_dir / "install"
         self.build_dir = work_dir / "build"
@@ -266,6 +268,8 @@ class Toolchain:
         marker = f".tc-{self.libc.value}-{self.arch.safe}"
         if self.libc == Libc.glibc:
             marker += f".{self._glibc_target}"
+        if self.debug:
+            marker += ".debug"
         return marker
 
     def _validate_toolchain_marker(self) -> None:
@@ -362,6 +366,13 @@ class Toolchain:
         install_lib = str(self.install_prefix / "lib")
         install_lib64 = str(self.install_prefix / "lib64")
         wd = str(self.work_dir / "wrappers")
+        if self.debug:
+            cmake_cflags = "-fPIC -g -O0 -w"
+            cmake_ldflags = f"-L{install_lib} -L{install_lib64}"
+        else:
+            cmake_cflags = "-fPIC -flto -w"
+            cmake_ldflags = f"-flto -L{install_lib} -L{install_lib64}"
+
         content = "\n".join(
             [
                 "cmake_policy(SET CMP0167 NEW)",
@@ -372,9 +383,9 @@ class Toolchain:
                 f'set(CMAKE_AR "{wd}/zig-ar")',
                 f'set(CMAKE_RANLIB "{wd}/zig-ranlib")',
                 "",
-                'set(CMAKE_C_FLAGS_INIT "-fPIC -flto -w")',
-                'set(CMAKE_CXX_FLAGS_INIT "-fPIC -flto -w")',
-                f'set(CMAKE_EXE_LINKER_FLAGS_INIT "-flto -L{install_lib} -L{install_lib64}")',
+                f'set(CMAKE_C_FLAGS_INIT "{cmake_cflags}")',
+                f'set(CMAKE_CXX_FLAGS_INIT "{cmake_cflags}")',
+                f'set(CMAKE_EXE_LINKER_FLAGS_INIT "{cmake_ldflags}")',
                 "",
                 'set(HAVE_FILE_OFFSET_BITS 0 CACHE INTERNAL "")',
                 "",
@@ -402,8 +413,12 @@ class Toolchain:
         install_lib = str(self.install_prefix / "lib")
         install_include = str(self.install_prefix / "include")
 
-        ldflags = f"-flto -L{install_lib} -L{install_lib}64"
-        cflags = f"-fPIC -Os -g -flto -w -march={self.arch.march}"
+        if self.debug:
+            ldflags = f"-L{install_lib} -L{install_lib}64"
+            cflags = f"-fPIC -g -O0 -w -march={self.arch.march}"
+        else:
+            ldflags = f"-flto -L{install_lib} -L{install_lib}64"
+            cflags = f"-fPIC -Os -g -flto -w -march={self.arch.march}"
         if self.libc == Libc.musl:
             ldflags += " -static"
             cflags += " -static"

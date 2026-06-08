@@ -187,6 +187,7 @@ def build_rtorrent(
     libc: Libc = Libc.glibc,
     arch: Arch = Arch.v1,
     docker_target_glibc: str | None = None,
+    debug: bool = False,
 ) -> Path:
     skip_deps = skip_deps or []
 
@@ -210,6 +211,7 @@ def build_rtorrent(
         options=options,
         libc=libc,
         arch=arch,
+        debug=debug,
     )
     tc.setup()
 

@@ -111,6 +111,12 @@ def main() -> None:
     default=None,
     help="Write build metadata (docker tag, version, etc.) to a JSON file",
 )
+@click.option(
+    "--debug",
+    is_flag=True,
+    default=False,
+    help="Debug build: -g -O0, no LTO, enable debug in rtorrent/libtorrent",
+)
 def build(
     manifest: tuple[Path, ...],
     work_dir: Path,
@@ -123,6 +129,7 @@ def build(
     arch: str,
     build_docker: bool,
     build_info: Path | None,
+    debug: bool,
 ) -> None:
     """Build one or more variants from manifest files."""
     output_dir = output_dir.resolve()
@@ -166,6 +173,7 @@ def build(
                 libc=resolved_libc,
                 arch=Arch(arch),
                 docker_target_glibc=glibc_override,
+                debug=debug,
             )
         except CmdError as e:
             log_path = variant_work / "logs"

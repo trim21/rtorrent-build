@@ -46,18 +46,19 @@ class LibtorrentBuilder(Builder):
         if self.lib.cxx_std:
             env["CXXFLAGS"] = f"{env['CXXFLAGS']} -std={self.lib.cxx_std}"
 
-        cmd.run(
-            [
-                "./configure",
-                f"--prefix={self.tc.install_prefix}",
-                f"--with-zlib={self.tc.dep_prefix('zlib')}",
-                "--disable-shared",
-                "--enable-static",
-                "--disable-debug",
-            ],
-            cwd=str(self.src_dir),
-            env=env,
-        )
+        configure_args = [
+            "./configure",
+            f"--prefix={self.tc.install_prefix}",
+            f"--with-zlib={self.tc.dep_prefix('zlib')}",
+            "--disable-shared",
+            "--enable-static",
+        ]
+        if self.tc.debug:
+            configure_args.append("--enable-debug")
+        else:
+            configure_args.append("--disable-debug")
+
+        cmd.run(configure_args, cwd=str(self.src_dir), env=env)
 
         if self._opts.peer_name:
             config_h = self.src_dir / "config.h"
