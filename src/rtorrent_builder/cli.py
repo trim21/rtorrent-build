@@ -190,6 +190,7 @@ def build(
                 variant=variant,
                 arch=arch,
                 disguise=disguise,
+                debug=debug,
                 resolved=resolved,
                 manifest_path=manifest_path,
             )
@@ -239,12 +240,17 @@ def _build_docker(
     variant: str,
     arch: str,
     disguise: bool,
+    debug: bool,
     resolved: ResolvedManifest,
     manifest_path: Path,
 ) -> list[str]:
     variant_name = variant.removeprefix("rtorrent-")
     arch_safe = Arch(arch).safe
-    suffix = "-disguised" if disguise else ""
+    suffix = ""
+    if disguise:
+        suffix += "-disguised"
+    if debug:
+        suffix += "-debug"
     pkg = resolved.packages[resolved.executable_package]
     assert pkg.version, f"executable package {resolved.executable_package!r} has no version"
     full_version = pkg.version
