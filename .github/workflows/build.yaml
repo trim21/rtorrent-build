@@ -76,7 +76,7 @@ jobs:
         run: tail -n 50 build/${{ matrix.variant }}/logs/*.log
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: ${{ matrix.variant }}-${{ matrix.libc }}-${{ matrix.arch.name }}
           path: "dist/*"
