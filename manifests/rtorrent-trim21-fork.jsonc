@@ -14,7 +14,7 @@
     "rtorrent-libtorrent": {
       "source": {
         "github": "trim21/libtorrent",
-        "ref": "fix/fallocate-respect-file-priority"
+        "ref": "my"
       },
       "requires": ["openssl", "zlib", "curl"]
     }
