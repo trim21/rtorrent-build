@@ -7,7 +7,7 @@
     "rtorrent": {
       "source": {
         "github": "trim21/rtorrent-upstream",
-        "ref": "fix/resume-flags-initial-value"
+        "ref": "my"
       },
       "requires": ["rtorrent-libtorrent", "lua"]
     },
