@@ -1,6 +1,6 @@
 {
   "executable_package": "qbittorrent",
-  "manifest_hash": "0910cd396b8ded825aedaad9c30d9c3c81cbc00535a8edd8f1b9f14c74ac5fb3",
+  "manifest_hash": "7099d1d824de51fa4d7f640819834cea8a5388f6b3b0d52e63ba676da74be41d",
   "packages": {
     "boost": {
       "url": "https://github.com/boostorg/boost/releases/download/boost-1.86.0/boost-1.86.0-cmake.tar.gz",
@@ -24,7 +24,7 @@
     },
     "libtorrent-rasterbar": {
       "cxx_std": "c++14",
-      "url": "https://github.com/arvidn/libtorrent/archive/refs/tags/v1.2.20.tar.gz",
+      "url": "https://github.com/arvidn/libtorrent/releases/download/v1.2.20/libtorrent-rasterbar-1.2.20.tar.gz",
       "version": "1.2.20"
     },
     "libunistring": {
