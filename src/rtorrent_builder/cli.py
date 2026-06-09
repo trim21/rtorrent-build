@@ -4,6 +4,7 @@ import json
 import re
 import subprocess
 import sys
+import time
 from enum import Enum
 from pathlib import Path
 
@@ -274,6 +275,7 @@ def _build_docker(
     variant_tag = f"{variant_name}{suffix}.{arch_safe}"
     if variant_tag not in tags:
         tags.insert(0, variant_tag)
+    tags.append(f"{variant_name}{suffix}.{arch_safe}.{int(time.time())}")
     primary = tags[0]
     image_ref = f"rtorrent:{primary}"
     output_name = binary_path.stem
