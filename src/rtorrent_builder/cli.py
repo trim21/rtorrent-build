@@ -125,6 +125,16 @@ def main() -> None:
     envvar="RTORRENT_CACHE_DIR",
     help="Persistent cache directory for build artifacts (Merkle-tree keyed)",
 )
+@click.option(
+    "--jobs",
+    "-j",
+    "jobs",
+    type=int,
+    default=1,
+    show_default=True,
+    envvar="RTORRENT_BUILD_JOBS",
+    help="Max concurrent package builds (1 = sequential)",
+)
 def build(
     manifest: tuple[Path, ...],
     work_dir: Path,
@@ -139,6 +149,7 @@ def build(
     build_info: Path | None,
     debug: bool,
     cache_dir: Path | None,
+    jobs: int,
 ) -> None:
     """Build one or more variants from manifest files."""
     output_dir = output_dir.resolve()
@@ -185,6 +196,7 @@ def build(
                 docker_target_glibc=glibc_override,
                 debug=debug,
                 cache_dir=cache_dir,
+                jobs=jobs,
             )
         except CmdError as e:
             log_path = variant_work / "logs"

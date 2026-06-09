@@ -15,6 +15,7 @@ from __future__ import annotations
 import hashlib
 import json
 import tarfile
+import threading
 from pathlib import Path
 
 
@@ -63,6 +64,7 @@ class CacheStore:
     def __init__(self, cache_dir: Path) -> None:
         self.cache_dir = cache_dir
         self.cache_dir.mkdir(parents=True, exist_ok=True)
+        self._lock = threading.Lock()
 
     def has(self, key: str) -> bool:
         return (self.cache_dir / f"{key}.tar.gz").exists()
@@ -81,11 +83,23 @@ class CacheStore:
     def store_files(self, key: str, prefix: Path, relative_files: set[Path], name: str) -> None:
         """Create a tarball of *relative_files* (relative to *prefix*) under *key*."""
         archive = self.cache_dir / f"{key}.tar.gz"
-        if archive.exists():
-            return
-        print(f"Caching {name} ({len(relative_files)} files) -> {archive}")
-        with tarfile.open(archive, "w:gz") as tf:
-            for rel in sorted(relative_files):
-                abs_path = prefix / rel
-                if abs_path.exists():
-                    tf.add(str(abs_path), arcname=str(rel))
+        with self._lock:
+            if archive.exists():
+                return
+            print(f"Caching {name} ({len(relative_files)} files) -> {archive}")
+            with tarfile.open(archive, "w:gz") as tf:
+                for rel in sorted(relative_files):
+                    abs_path = prefix / rel
+                    if abs_path.exists():
+                        tf.add(str(abs_path), arcname=str(rel))
+
+    def gc(self, current_hashes: set[str]) -> int:
+        """Remove cached tarballs not referenced by *current_hashes*."""
+        removed = 0
+        for f in sorted(self.cache_dir.glob("*.tar.gz")):
+            key = f.stem
+            if key not in current_hashes:
+                print(f"Cache GC: removing stale {f}")
+                f.unlink()
+                removed += 1
+        return removed

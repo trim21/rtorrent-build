@@ -1,5 +1,6 @@
 """Build orchestrator for rtorrent-static."""
 
+import concurrent.futures
 import os
 import re
 import shutil
@@ -197,6 +198,7 @@ def build_rtorrent(
     docker_target_glibc: str | None = None,
     debug: bool = False,
     cache_dir: Path | None = None,
+    jobs: int = 1,
 ) -> Path:
     skip_deps = skip_deps or []
 
@@ -301,17 +303,35 @@ def build_rtorrent(
 
         return name
 
-    while ts.is_active():
-        for name in ts.get_ready():
-            if name in skip_deps:
-                print(f"Skipping {name}")
-                timings.append(_Timing(name=name, start=0, end=0, skipped=True))
+    with concurrent.futures.ThreadPoolExecutor(max_workers=jobs) as pool:
+        futures: dict[concurrent.futures.Future[str], str] = {}
+
+        while ts.is_active() or futures:
+            ready_names = ts.get_ready()
+            for name in ready_names:
+                if name in skip_deps:
+                    print(f"Skipping {name}")
+                    timings.append(_Timing(name=name, start=0, end=0, skipped=True))
+                    ts.done(name)
+
+            unblocked = [n for n in ready_names if n not in skip_deps]
+            for n in unblocked:
+                futures[pool.submit(_build_pkg, n)] = n
+
+            if not futures:
+                break
+
+            done_set, _ = concurrent.futures.wait(
+                futures, return_when=concurrent.futures.FIRST_COMPLETED
+            )
+            for future in done_set:
+                name = futures.pop(future)
+                future.result()
                 ts.done(name)
-                continue
-            _build_pkg(name)
-            ts.done(name)
 
     total_elapsed = time.monotonic() - build_origin
+    if _cache_store:
+        _cache_store.gc(set(_pkg_hashes.values()))
     _render_timeline_table(timings, total_elapsed)
 
     app_name = manifest.executable_package
