@@ -162,7 +162,8 @@ def build(
 
     for manifest_path in manifest:
         variant = manifest_path.stem
-        variant_work = (work_dir / variant).resolve()
+        variant_dir = f"{variant}.debug" if debug else variant
+        variant_work = (work_dir / variant_dir).resolve()
         print(f"Starting rtorrent-static build for {variant}")
         print(f"Work directory: {variant_work}")
 
