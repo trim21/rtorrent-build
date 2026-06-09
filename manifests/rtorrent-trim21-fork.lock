@@ -48,8 +48,8 @@
         "zlib",
         "curl"
       ],
-      "url": "https://github.com/trim21/libtorrent/archive/ab28cbab4fbcee63c612962b407c6db1cd023e44.tar.gz",
-      "version": "ab28cbab4fbc"
+      "url": "https://github.com/trim21/libtorrent/archive/3790506a92bc8127c5fef48fd6d15098b33d546c.tar.gz",
+      "version": "3790506a92bc"
     },
     "zlib": {
       "url": "https://github.com/zlib-ng/zlib-ng/archive/refs/tags/2.3.3.tar.gz",
