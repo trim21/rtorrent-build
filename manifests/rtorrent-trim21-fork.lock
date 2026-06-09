@@ -39,8 +39,8 @@
         "rtorrent-libtorrent",
         "lua"
       ],
-      "url": "https://github.com/trim21/rtorrent-upstream/archive/78e46f60378597b2637d6660f5db9839ab7ff00d.tar.gz",
-      "version": "78e46f603785"
+      "url": "https://github.com/trim21/rtorrent-upstream/archive/2dd746f1acd198a8d83766c059f3e0a2beb27fca.tar.gz",
+      "version": "2dd746f1acd1"
     },
     "rtorrent-libtorrent": {
       "requires": [
@@ -48,8 +48,8 @@
         "zlib",
         "curl"
       ],
-      "url": "https://github.com/trim21/libtorrent/archive/2483fa75e096d2b5b9b5db6f0a86ce297825e58e.tar.gz",
-      "version": "2483fa75e096"
+      "url": "https://github.com/trim21/libtorrent/archive/2198632ab4b4b862dea3a8d8317fd70222164f51.tar.gz",
+      "version": "2198632ab4b4"
     },
     "zlib": {
       "url": "https://github.com/zlib-ng/zlib-ng/archive/refs/tags/2.3.3.tar.gz",
