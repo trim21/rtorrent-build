@@ -48,8 +48,8 @@
         "zlib",
         "curl"
       ],
-      "url": "https://github.com/rakshasa/libtorrent/archive/d526e249687af04d15f0589913ae53fa38022574.tar.gz",
-      "version": "d526e249687a"
+      "url": "https://github.com/rakshasa/libtorrent/archive/15cb52127af0ecaf7bf6ce72e5f04e46134ab01f.tar.gz",
+      "version": "15cb52127af0"
     },
     "zlib": {
       "url": "https://github.com/zlib-ng/zlib-ng/archive/refs/tags/2.3.3.tar.gz",
