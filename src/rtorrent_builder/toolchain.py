@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import hashlib
 import os
 import shutil
 import subprocess
@@ -280,17 +279,15 @@ class Toolchain:
             self.marker_dir.mkdir(parents=True, exist_ok=True)
             tc_marker.touch()
 
-    def _marker_path(self, name: str, version: str, features: list[str] | None = None) -> Path:
-        features = features or []
-        h = hashlib.blake2b(repr(sorted(features)).encode(), digest_size=4).hexdigest()
-        return self.marker_dir / f"{name}-{version}-{h}"
+    def _marker_path(self, name: str, merkle_hash: str) -> Path:
+        return self.marker_dir / f"{name}-{merkle_hash[:16]}"
 
-    def is_built(self, name: str, version: str, features: list[str] | None = None) -> bool:
-        return self._marker_path(name, version, features).exists()
+    def is_built_merkle(self, name: str, merkle_hash: str) -> bool:
+        return self._marker_path(name, merkle_hash).exists()
 
-    def mark_built(self, name: str, version: str, features: list[str] | None = None) -> None:
+    def mark_built_merkle(self, name: str, merkle_hash: str) -> None:
         self.marker_dir.mkdir(parents=True, exist_ok=True)
-        self._marker_path(name, version, features).touch()
+        self._marker_path(name, merkle_hash).touch()
 
     @cached_property
     def zig_bin(self) -> str:

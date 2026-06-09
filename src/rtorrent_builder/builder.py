@@ -268,7 +268,7 @@ def build_rtorrent(
         )
         _pkg_hashes[name] = merkle_hash
 
-        if not no_cache and tc.is_built(name, source.version, features):
+        if not no_cache and tc.is_built_merkle(name, merkle_hash):
             print(f"Already built {name} {source.version}")
             t.gen_end = time.monotonic() - build_origin
             t.end = time.monotonic() - build_origin
@@ -277,7 +277,7 @@ def build_rtorrent(
         if _cache_store and _cache_store.has(merkle_hash):
             print(f"Persistent cache hit for {name}")
             _cache_store.restore(merkle_hash, tc.install_prefix, name)
-            tc.mark_built(name, source.version, features)
+            tc.mark_built_merkle(name, merkle_hash)
             t.gen_end = time.monotonic() - build_origin
             t.end = time.monotonic() - build_origin
             return name
@@ -290,7 +290,7 @@ def build_rtorrent(
         builder = builder_cls(tc, lib, source, commander)
         t.gen_end = time.monotonic() - build_origin
         builder.build()
-        tc.mark_built(name, source.version, features)
+        tc.mark_built_merkle(name, merkle_hash)
         t.end = time.monotonic() - build_origin
 
         if _cache_store:
