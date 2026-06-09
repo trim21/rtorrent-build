@@ -29,7 +29,7 @@ jobs:
       - name: Install Go
         uses: actions/setup-go@v5
         with:
-          go-version: "1.24"
+          go-version-file: /tmp/neptune/go.mod
 
       - name: Build binary (linux/amd64)
         env:
@@ -59,4 +59,4 @@ jobs:
           context: .
           file: neptune.Dockerfile
           push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:dev-disguised
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest-disguised
