@@ -31,8 +31,8 @@
       "version": "1.69.0"
     },
     "openssl": {
-      "url": "https://github.com/openssl/openssl/archive/refs/tags/openssl-3.6.2.tar.gz",
-      "version": "3.6.2"
+      "url": "https://github.com/openssl/openssl/archive/refs/tags/openssl-3.6.3.tar.gz",
+      "version": "3.6.3"
     },
     "rtorrent": {
       "requires": [
@@ -48,8 +48,8 @@
         "zlib",
         "curl"
       ],
-      "url": "https://github.com/trim21/libtorrent/archive/7cc929ac9438354138898a41f5f9ee91f0f5fbd2.tar.gz",
-      "version": "7cc929ac9438"
+      "url": "https://github.com/trim21/libtorrent/archive/bd31011bb940fc4a12aba9b6703dfa23deebfe44.tar.gz",
+      "version": "bd31011bb940"
     },
     "zlib": {
       "url": "https://github.com/zlib-ng/zlib-ng/archive/refs/tags/2.3.3.tar.gz",

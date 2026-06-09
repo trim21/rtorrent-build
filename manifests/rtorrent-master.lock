@@ -31,8 +31,8 @@
       "version": "1.69.0"
     },
     "openssl": {
-      "url": "https://github.com/openssl/openssl/archive/refs/tags/openssl-3.6.2.tar.gz",
-      "version": "3.6.2"
+      "url": "https://github.com/openssl/openssl/archive/refs/tags/openssl-3.6.3.tar.gz",
+      "version": "3.6.3"
     },
     "rtorrent": {
       "requires": [
