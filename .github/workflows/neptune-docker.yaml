@@ -59,4 +59,4 @@ jobs:
           context: .
           file: neptune.Dockerfile
           push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest-disguised
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-disguised:latest
