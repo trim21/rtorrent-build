@@ -17,6 +17,7 @@ class LuaJITBuilder(MakeBuilder):
             f"PREFIX={self.tc.install_prefix}",
             "BUILDMODE=static",
             f"CC={' '.join(self.tc.zig_cc)}",
+            f"HOST_CC={self.tc.zig_bin} cc -fno-sanitize=undefined -O2",
             "XCFLAGS=-DLUAJIT_NO_UNWIND",
         ]
 
