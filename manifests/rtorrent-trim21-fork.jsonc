@@ -13,7 +13,7 @@
     },
     "rtorrent-meson": {
       "source": {
-        "github": "trim21/rtorrent",
+        "github": "trim21/rtorrent-meson",
         "ref": "master"
       },
       "requires": ["openssl", "zlib", "curl", "luajit"]

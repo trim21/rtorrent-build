@@ -1,6 +1,6 @@
 {
   "executable_package": "rtorrent-meson",
-  "manifest_hash": "d89bced8d3218ebcb2fc5817a26755fc78605b92fb63fde06eebda957b48c14c",
+  "manifest_hash": "80f4e52f059ac15e04ec8754a60869e128698b6fd7a5416eb83fe1a7d7bd616d",
   "packages": {
     "brotli": {
       "url": "https://github.com/google/brotli/archive/refs/tags/v1.2.0.tar.gz",
@@ -43,7 +43,7 @@
       ],
       "src": {
         "sha": "62803a15231ec1f664e85b0209afd8b45be0986c",
-        "url": "https://github.com/trim21/rtorrent.git"
+        "url": "https://github.com/trim21/rtorrent-meson.git"
       },
       "version": "62803a15231e"
     },
