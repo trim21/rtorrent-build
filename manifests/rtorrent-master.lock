@@ -39,8 +39,11 @@
         "rtorrent-libtorrent",
         "lua"
       ],
-      "url": "https://github.com/rakshasa/rtorrent/archive/72f2197add14f8c456f316e6faa763bb84402da0.tar.gz",
-      "version": "72f2197add14"
+      "src": {
+        "sha": "c63db9cf9753baf70737e397cb53e8908e990324",
+        "url": "https://github.com/rakshasa/rtorrent.git"
+      },
+      "version": "c63db9cf9753"
     },
     "rtorrent-libtorrent": {
       "requires": [
@@ -48,8 +51,11 @@
         "zlib",
         "curl"
       ],
-      "url": "https://github.com/rakshasa/libtorrent/archive/15cb52127af0ecaf7bf6ce72e5f04e46134ab01f.tar.gz",
-      "version": "15cb52127af0"
+      "src": {
+        "sha": "820e72de96caf0f2451de146bb22c60da7a87aa4",
+        "url": "https://github.com/rakshasa/libtorrent.git"
+      },
+      "version": "820e72de96ca"
     },
     "zlib": {
       "url": "https://github.com/zlib-ng/zlib-ng/archive/refs/tags/2.3.3.tar.gz",

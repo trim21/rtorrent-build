@@ -41,7 +41,13 @@ class URLSource:
     url: str
 
 
-PackageSource = GitHubTagSource | GitHubRefSource | GitHubReleaseSource | URLSource
+@dataclass(frozen=True, kw_only=True)
+class GitSource:
+    url: str
+    sha: str
+
+
+PackageSource = GitHubTagSource | GitHubRefSource | GitHubReleaseSource | URLSource | GitSource
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -71,12 +77,20 @@ class Manifest:
 
 @dataclass(frozen=True, kw_only=True)
 class ResolvedPackage:
-    url: str
+    url: str = ""
     version: str = ""
     cxx_std: str | None = None
     requires: list[str] | None = None
+    src: GitSource | None = None
 
     def to_libinfo(self) -> LibInfo:
+        if self.src is not None:
+            return LibInfo(
+                source=self.src,
+                version=self.version,
+                cxx_std=self.cxx_std,
+                requires=self.requires,
+            )
         return LibInfo(
             source=URLSource(url=self.url),
             version=self.version,
@@ -278,6 +292,12 @@ _DEPENDENCIES: dict[str, list[str]] = {
     ],
     "rtorrent": [
         "rtorrent-libtorrent",
+    ],
+    "rtorrent-meson": [
+        "openssl",
+        "zlib",
+        "curl",
+        "luajit",
     ],
 }
 
