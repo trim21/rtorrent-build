@@ -31,6 +31,7 @@ from .deps.qbittorrent import QbittorrentBuilder
 from .deps.qt import QtBuilder
 from .deps.qttools import QtToolsBuilder
 from .deps.rtorrent import RtorrentBuilder
+from .deps.rtorrent_meson import RtorrentMesonBuilder
 from .deps.zlib import ZlibBuilder
 from .deps.zstd import ZstdBuilder
 from .manifest import ResolvedManifest, deps_for, reachable_packages
@@ -56,6 +57,7 @@ _BUILDER_MAP: dict[str, type[Builder]] = {
     "qttools": QtToolsBuilder,
     "qbittorrent": QbittorrentBuilder,
     "rtorrent": RtorrentBuilder,
+    "rtorrent-meson": RtorrentMesonBuilder,
 }
 
 _ALLOWED_SOS = frozenset(
@@ -110,6 +112,8 @@ def _verify_linkage(binary: Path) -> None:
 
 def _binary_path(tc: Toolchain, name: str) -> Path:
     if name == "rtorrent":
+        return tc.install_prefix / "bin" / "rtorrent"
+    if name == "rtorrent-meson":
         return tc.install_prefix / "bin" / "rtorrent"
     if name == "qbittorrent":
         return tc.install_prefix / "bin" / "qbittorrent-nox"
@@ -251,14 +255,14 @@ def build_rtorrent(
         source = tc.prepare_source(name, lib)
         resolved[name] = source
         builder = builder_cls(tc, lib, source, commander)
-        features = builder.cache_key_extra
+        cache_key = builder.cache_key_extra()
 
         dep_hashes = {d: _pkg_hashes[d] for d in deps_for(name, pkgs) if d in _pkg_hashes}
         merkle_hash = compute_merkle_hash(
             name=name,
             version=source.version,
             url=pkg.url,
-            options=features,
+            options=cache_key,
             toolchain_name=tc._toolchain_name,
             zig_version=tc.zig_version,
             libc=tc.libc.value,

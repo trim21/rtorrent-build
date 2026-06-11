@@ -2,9 +2,8 @@ from ._make import MakeBuilder
 
 
 class NcursesBuilder(MakeBuilder):
-    @property
     def cache_key_extra(self) -> list[str]:
-        return [
+        return super().cache_key_extra() + [
             "--enable-static",
             "--disable-shared",
             "--with-termlib",

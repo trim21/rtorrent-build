@@ -15,9 +15,8 @@ class OpensslBuilder(Builder):
         self.src_dir = source.src_dir
         self.commander = commander
 
-    @property
     def cache_key_extra(self) -> list[str]:
-        return ["no-shared", "no-dso", "no-tests", "linux-x86_64"]
+        return super().cache_key_extra() + ["no-shared", "no-dso", "no-tests", "linux-x86_64"]
 
     def build(self) -> None:
         print(f"Building {self.name} {self.version}")

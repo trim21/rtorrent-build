@@ -12,6 +12,7 @@ from .manifest import (
     GitHubRefSource,
     GitHubReleaseSource,
     GitHubTagSource,
+    GitSource,
     LibInfo,
     PackageSource,
     ResolvedManifest,
@@ -82,12 +83,14 @@ def _resolve_ref(owner_repo: str, ref: str) -> str:
     raise ValueError(f"Ref {ref} not found in {owner_repo}")
 
 
-def _resolve_github_source(source: PackageSource) -> tuple[str, str]:
-    """Resolve a GitHub source to (url, version)."""
+def _resolve_github_source(source: PackageSource) -> tuple[str, str] | tuple[GitSource, str]:
+    """Resolve a GitHub source to (url, version) or (GitSource, version)."""
     if isinstance(source, GitHubRefSource):
         sha = _resolve_ref(source.github, source.ref)
-        url = f"https://github.com/{source.github}/archive/{sha}.tar.gz"
-        return url, sha[:12]
+        return GitSource(
+            url=f"https://github.com/{source.github}.git",
+            sha=sha,
+        ), sha[:12]
     if isinstance(source, (GitHubTagSource, GitHubReleaseSource)):
         tags = _gh_tags(source.github)
         versions = [(t, _extract_version(t, source.github)) for t in tags]
@@ -96,9 +99,6 @@ def _resolve_github_source(source: PackageSource) -> tuple[str, str]:
             raise ValueError(f"No version tags found for {source.github}")
         best = resolve_best(version_strings, source.tag_range)
         matching_tags = [t for t, v in versions if v == best]
-        # When multiple tags map to the same version (e.g., boost-1.91.0 and
-        # boost-1.91.0-1), prefer the longest tag — it typically carries a
-        # build-number suffix and is the one with actual release assets.
         tag = max(matching_tags, key=len)
         if isinstance(source, GitHubReleaseSource):
             asset = source.asset.format(tag=tag, version=best)
@@ -111,13 +111,15 @@ def _resolve_github_source(source: PackageSource) -> tuple[str, str]:
     raise TypeError(f"Unsupported git source type: {type(source)}")
 
 
-def _resolve_source(pkg_name: str, lib: LibInfo) -> tuple[URLSource, str]:
-    """Resolve a LibInfo's source to (URL-only source, version)."""
+def _resolve_source(pkg_name: str, lib: LibInfo) -> tuple[PackageSource, str]:
+    """Resolve a LibInfo's source to (source, version)."""
     if isinstance(lib.source, URLSource):
         return lib.source, lib.version
     if isinstance(lib.source, (GitHubRefSource, GitHubTagSource, GitHubReleaseSource)):
-        url, version = _resolve_github_source(lib.source)
-        return URLSource(url=url), version
+        resolved, version = _resolve_github_source(lib.source)
+        if isinstance(resolved, GitSource):
+            return resolved, version
+        return URLSource(url=resolved), version
     raise ValueError(f"Package {pkg_name!r} has no source")
 
 
@@ -143,8 +145,12 @@ def resolve_manifest(manifest_path: Path) -> None:
     for name, pkg in raw.packages.items():
         if name not in reachable:
             continue
-        url_source, version = _resolve_source(name, pkg)
-        entry: dict = {"url": url_source.url}
+        resolved_source, version = _resolve_source(name, pkg)
+        entry: dict = {}
+        if isinstance(resolved_source, GitSource):
+            entry["src"] = {"url": resolved_source.url, "sha": resolved_source.sha}
+        elif isinstance(resolved_source, URLSource):
+            entry["url"] = resolved_source.url
         if version:
             entry["version"] = version
         if pkg.cxx_std:
@@ -152,7 +158,12 @@ def resolve_manifest(manifest_path: Path) -> None:
         if pkg.requires is not None:
             entry["requires"] = pkg.requires
         resolved_packages[name] = entry
-        print(f"  {name}: {url_source.url[:60]}...")
+        src_url = (
+            resolved_source.url
+            if isinstance(resolved_source, URLSource | GitSource)
+            else "<unknown>"
+        )
+        print(f"  {name}: {src_url[:60]}...")
 
     manifest_hash = compute_manifest_hash(manifest_path)
     lock_data: dict[str, object] = {

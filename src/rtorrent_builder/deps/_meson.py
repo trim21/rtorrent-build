@@ -7,7 +7,7 @@ from ..run import Commander
 from ..toolchain import Builder, ResolvedSource, Toolchain
 
 
-class CMakeBuilder(Builder):
+class MesonBuilder(Builder):
     def __init__(
         self, toolchain: Toolchain, lib: LibInfo, source: ResolvedSource, commander: Commander
     ) -> None:
@@ -19,40 +19,33 @@ class CMakeBuilder(Builder):
         self.commander = commander
 
     @abstractmethod
-    def cmake_args(self, prefix: str) -> list[str]: ...
+    def meson_args(self, prefix: str) -> list[str]: ...
 
     def cache_key_extra(self) -> list[str]:
-        return super().cache_key_extra() + self.cmake_args("$PREFIX")
+        extra = super().cache_key_extra()
+        extra += self.meson_args("$PREFIX")
+        return extra
 
     def build(self) -> None:
         print(f"Building {self.name} {self.version}")
-        env = self.tc.cmake_env
+        self._apply_patches()
         build_dir = self.src_dir / "build"
         prefix = str(self.tc.install_prefix)
         cmd = self.commander
 
         cmd.run(
             [
-                self.tc.cmake_bin,
-                "-B",
+                self.tc.meson_bin,
+                "setup",
                 str(build_dir),
-                *self.tc.cmake_common_args,
-                f"-DCMAKE_INSTALL_PREFIX={prefix}",
-                "-DCMAKE_BUILD_TYPE=RelWithDebInfo",
-                "-DBUILD_SHARED_LIBS=OFF",
-                "-DBUILD_TESTING=OFF",
-                *self.cmake_args(prefix),
-                "-S",
+                "--prefix",
+                prefix,
+                *self.tc.meson_native_file_args,
+                *self.meson_args(prefix),
                 str(self.src_dir),
             ],
-            env=env,
+            env=self.tc.meson_env,
         )
-        cmd.run(
-            [self.tc.cmake_bin, "--build", str(build_dir), *cmd.nproc_args()],
-            env=env,
-        )
-        cmd.run(
-            [self.tc.cmake_bin, "--install", str(build_dir)],
-            env=env,
-        )
+        cmd.run([self.tc.meson_bin, "compile", "-C", str(build_dir), *cmd.nproc_args()])
+        cmd.run([self.tc.meson_bin, "install", "-C", str(build_dir)])
         print(f"Built {self.name} {self.version}")

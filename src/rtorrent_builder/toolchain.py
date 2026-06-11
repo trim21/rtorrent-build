@@ -19,12 +19,17 @@ from .manifest import (
     GitHubRefSource,
     GitHubReleaseSource,
     GitHubTagSource,
+    GitSource,
     LibInfo,
-    Lock,
     URLSource,
-    load_lock,
 )
 from .run import Commander
+
+
+def _git_repo_key(url: str) -> str:
+    path = url.removeprefix("https://").removesuffix(".git")
+    parts = path.split("/")
+    return "-".join(parts[-2:])
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -35,6 +40,9 @@ class ResolvedSource:
 
 
 class Builder(ABC):
+    commander: Commander
+    src_dir: Path
+
     @abstractmethod
     def __init__(
         self, toolchain: Toolchain, lib: LibInfo, source: ResolvedSource, commander: Commander
@@ -44,8 +52,27 @@ class Builder(ABC):
     def build(self) -> None: ...
 
     @property
+    def patches_dir(self) -> Path | None:
+        return None
+
     def cache_key_extra(self) -> list[str]:
-        return []
+        extra: list[str] = []
+        pd = self.patches_dir
+        if pd is not None and pd.is_dir():
+            for patch in sorted(pd.glob("*.patch")):
+                extra.append(patch.read_text())
+        return extra
+
+    def _apply_patches(self) -> None:
+        pd = self.patches_dir
+        if pd is None or not pd.is_dir():
+            return
+        for patch in sorted(pd.glob("*.patch")):
+            print(f"Applying patch: {patch.name}")
+            self.commander.run(
+                ["git", "apply", "-p1", str(patch)],
+                cwd=str(self.src_dir),
+            )
 
 
 class Toolchain:
@@ -99,27 +126,9 @@ class Toolchain:
     def dep_prefix(self, dep_name: str) -> Path:
         return self.install_prefix
 
-    @cached_property
-    def _lock(self) -> Lock:
-        return load_lock(self._project_root / "manifests" / f"{self.variant}.jsonc")
-
-    def _resolve_git_sha(self, source: GitHubRefSource) -> str:
-        resolved_tag = self._lock.resolved_tag(source.github, source.ref)
-        if resolved_tag:
-            sha = self._lock.sha(source.github, resolved_tag)
-            if sha:
-                return sha
-        sha = self._lock.sha(source.github, source.ref)
-        if sha is None:
-            raise RuntimeError(
-                f"Git source {source.github}#{source.ref} not found in lockfile — "
-                "run 'uv run python scripts/lock.py' to regenerate"
-            )
-        return sha
-
     def prepare_source(self, name: str, lib: LibInfo) -> ResolvedSource:
-        if isinstance(lib.source, GitHubRefSource):
-            return self._prepare_git_source(name, lib.source)
+        if isinstance(lib.source, GitSource):
+            return self._prepare_git_source(name, lib.source, lib.version)
         if isinstance(lib.source, (GitHubTagSource, GitHubReleaseSource)):
             msg = f"{type(lib.source).__name__} should be resolved to URLSource via lockfile first"
             raise TypeError(msg)
@@ -143,6 +152,12 @@ class Toolchain:
             return os.path.commonpath(tf.getnames())
 
     def clean_source(self, name: str, lib: LibInfo) -> None:
+        if isinstance(lib.source, GitSource):
+            src_dir = self.build_dir / f"{name}-{lib.version}"
+            if src_dir.exists():
+                print(f"Cleaning source dir: {src_dir}")
+                shutil.rmtree(src_dir)
+            return
         if isinstance(lib.source, URLSource):
             ext = self._archive_ext(lib.source.url)
             tarball = self.package_dir / f"{name}-{lib.version}{ext}"
@@ -182,45 +197,76 @@ class Toolchain:
 
         return ResolvedSource(name=name, version=version, src_dir=src_dir)
 
-    def _prepare_git_source(self, name: str, source: GitHubRefSource) -> ResolvedSource:
-        full_sha = self._resolve_git_sha(source)
-        short_sha = full_sha[:7]
+    def _prepare_git_source(self, name: str, source: GitSource, version: str) -> ResolvedSource:
+        git_url = source.url
+        sha = source.sha
+        repo_key = _git_repo_key(git_url)
 
-        clone_dir = self.work_dir / "sources" / name
+        clone_dir = self._project_root / "sources" / repo_key
 
         if not (clone_dir / ".git").exists():
             clone_dir.parent.mkdir(parents=True, exist_ok=True)
-            print(f"Cloning {source.github}...")
-            self._commander.run(["git", "clone", source.github, str(clone_dir)])
+            print(f"Cloning {git_url}...")
+            self._commander.run(["git", "clone", git_url, str(clone_dir)])
 
-        print(f"Fetching {full_sha} from {source.github}...")
-        self._commander.run(["git", "-C", str(clone_dir), "fetch", "--prune", "origin", full_sha])
+        print(f"Fetching {sha[:12]}...")
+        self._commander.run(["git", "-C", str(clone_dir), "fetch", "--prune", "origin", sha])
 
-        tarball = self.package_dir / f"{name}-{full_sha}.tar.gz"
-        src_dir = self.build_dir / f"{name}-{full_sha}"
+        tarball = self.package_dir / f"{name}-{version}.tar.gz"
+        src_dir = self.build_dir / f"{name}-{version}"
 
         if not src_dir.exists():
-            if not tarball.exists():
-                print(f"Creating archive {tarball}")
+            print(f"Checking out {sha[:12]}...")
+            self._commander.run(["git", "-C", str(clone_dir), "checkout", "-f", sha])
+
+            if (clone_dir / ".gitmodules").exists():
+                print("Updating submodules...")
                 self._commander.run(
                     [
                         "git",
                         "-C",
                         str(clone_dir),
-                        "archive",
-                        "--format=tar.gz",
-                        f"--prefix={name}-{full_sha}/",
-                        "-o",
+                        "submodule",
+                        "update",
+                        "--init",
+                        "--recursive",
+                    ]
+                )
+
+            if not tarball.exists():
+                print(f"Creating archive {tarball}")
+                self._commander.run(
+                    [
+                        "tar",
+                        "-czf",
                         str(tarball),
-                        full_sha,
+                        "--exclude=.git",
+                        "-C",
+                        str(clone_dir.parent),
+                        clone_dir.name,
                     ]
                 )
 
             print(f"Extracting {tarball}")
             with tarfile.open(tarball) as tf:
-                tf.extractall(path=self.build_dir, filter="data")
+                tf.extractall(
+                    path=self.build_dir,
+                    filter="data",
+                    members=self._tarball_rename_prefix(tf, clone_dir.name, f"{name}-{version}"),
+                )
 
-        return ResolvedSource(name=name, version=short_sha, src_dir=src_dir)
+        return ResolvedSource(name=name, version=version, src_dir=src_dir)
+
+    @staticmethod
+    def _tarball_rename_prefix(
+        tf: tarfile.TarFile, old_prefix: str, new_prefix: str
+    ) -> list[tarfile.TarInfo]:
+        members: list[tarfile.TarInfo] = []
+        for member in tf.getmembers():
+            if member.name.startswith(old_prefix + "/"):
+                member.name = member.name.replace(old_prefix, new_prefix, 1)
+                members.append(member)
+        return members
 
     @property
     def _target_triple(self) -> str:
@@ -314,6 +360,10 @@ class Toolchain:
     @property
     def cmake_bin(self) -> str:
         return str(self.venv_dir / "bin" / "cmake")
+
+    @property
+    def meson_bin(self) -> str:
+        return str(self.venv_dir / "bin" / "meson")
 
     @property
     def zig_cc(self) -> list[str]:
@@ -445,5 +495,62 @@ class Toolchain:
             "CMAKE_PREFIX_PATH": pfx,
             "PKG_CONFIG_PATH": pkg_path,
             "PKG_CONFIG_LIBDIR": pkg_path,
+            "PATH": f"{self.venv_dir}/bin:{os.environ.get('PATH', '')}",
+        }
+
+    def _write_meson_native_file(self) -> Path:
+        path = self.work_dir / "zig-meson-native.ini"
+        wd = str(self.work_dir / "wrappers")
+        install_lib = str(self.install_prefix / "lib")
+        install_lib64 = str(self.install_prefix / "lib64")
+        pkg_path = f"{install_lib}/pkgconfig:{install_lib64}/pkgconfig"
+
+        if self.debug:
+            cflags = f"-fPIC -g -O0 -w -march={self.arch.march}"
+            ldflags = f"-L{install_lib} -L{install_lib64}"
+        else:
+            cflags = f"-fPIC -Os -g -flto -w -march={self.arch.march}"
+            ldflags = f"-flto -L{install_lib} -L{install_lib64}"
+
+        if self.libc == Libc.musl:
+            ldflags += " -static"
+            cflags += " -static"
+
+        content = "\n".join(
+            [
+                "[binaries]",
+                f"c = '{wd}/zig-cc'",
+                f"cpp = '{wd}/zig-c++'",
+                f"ar = '{wd}/zig-ar'",
+                f"ranlib = '{wd}/zig-ranlib'",
+                "",
+                "[built-in options]",
+                f"c_args = [{', '.join(repr(f) for f in cflags.split())}]",
+                f"cpp_args = [{', '.join(repr(f) for f in cflags.split())}]",
+                f"c_link_args = [{', '.join(repr(f) for f in ldflags.split())}]",
+                f"cpp_link_args = [{', '.join(repr(f) for f in ldflags.split())}]",
+                "default_library = 'static'",
+                "buildtype = 'plain'",
+                "",
+                "[properties]",
+                f"pkg_config_path = '{pkg_path}'",
+                "",
+            ]
+        )
+        path.write_text(content)
+        return path
+
+    @property
+    def meson_native_file_args(self) -> list[str]:
+        return ["--native-file", str(self._write_meson_native_file())]
+
+    @property
+    def meson_env(self) -> dict[str, str]:
+        pfx = str(self.install_prefix)
+        pkg_path = f"{pfx}/lib/pkgconfig:{pfx}/lib64/pkgconfig"
+        return os.environ | {
+            "PKG_CONFIG_PATH": pkg_path,
+            "PKG_CONFIG_LIBDIR": pkg_path,
+            "PKG_CONFIG": "pkg-config --static",
             "PATH": f"{self.venv_dir}/bin:{os.environ.get('PATH', '')}",
         }
