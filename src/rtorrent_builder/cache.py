@@ -44,7 +44,7 @@ def compute_merkle_hash(
         "name": name,
         "version": version,
         "url": url,
-        "options": sorted(options),
+        "options": options,
         "toolchain": toolchain_name,
         "zig": zig_version,
         "libc": libc,
