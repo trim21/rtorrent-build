@@ -21,14 +21,13 @@ jobs:
       packages: write
     steps:
       - uses: actions/checkout@v6
-
-      - name: Clone neptune
-        run: git clone --depth 1 https://github.com/trim21/neptune.git /tmp/neptune
+        with:
+          repository: trim21/neptune
 
       - name: Install Go
         uses: actions/setup-go@v5
         with:
-          go-version-file: /tmp/neptune/go.mod
+          go-version-file: go.mod
 
       - name: Build binary (linux/amd64)
         env:
@@ -40,9 +39,8 @@ jobs:
             -tags release \
             -ldflags='-s -w -X "neptune/internal/pkg/global.UserAgent=rtorrent/0.9.8/0.13.8" -X "neptune/internal/core.peerIDPrefix=-lt0D80-"' \
             -trimpath \
-            -o ${{ github.workspace }}/neptune \
+            -o ${{ github.workspace }}/dist/neptune_linux_amd64 \
             .
-        working-directory: /tmp/neptune
 
       - name: Log in to Container Registry
         if: github.event_name != 'pull_request'
@@ -56,6 +54,6 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: neptune.Dockerfile
+          file: etc/Dockerfile
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-disguised:latest
