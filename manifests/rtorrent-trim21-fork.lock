@@ -42,10 +42,10 @@
         "luajit"
       ],
       "src": {
-        "sha": "459915f0258f1232299f8969e18f35a9a6be23b9",
+        "sha": "62803a15231ec1f664e85b0209afd8b45be0986c",
         "url": "https://github.com/trim21/rtorrent.git"
       },
-      "version": "459915f0258f"
+      "version": "62803a15231e"
     },
     "zlib": {
       "url": "https://github.com/zlib-ng/zlib-ng/archive/refs/tags/2.3.3.tar.gz",

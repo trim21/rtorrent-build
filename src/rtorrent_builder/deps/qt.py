@@ -18,9 +18,8 @@ class QtBuilder(Builder):
         self.src_dir = source.src_dir
         self.commander = commander
 
-    @property
     def cache_key_extra(self) -> list[str]:
-        return [
+        return super().cache_key_extra() + [
             "-DCMAKE_BUILD_TYPE=Release",
             "-DBUILD_SHARED_LIBS=OFF",
             "-DFEATURE_shared=OFF",

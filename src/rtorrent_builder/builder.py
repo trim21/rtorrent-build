@@ -255,7 +255,7 @@ def build_rtorrent(
         source = tc.prepare_source(name, lib)
         resolved[name] = source
         builder = builder_cls(tc, lib, source, commander)
-        features = builder.cache_key_extra
+        features = builder.cache_key_extra()
 
         dep_hashes = {d: _pkg_hashes[d] for d in deps_for(name, pkgs) if d in _pkg_hashes}
         merkle_hash = compute_merkle_hash(

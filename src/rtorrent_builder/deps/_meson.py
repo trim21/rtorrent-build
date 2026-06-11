@@ -21,12 +21,14 @@ class MesonBuilder(Builder):
     @abstractmethod
     def meson_args(self, prefix: str) -> list[str]: ...
 
-    @property
     def cache_key_extra(self) -> list[str]:
-        return self.meson_args("$PREFIX")
+        extra = super().cache_key_extra()
+        extra += self.meson_args("$PREFIX")
+        return extra
 
     def build(self) -> None:
         print(f"Building {self.name} {self.version}")
+        self._apply_patches()
         build_dir = self.src_dir / "build"
         prefix = str(self.tc.install_prefix)
         cmd = self.commander

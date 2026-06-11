@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import os
 import shutil
 import subprocess
@@ -49,8 +50,29 @@ class Builder(ABC):
     def build(self) -> None: ...
 
     @property
+    def patches_dir(self) -> Path | None:
+        return None
+
     def cache_key_extra(self) -> list[str]:
-        return []
+        extra: list[str] = []
+        pd = self.patches_dir
+        if pd is not None and pd.is_dir():
+            for patch in sorted(pd.glob("*.patch")):
+                extra.append(
+                    "patch:" + patch.name + ":" + hashlib.sha256(patch.read_bytes()).hexdigest()
+                )
+        return extra
+
+    def _apply_patches(self) -> None:
+        pd = self.patches_dir
+        if pd is None or not pd.is_dir():
+            return
+        for patch in sorted(pd.glob("*.patch")):
+            print(f"Applying patch: {patch.name}")
+            self.commander.run(
+                ["git", "apply", "-p1", str(patch)],
+                cwd=str(self.src_dir),
+            )
 
 
 class Toolchain:
@@ -103,10 +125,6 @@ class Toolchain:
 
     def dep_prefix(self, dep_name: str) -> Path:
         return self.install_prefix
-
-    @property
-    def patches_dir(self) -> Path:
-        return self._project_root / "patches"
 
     def prepare_source(self, name: str, lib: LibInfo) -> ResolvedSource:
         if isinstance(lib.source, GitSource):

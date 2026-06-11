@@ -28,9 +28,8 @@ class RtorrentBuilder(Builder):
         self._opts = RtorrentOptions.from_options(toolchain.options)
         self.commander = commander
 
-    @property
     def cache_key_extra(self) -> list[str]:
-        return self._opts.cache_key()
+        return super().cache_key_extra() + self._opts.cache_key()
 
     def _autoreconf(self) -> None:
         if (self.src_dir / "configure").exists():

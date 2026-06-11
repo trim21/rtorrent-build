@@ -21,9 +21,8 @@ class CMakeBuilder(Builder):
     @abstractmethod
     def cmake_args(self, prefix: str) -> list[str]: ...
 
-    @property
     def cache_key_extra(self) -> list[str]:
-        return self.cmake_args("$PREFIX")
+        return super().cache_key_extra() + self.cmake_args("$PREFIX")
 
     def build(self) -> None:
         print(f"Building {self.name} {self.version}")
