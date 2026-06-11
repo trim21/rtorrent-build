@@ -255,14 +255,14 @@ def build_rtorrent(
         source = tc.prepare_source(name, lib)
         resolved[name] = source
         builder = builder_cls(tc, lib, source, commander)
-        features = builder.cache_key_extra()
+        cache_key = builder.cache_key_extra()
 
         dep_hashes = {d: _pkg_hashes[d] for d in deps_for(name, pkgs) if d in _pkg_hashes}
         merkle_hash = compute_merkle_hash(
             name=name,
             version=source.version,
             url=pkg.url,
-            options=features,
+            options=cache_key,
             toolchain_name=tc._toolchain_name,
             zig_version=tc.zig_version,
             libc=tc.libc.value,
