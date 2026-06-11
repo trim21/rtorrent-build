@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import hashlib
 import os
 import shutil
 import subprocess
@@ -41,6 +40,9 @@ class ResolvedSource:
 
 
 class Builder(ABC):
+    commander: Commander
+    src_dir: Path
+
     @abstractmethod
     def __init__(
         self, toolchain: Toolchain, lib: LibInfo, source: ResolvedSource, commander: Commander
@@ -58,9 +60,7 @@ class Builder(ABC):
         pd = self.patches_dir
         if pd is not None and pd.is_dir():
             for patch in sorted(pd.glob("*.patch")):
-                extra.append(
-                    "patch:" + patch.name + ":" + hashlib.sha256(patch.read_bytes()).hexdigest()
-                )
+                extra.append(patch.read_text())
         return extra
 
     def _apply_patches(self) -> None:
