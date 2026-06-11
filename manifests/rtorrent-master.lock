@@ -52,10 +52,10 @@
         "curl"
       ],
       "src": {
-        "sha": "820e72de96caf0f2451de146bb22c60da7a87aa4",
+        "sha": "dbd3b8df02ef4f28d634b71a01679723774aa4d4",
         "url": "https://github.com/rakshasa/libtorrent.git"
       },
-      "version": "820e72de96ca"
+      "version": "dbd3b8df02ef"
     },
     "zlib": {
       "url": "https://github.com/zlib-ng/zlib-ng/archive/refs/tags/2.3.3.tar.gz",
