@@ -176,7 +176,7 @@ def resolve_manifest(manifest_path: Path) -> None:
         lock_data["executable_package"] = raw.executable_package
 
     lock_path = manifest_path.with_suffix(".lock")
-    lock_path.write_text(json.dumps(lock_data, indent=2, sort_keys=True) + "\n")
+    lock_path.write_bytes(json.dumps(lock_data, indent=2, sort_keys=True).encode() + b"\n")
     print(f"Wrote {lock_path}\n")
 
 
