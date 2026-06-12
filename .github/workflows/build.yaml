@@ -62,9 +62,10 @@ jobs:
         uses: actions/cache@v5
         with:
           path: .rtorrent-cache/
-          key: rtorrent-cache-v1-${{ matrix.variant }}-${{ matrix.libc }}-${{ matrix.arch.name }}-${{ github.run_id }}
+          key: rtorrent-build-v2-${{ matrix.arch.name }}-${{ matrix.libc }}-${{ matrix.variant }}-${{ github.run_id }}
           restore-keys: |
-            rtorrent-cache-v1-${{ matrix.variant }}-${{ matrix.libc }}-${{ matrix.arch.name }}-
+            rtorrent-build-v2-${{ matrix.arch.name }}-${{ matrix.libc }}-${{ matrix.variant }}
+            rtorrent-build-v2-${{ matrix.arch.name }}-${{ matrix.libc }}
 
       - name: Build ${{ matrix.variant }} (${{ matrix.libc }}/${{ matrix.arch.name }})
         env:

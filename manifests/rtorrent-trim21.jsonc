@@ -6,14 +6,14 @@
   "packages": {
     "rtorrent": {
       "source": {
-        "github": "trim21/rtorrent",
+        "github": "rakshasa/rtorrent",
         "ref": "master"
       },
       "requires": ["rtorrent-libtorrent", "lua"]
     },
     "rtorrent-libtorrent": {
       "source": {
-        "github": "rakshasa/libtorrent",
+        "github": "trim21/libtorrent",
         "ref": "master"
       },
       "requires": ["openssl", "zlib", "curl"]

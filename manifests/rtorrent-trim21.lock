@@ -1,6 +1,6 @@
 {
   "executable_package": "rtorrent",
-  "manifest_hash": "21fcd7c0bbdc7e524186251640d3262592636417c4d928689e6a7a7d5a41a089",
+  "manifest_hash": "e87bdbf029601f4037ce035421a081143625032af1ae3048b8f549d9e0a5f127",
   "packages": {
     "brotli": {
       "url": "https://github.com/google/brotli/archive/refs/tags/v1.2.0.tar.gz",
@@ -40,10 +40,10 @@
         "lua"
       ],
       "src": {
-        "sha": "880510073ae142706aeb778e883f86789b425ae3",
-        "url": "https://github.com/trim21/rtorrent.git"
+        "sha": "1603ba057361baa4b07a0e7e92f99a34d36e7414",
+        "url": "https://github.com/rakshasa/rtorrent.git"
       },
-      "version": "880510073ae1"
+      "version": "1603ba057361"
     },
     "rtorrent-libtorrent": {
       "requires": [
@@ -52,10 +52,10 @@
         "curl"
       ],
       "src": {
-        "sha": "09376108b604035f2d095fdfa0b707e8dfc5d957",
-        "url": "https://github.com/rakshasa/libtorrent.git"
+        "sha": "e573319ff336dde5e963644cbf009294ea52148f",
+        "url": "https://github.com/trim21/libtorrent.git"
       },
-      "version": "09376108b604"
+      "version": "e573319ff336"
     },
     "zlib": {
       "url": "https://github.com/zlib-ng/zlib-ng/archive/refs/tags/2.3.3.tar.gz",
