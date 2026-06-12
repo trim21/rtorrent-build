@@ -209,9 +209,24 @@ def build_rtorrent(
     work_dir = work_dir.resolve()
     output_dir = output_dir.resolve()
 
-    if clean and work_dir.exists():
-        print(f"Cleaning work directory: {work_dir}")
-        shutil.rmtree(work_dir)
+    _variant_id = f"{variant}.debug" if debug else variant
+    _variant_marker = work_dir / ".variant"
+
+    if work_dir.exists():
+        if clean:
+            print(f"Cleaning work directory: {work_dir}")
+            shutil.rmtree(work_dir)
+        elif _variant_marker.exists():
+            stored_variant = _variant_marker.read_text()
+            if stored_variant != _variant_id:
+                print(
+                    f"Variant changed from {stored_variant!r} to {_variant_id!r}, "
+                    f"cleaning work directory..."
+                )
+                shutil.rmtree(work_dir)
+        else:
+            print("Work directory exists without variant marker, cleaning...")
+            shutil.rmtree(work_dir)
 
     work_dir.mkdir(parents=True, exist_ok=True)
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -229,6 +244,9 @@ def build_rtorrent(
         debug=debug,
     )
     tc.setup()
+
+    # Write variant marker after Toolchain init (which may have cleaned work_dir)
+    _variant_marker.write_text(_variant_id)
 
     pkgs = manifest.packages
     needed = reachable_packages(pkgs, manifest.executable_package)
