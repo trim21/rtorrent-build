@@ -1,0 +1,22 @@
+{
+  "$schema": "../manifest.schema.json",
+  "extends": "base/common.jsonc",
+  "executable_package": "rtorrent",
+  "target_glibc": "2.28",
+  "packages": {
+    "rtorrent": {
+      "source": {
+        "github": "trim21/rtorrent",
+        "ref": "master"
+      },
+      "requires": ["rtorrent-libtorrent", "lua"]
+    },
+    "rtorrent-libtorrent": {
+      "source": {
+        "github": "rakshasa/libtorrent",
+        "ref": "master"
+      },
+      "requires": ["openssl", "zlib", "curl"]
+    }
+  }
+}

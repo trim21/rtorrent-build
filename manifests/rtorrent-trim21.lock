@@ -1,6 +1,6 @@
 {
   "executable_package": "rtorrent",
-  "manifest_hash": "3676f95c91f166360f9dd6d2aab1061fc7f72d714b4c459ffcb8f06b3eeef329",
+  "manifest_hash": "21fcd7c0bbdc7e524186251640d3262592636417c4d928689e6a7a7d5a41a089",
   "packages": {
     "brotli": {
       "url": "https://github.com/google/brotli/archive/refs/tags/v1.2.0.tar.gz",
@@ -40,10 +40,10 @@
         "lua"
       ],
       "src": {
-        "sha": "1603ba057361baa4b07a0e7e92f99a34d36e7414",
-        "url": "https://github.com/rakshasa/rtorrent.git"
+        "sha": "880510073ae142706aeb778e883f86789b425ae3",
+        "url": "https://github.com/trim21/rtorrent.git"
       },
-      "version": "1603ba057361"
+      "version": "880510073ae1"
     },
     "rtorrent-libtorrent": {
       "requires": [
