@@ -40,10 +40,10 @@
         "lua"
       ],
       "src": {
-        "sha": "83bdc271a4b3993e9d49e7fe2daf69c810af8bf9",
+        "sha": "662d67e861588c7ddf1fcf3f0317561bbddef487",
         "url": "https://github.com/rakshasa/rtorrent.git"
       },
-      "version": "83bdc271a4b3"
+      "version": "662d67e86158"
     },
     "rtorrent-libtorrent": {
       "requires": [

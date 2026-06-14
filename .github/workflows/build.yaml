@@ -67,17 +67,11 @@ jobs:
             build-v1-${{ matrix.arch.name }}-${{ matrix.libc }}-${{ matrix.variant }}
             build-v1-${{ matrix.arch.name }}-${{ matrix.libc }}
 
-      - run: ls -ahl .rtorrent-cache/
-      - run: tree .rtorrent-cache/
-
       - name: Build ${{ matrix.variant }} (${{ matrix.libc }}/${{ matrix.arch.name }})
         env:
           PYTHONUNBUFFERED: "1"
           RTORRENT_CACHE_DIR: ${{ github.workspace }}/.rtorrent-cache
         run: python build.py build "manifests/${{ matrix.variant }}.jsonc" --libc "${{ matrix.libc }}" --arch "${{ matrix.arch.flag }}"
-
-      - run: ls -ahl .rtorrent-cache/
-      - run: tree .rtorrent-cache/
 
       - name: Upload artifact
         uses: actions/upload-artifact@v7
