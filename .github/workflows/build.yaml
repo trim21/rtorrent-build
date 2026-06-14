@@ -73,6 +73,8 @@ jobs:
           RTORRENT_CACHE_DIR: ${{ github.workspace }}/.rtorrent-cache
         run: python build.py build "manifests/${{ matrix.variant }}.jsonc" --libc "${{ matrix.libc }}" --arch "${{ matrix.arch.flag }}"
 
+      - run: ls -ahl .rtorrent-cache/
+
       - name: Upload artifact
         uses: actions/upload-artifact@v7
         with:
