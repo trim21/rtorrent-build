@@ -44,8 +44,8 @@
         "ncurses",
         "lua"
       ],
-      "url": "https://github.com/rakshasa/rtorrent/releases/download/v0.16.13/rtorrent-0.16.13.tar.gz",
-      "version": "0.16.13"
+      "url": "https://github.com/rakshasa/rtorrent/releases/download/v0.16.14/rtorrent-0.16.14.tar.gz",
+      "version": "0.16.14"
     },
     "rtorrent-libtorrent": {
       "requires": [
@@ -53,8 +53,8 @@
         "zlib",
         "curl"
       ],
-      "url": "https://github.com/rakshasa/rtorrent/releases/download/v0.16.13/libtorrent-0.16.13.tar.gz",
-      "version": "0.16.13"
+      "url": "https://github.com/rakshasa/rtorrent/releases/download/v0.16.14/libtorrent-0.16.14.tar.gz",
+      "version": "0.16.14"
     },
     "zlib": {
       "url": "https://github.com/zlib-ng/zlib-ng/archive/refs/tags/2.3.3.tar.gz",
