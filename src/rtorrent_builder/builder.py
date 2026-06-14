@@ -266,7 +266,11 @@ def build_rtorrent(
 
     pkgs = manifest.packages
     needed = reachable_packages(pkgs, manifest.executable_package)
-    names = [n for n in _BUILDER_MAP if n in needed]
+    missing = {n for n in needed if n in _BUILDER_MAP and n not in pkgs}
+    if missing:
+        msg = "WARNING: packages referenced as deps but not defined in manifest"
+        print(f"{msg}: {missing}")
+    names = [n for n in _BUILDER_MAP if n in needed and n in pkgs]
 
     ts = TopologicalSorter({name: [d for d in deps_for(name, pkgs) if d in pkgs] for name in names})
     ts.prepare()
