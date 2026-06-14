@@ -67,6 +67,8 @@ jobs:
             build-v1-${{ matrix.arch.name }}-${{ matrix.libc }}-${{ matrix.variant }}
             build-v1-${{ matrix.arch.name }}-${{ matrix.libc }}
 
+      - run: ls -ahl .rtorrent-cache/
+
       - name: Build ${{ matrix.variant }} (${{ matrix.libc }}/${{ matrix.arch.name }})
         env:
           PYTHONUNBUFFERED: "1"

@@ -95,6 +95,8 @@ jobs:
             docker-v1-a${{ matrix.debug }}-${{ matrix.arch.name }}-${{ matrix.libc }}-${{ matrix.variant }}
             docker-v1-a${{ matrix.debug }}-${{ matrix.arch.name }}-${{ matrix.libc }}
 
+      - run: ls -ahl .rtorrent-cache/
+
       - name: Build ${{ matrix.variant }} (${{ matrix.libc }}/${{ matrix.arch.name }})${{ matrix.disguise && ' disguised' || '' }}${{ matrix.debug && ' debug' || '' }}
         env:
           PYTHONUNBUFFERED: "1"
