@@ -1,6 +1,6 @@
 {
-  "executable_package": "rtorrent-meson",
-  "manifest_hash": "80f4e52f059ac15e04ec8754a60869e128698b6fd7a5416eb83fe1a7d7bd616d",
+  "executable_package": "rtorrent",
+  "manifest_hash": "04bac44b580e6b68a00bba2d2624f00850658bc34e1c6d811702d875e3d5a2a8",
   "packages": {
     "brotli": {
       "url": "https://github.com/google/brotli/archive/refs/tags/v1.2.0.tar.gz",
@@ -22,9 +22,9 @@
       "url": "https://ftp.gnu.org/gnu/libunistring/libunistring-1.4.tar.gz",
       "version": "1.4"
     },
-    "luajit": {
-      "url": "https://github.com/LuaJIT/LuaJIT/archive/refs/tags/v2.0.5.tar.gz",
-      "version": "2.0.5"
+    "lua": {
+      "url": "https://www.lua.org/ftp/lua-5.4.8.tar.gz",
+      "version": "5.4.8"
     },
     "nghttp2": {
       "url": "https://github.com/nghttp2/nghttp2/archive/refs/tags/v1.69.0.tar.gz",
@@ -34,18 +34,28 @@
       "url": "https://github.com/openssl/openssl/archive/refs/tags/openssl-3.6.3.tar.gz",
       "version": "3.6.3"
     },
-    "rtorrent-meson": {
+    "rtorrent": {
+      "requires": [
+        "rtorrent-libtorrent",
+        "lua"
+      ],
+      "src": {
+        "sha": "83bdc271a4b3993e9d49e7fe2daf69c810af8bf9",
+        "url": "https://github.com/rakshasa/rtorrent.git"
+      },
+      "version": "83bdc271a4b3"
+    },
+    "rtorrent-libtorrent": {
       "requires": [
         "openssl",
         "zlib",
-        "curl",
-        "luajit"
+        "curl"
       ],
       "src": {
-        "sha": "a3d96f034e8e15e8c283840daea6d31179bc8dc0",
-        "url": "https://github.com/trim21/rtorrent-meson.git"
+        "sha": "88da907867099ed676d5bd2a5777d9715f81ff40",
+        "url": "https://github.com/trim21/libtorrent.git"
       },
-      "version": "a3d96f034e8e"
+      "version": "88da90786709"
     },
     "zlib": {
       "url": "https://github.com/zlib-ng/zlib-ng/archive/refs/tags/2.3.3.tar.gz",
