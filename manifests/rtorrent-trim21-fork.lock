@@ -52,10 +52,10 @@
         "curl"
       ],
       "src": {
-        "sha": "88da907867099ed676d5bd2a5777d9715f81ff40",
+        "sha": "4f94e7001e3589b221e4cebed600ead953d9c008",
         "url": "https://github.com/trim21/libtorrent.git"
       },
-      "version": "88da90786709"
+      "version": "4f94e7001e35"
     },
     "zlib": {
       "url": "https://github.com/zlib-ng/zlib-ng/archive/refs/tags/2.3.3.tar.gz",
