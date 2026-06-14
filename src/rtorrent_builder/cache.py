@@ -126,10 +126,13 @@ class CacheStore:
             return
 
         metas = sorted(pkg_dir.glob("*.json"))
-        if not metas:
+        tarballs = sorted(pkg_dir.glob("*.tar.gz"))
+        if not metas and not tarballs:
             return
 
         print(f"\n--- Cache miss diagnosis for {name} ---", file=sys.stderr)
+        print(f"  pkg_dir: {pkg_dir}", file=sys.stderr)
+        print(f"  contained: {[f.name for f in sorted(pkg_dir.iterdir())]}", file=sys.stderr)
         print("  Current hash inputs:", file=sys.stderr)
         for k, v in sorted(current_payload.items()):
             print(f"    {k}: {v!r}", file=sys.stderr)
@@ -138,8 +141,17 @@ class CacheStore:
             try:
                 stored = json.loads(mp.read_text())
             except (json.JSONDecodeError, OSError):
+                print(f"  WARNING: could not read metadata {mp}", file=sys.stderr)
                 continue
+            tarball_path = mp.with_suffix(".tar.gz")
+            tarball_exists = tarball_path.exists()
+            tarball_size = tarball_path.stat().st_size if tarball_exists else 0
             print(f"\n  Cached entry: {mp.name}", file=sys.stderr)
+            print(
+                f"  Corresponding tarball: {tarball_path.name} "
+                f"(exists={tarball_exists}, size={tarball_size})",
+                file=sys.stderr,
+            )
             print("  Cached hash inputs:", file=sys.stderr)
             all_keys = sorted(set(current_payload) | set(stored))
             for k in all_keys:
