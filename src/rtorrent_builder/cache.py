@@ -5,11 +5,13 @@ options) AND the hashes of all its transitive dependencies.  This means
 changing a leaf dependency (e.g. openssl) invalidates only its subtree, while
 unchanged subtrees remain cacheable.
 
-Cache entries are tarballs containing only the files that a single package
-installed into the shared prefix, keyed by Merkle hash.  Multiple cache entries
-can be restored independently into the same prefix without conflict.
+Cache entries are gzip-compressed tarballs containing only the files that a
+single package installed into the shared prefix, keyed by Merkle hash.  They
+use the ``.cache`` file extension (not ``.tar.gz``) to avoid being silently
+dropped by GitHub Actions cache tooling.  Multiple cache entries can be
+restored independently into the same prefix without conflict.
 
-Each tarball is accompanied by a .json metadata file recording the hash
+Each archive is accompanied by a .json metadata file recording the hash
 computation inputs, so that cache-miss root causes can be diagnosed.
 """
 
@@ -21,6 +23,8 @@ import sys
 import tarfile
 import threading
 from pathlib import Path
+
+CACHE_EXT = ".cache"
 
 
 def compute_merkle_hash(
@@ -61,7 +65,7 @@ def compute_merkle_hash(
 
 
 class CacheStore:
-    """Manages a directory of cached per-package tarballs keyed by Merkle hash."""
+    """Manages a directory of cached per-package archives keyed by Merkle hash."""
 
     def __init__(self, cache_dir: Path) -> None:
         self.cache_dir = cache_dir
@@ -72,7 +76,7 @@ class CacheStore:
         return self.cache_dir / name
 
     def _archive_path(self, name: str, key: str) -> Path:
-        return self._pkg_dir(name) / f"{key}.tar.gz"
+        return self._pkg_dir(name) / f"{key}{CACHE_EXT}"
 
     def _meta_path(self, name: str, key: str) -> Path:
         return self._pkg_dir(name) / f"{key}.json"
@@ -99,7 +103,7 @@ class CacheStore:
         prefix: Path,
         relative_files: set[Path],
     ) -> None:
-        """Create a tarball and metadata JSON for *name* under *key*."""
+        """Create a gzip-compressed tarball and metadata JSON for *name* under *key*."""
         pkg_dir = self._pkg_dir(name)
         archive = self._archive_path(name, key)
         meta = self._meta_path(name, key)
@@ -126,8 +130,8 @@ class CacheStore:
             return
 
         metas = sorted(pkg_dir.glob("*.json"))
-        tarballs = sorted(pkg_dir.glob("*.tar.gz"))
-        if not metas and not tarballs:
+        archives = sorted(pkg_dir.glob(f"*{CACHE_EXT}"))
+        if not metas and not archives:
             return
 
         print(f"\n--- Cache miss diagnosis for {name} ---", file=sys.stderr)
@@ -143,13 +147,13 @@ class CacheStore:
             except (json.JSONDecodeError, OSError):
                 print(f"  WARNING: could not read metadata {mp}", file=sys.stderr)
                 continue
-            tarball_path = mp.with_suffix(".tar.gz")
-            tarball_exists = tarball_path.exists()
-            tarball_size = tarball_path.stat().st_size if tarball_exists else 0
+            archive_path = mp.with_suffix(CACHE_EXT)
+            archive_exists = archive_path.exists()
+            archive_size = archive_path.stat().st_size if archive_exists else 0
             print(f"\n  Cached entry: {mp.name}", file=sys.stderr)
             print(
-                f"  Corresponding tarball: {tarball_path.name} "
-                f"(exists={tarball_exists}, size={tarball_size})",
+                f"  Corresponding archive: {archive_path.name} "
+                f"(exists={archive_exists}, size={archive_size})",
                 file=sys.stderr,
             )
             print("  Cached hash inputs:", file=sys.stderr)
@@ -164,21 +168,23 @@ class CacheStore:
         print(f"--- End cache miss diagnosis for {name} ---\n", file=sys.stderr)
 
     def gc(self, current_packages: dict[str, str]) -> int:
-        """Remove cached tarballs not referenced by *current_packages*.
+        """Remove cached archives not referenced by *current_packages*.
 
         *current_packages* is a mapping of ``{name: merkle_hash}`` for the
-        current build.  Tarballs and metadata for other hashes (within each
+        current build.  Archives and metadata for other hashes (within each
         package directory) are removed.  Empty package directories are
         also removed.  Old flat-format files in the cache root are cleaned up.
         """
         removed = 0
 
         for entry in sorted(self.cache_dir.iterdir()):
-            if entry.is_file() and entry.suffix in (".gz", ".json"):
-                print(f"Cache GC: removing stale old-format {entry}")
-                entry.unlink()
-                removed += 1
-                continue
+            if entry.is_file():
+                sfx = entry.suffix
+                if sfx in (CACHE_EXT, ".json") or entry.name.endswith(".tar.gz"):
+                    print(f"Cache GC: removing stale old-format {entry}")
+                    entry.unlink()
+                    removed += 1
+                    continue
 
             if not entry.is_dir():
                 continue
@@ -186,7 +192,7 @@ class CacheStore:
             pkg_dir = entry
             current_key = current_packages.get(pkg_dir.name)
 
-            for f in sorted(pkg_dir.glob("*.tar.gz")):
+            for f in sorted(pkg_dir.glob(f"*{CACHE_EXT}")):
                 key = f.stem
                 if current_key is not None and key == current_key:
                     continue
