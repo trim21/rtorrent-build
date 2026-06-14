@@ -96,6 +96,7 @@ jobs:
             docker-v1-a${{ matrix.debug }}-${{ matrix.arch.name }}-${{ matrix.libc }}
 
       - run: ls -ahl .rtorrent-cache/
+      - run: tree .rtorrent-cache/
 
       - name: Build ${{ matrix.variant }} (${{ matrix.libc }}/${{ matrix.arch.name }})${{ matrix.disguise && ' disguised' || '' }}${{ matrix.debug && ' debug' || '' }}
         env:
@@ -111,6 +112,7 @@ jobs:
             --build-info build-info.json
 
       - run: ls -ahl .rtorrent-cache/
+      - run: tree .rtorrent-cache/
 
       - name: Log in to Container Registry
         if: (matrix.disguise && github.event_name != 'pull_request') || (!matrix.disguise && startsWith(github.ref, 'refs/tags/'))
