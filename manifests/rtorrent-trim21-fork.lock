@@ -42,10 +42,10 @@
         "luajit"
       ],
       "src": {
-        "sha": "71ae9855b44e5df4aa5c2a9aa6ce99ca77817c69",
+        "sha": "a3d96f034e8e15e8c283840daea6d31179bc8dc0",
         "url": "https://github.com/trim21/rtorrent-meson.git"
       },
-      "version": "71ae9855b44e"
+      "version": "a3d96f034e8e"
     },
     "zlib": {
       "url": "https://github.com/zlib-ng/zlib-ng/archive/refs/tags/2.3.3.tar.gz",
