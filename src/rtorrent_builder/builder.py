@@ -8,6 +8,7 @@ import subprocess
 import sys
 import time
 from dataclasses import dataclass
+from enum import IntEnum
 from graphlib import TopologicalSorter
 from pathlib import Path
 
@@ -120,13 +121,19 @@ def _binary_path(tc: Toolchain, name: str) -> Path:
     raise KeyError(f"No binary path known for top-level package: {name}")
 
 
+class _BuildSource(IntEnum):
+    built = 0
+    marker = 1
+    cached = 2
+
+
 @dataclass
 class _Timing:
     name: str
     start: float
     gen_end: float = 0.0
     end: float = 0.0
-    skipped: bool = False
+    source: _BuildSource = _BuildSource.built
 
 
 def _fmt_ts(sec: float) -> str:
@@ -146,21 +153,32 @@ def _render_timeline_table(timings: list[_Timing], total_elapsed: float) -> None
     gens: list[str] = []
     builds: list[str] = []
     totals: list[str] = []
+    statuses: list[str] = []
     for t in timings:
-        if t.skipped:
-            gens.append("skipped")
-            builds.append("skipped")
-            totals.append("skipped")
+        if t.source == _BuildSource.cached:
+            gens.append("-")
+            builds.append("-")
+            totals.append("-")
+            statuses.append("cached")
+        elif t.source == _BuildSource.marker:
+            gens.append("-")
+            builds.append("-")
+            totals.append("-")
+            statuses.append("marker")
         else:
             gens.append(_fmt_ts(t.gen_end - t.start))
             builds.append(_fmt_ts(t.end - t.gen_end))
             totals.append(_fmt_ts(t.end - t.start))
+            statuses.append("built")
 
     header = f"| {'':<{name_w}} | " + " | ".join(f"{n:^{name_w}}" for n in names) + " |"
     sep = "|-" + "-" * name_w + "-|" + "|".join("-" * (name_w + 2) for _ in names) + "|"
     gen_row = f"| {'Generate':<{name_w}} | " + " | ".join(f"{g:>{name_w}}" for g in gens) + " |"
     build_row = f"| {'Build':<{name_w}} | " + " | ".join(f"{b:>{name_w}}" for b in builds) + " |"
     total_row = f"| {'Total':<{name_w}} | " + " | ".join(f"{t:>{name_w}}" for t in totals) + " |"
+    status_row = (
+        f"| {'Status':<{name_w}} | " + " | ".join(f"{s:^{name_w}}" for s in statuses) + " |"
+    )
 
     lines = [
         f"Build Timeline ({wall} wall)",
@@ -169,6 +187,7 @@ def _render_timeline_table(timings: list[_Timing], total_elapsed: float) -> None
         gen_row,
         build_row,
         total_row,
+        status_row,
         "",
     ]
     out = "\n".join(lines)
@@ -193,7 +212,6 @@ def build_rtorrent(
     manifest: ResolvedManifest,
     work_dir: Path,
     output_dir: Path,
-    skip_deps: list[str] | None = None,
     clean: bool = True,
     no_cache: bool = False,
     options: dict[str, str] | None = None,
@@ -204,8 +222,6 @@ def build_rtorrent(
     cache_dir: Path | None = None,
     jobs: int = 1,
 ) -> Path:
-    skip_deps = skip_deps or []
-
     work_dir = work_dir.resolve()
     output_dir = output_dir.resolve()
 
@@ -276,7 +292,7 @@ def build_rtorrent(
         cache_key = builder.cache_key_extra()
 
         dep_hashes = {d: _pkg_hashes[d] for d in deps_for(name, pkgs) if d in _pkg_hashes}
-        merkle_hash = compute_merkle_hash(
+        merkle_hash, merkle_payload = compute_merkle_hash(
             name=name,
             version=source.version,
             url=pkg.url,
@@ -296,15 +312,19 @@ def build_rtorrent(
             print(f"Already built {name} {source.version}")
             t.gen_end = time.monotonic() - build_origin
             t.end = time.monotonic() - build_origin
+            t.source = _BuildSource.marker
             return name
 
-        if _cache_store and _cache_store.has(merkle_hash):
-            print(f"Persistent cache hit for {name}")
-            _cache_store.restore(merkle_hash, tc.install_prefix, name)
+        if _cache_store and _cache_store.has(name, merkle_hash):
+            _cache_store.restore(name, merkle_hash, tc.install_prefix)
             tc.mark_built_merkle(name, merkle_hash)
             t.gen_end = time.monotonic() - build_origin
             t.end = time.monotonic() - build_origin
+            t.source = _BuildSource.cached
             return name
+
+        if _cache_store:
+            _cache_store.diagnose_miss(name, merkle_payload)
 
         before_files = _list_prefix_files(tc.install_prefix)
 
@@ -321,7 +341,9 @@ def build_rtorrent(
             after_files = _list_prefix_files(tc.install_prefix)
             new_files = after_files - before_files
             if new_files:
-                _cache_store.store_files(merkle_hash, tc.install_prefix, new_files, name)
+                _cache_store.store_files(
+                    name, merkle_hash, merkle_payload, tc.install_prefix, new_files
+                )
 
         return name
 
@@ -330,14 +352,7 @@ def build_rtorrent(
 
         while ts.is_active() or futures:
             ready_names = ts.get_ready()
-            for name in ready_names:
-                if name in skip_deps:
-                    print(f"Skipping {name}")
-                    timings.append(_Timing(name=name, start=0, end=0, skipped=True))
-                    ts.done(name)
-
-            unblocked = [n for n in ready_names if n not in skip_deps]
-            for n in unblocked:
+            for n in ready_names:
                 futures[pool.submit(_build_pkg, n)] = n
 
             if not futures:
@@ -353,7 +368,7 @@ def build_rtorrent(
 
     total_elapsed = time.monotonic() - build_origin
     if _cache_store:
-        _cache_store.gc(set(_pkg_hashes.values()))
+        _cache_store.gc(_pkg_hashes)
     _render_timeline_table(timings, total_elapsed)
 
     app_name = manifest.executable_package

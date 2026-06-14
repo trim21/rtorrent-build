@@ -89,11 +89,11 @@ jobs:
         uses: actions/cache@v5
         with:
           path: .rtorrent-cache/
-          key: rtorrent-docker-v2-a${{ matrix.debug }}-${{ matrix.arch.name }}-${{ matrix.libc }}-${{ matrix.variant }}-b${{ matrix.disguise }}-${{ github.run_id }}
+          key: docker-v1-a${{ matrix.debug }}-${{ matrix.arch.name }}-${{ matrix.libc }}-${{ matrix.variant }}-b${{ matrix.disguise }}-${{ github.run_id }}
           restore-keys: |
-            rtorrent-docker-v2-a${{ matrix.debug }}-${{ matrix.arch.name }}-${{ matrix.libc }}-${{ matrix.variant }}-b${{ matrix.disguise }}
-            rtorrent-docker-v2-a${{ matrix.debug }}-${{ matrix.arch.name }}-${{ matrix.libc }}-${{ matrix.variant }}
-            rtorrent-docker-v2-a${{ matrix.debug }}-${{ matrix.arch.name }}-${{ matrix.libc }}
+            docker-v1-a${{ matrix.debug }}-${{ matrix.arch.name }}-${{ matrix.libc }}-${{ matrix.variant }}-b${{ matrix.disguise }}
+            docker-v1-a${{ matrix.debug }}-${{ matrix.arch.name }}-${{ matrix.libc }}-${{ matrix.variant }}
+            docker-v1-a${{ matrix.debug }}-${{ matrix.arch.name }}-${{ matrix.libc }}
 
       - name: Build ${{ matrix.variant }} (${{ matrix.libc }}/${{ matrix.arch.name }})${{ matrix.disguise && ' disguised' || '' }}${{ matrix.debug && ' debug' || '' }}
         env:

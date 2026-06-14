@@ -8,12 +8,16 @@ unchanged subtrees remain cacheable.
 Cache entries are tarballs containing only the files that a single package
 installed into the shared prefix, keyed by Merkle hash.  Multiple cache entries
 can be restored independently into the same prefix without conflict.
+
+Each tarball is accompanied by a .json metadata file recording the hash
+computation inputs, so that cache-miss root causes can be diagnosed.
 """
 
 from __future__ import annotations
 
 import hashlib
 import json
+import sys
 import tarfile
 import threading
 from pathlib import Path
@@ -33,12 +37,10 @@ def compute_merkle_hash(
     debug: bool,
     install_prefix: str,
     dep_hashes: dict[str, str],
-) -> str:
+) -> tuple[str, dict[str, object]]:
     """Compute a content-hash that uniquely identifies a package's build output.
 
-    The hash includes the package's own inputs plus the hashes of all
-    dependencies (Merkle tree), so any change in a transitive dependency
-    propagates upward.
+    Returns (hash, payload) so callers can inspect or persist the inputs.
     """
     payload: dict[str, object] = {
         "name": name,
@@ -55,7 +57,7 @@ def compute_merkle_hash(
         "deps": dict(sorted(dep_hashes.items())),
     }
     raw = json.dumps(payload, sort_keys=True, ensure_ascii=False)
-    return hashlib.sha256(raw.encode()).hexdigest()
+    return hashlib.sha256(raw.encode()).hexdigest(), payload
 
 
 class CacheStore:
@@ -66,24 +68,43 @@ class CacheStore:
         self.cache_dir.mkdir(parents=True, exist_ok=True)
         self._lock = threading.Lock()
 
-    def has(self, key: str) -> bool:
-        return (self.cache_dir / f"{key}.tar.gz").exists()
+    def _pkg_dir(self, name: str) -> Path:
+        return self.cache_dir / name
 
-    def restore(self, key: str, prefix: Path, name: str) -> bool:
+    def _archive_path(self, name: str, key: str) -> Path:
+        return self._pkg_dir(name) / f"{key}.tar.gz"
+
+    def _meta_path(self, name: str, key: str) -> Path:
+        return self._pkg_dir(name) / f"{key}.json"
+
+    def has(self, name: str, key: str) -> bool:
+        return self._archive_path(name, key).exists()
+
+    def restore(self, name: str, key: str, prefix: Path) -> bool:
         """Extract cached package files into *prefix*.  Returns True on success."""
-        archive = self.cache_dir / f"{key}.tar.gz"
+        archive = self._archive_path(name, key)
         if not archive.exists():
             return False
-        print(f"Cache hit: restoring {name} from {archive}")
+        print(f"Persistent cache hit for {name}")
         prefix.mkdir(parents=True, exist_ok=True)
         with tarfile.open(archive, "r:gz") as tf:
             tf.extractall(str(prefix))
         return True
 
-    def store_files(self, key: str, prefix: Path, relative_files: set[Path], name: str) -> None:
-        """Create a tarball of *relative_files* (relative to *prefix*) under *key*."""
-        archive = self.cache_dir / f"{key}.tar.gz"
+    def store_files(
+        self,
+        name: str,
+        key: str,
+        payload: dict[str, object],
+        prefix: Path,
+        relative_files: set[Path],
+    ) -> None:
+        """Create a tarball and metadata JSON for *name* under *key*."""
+        pkg_dir = self._pkg_dir(name)
+        archive = self._archive_path(name, key)
+        meta = self._meta_path(name, key)
         with self._lock:
+            pkg_dir.mkdir(parents=True, exist_ok=True)
             if archive.exists():
                 return
             print(f"Caching {name} ({len(relative_files)} files) -> {archive}")
@@ -92,14 +113,86 @@ class CacheStore:
                     abs_path = prefix / rel
                     if abs_path.exists():
                         tf.add(str(abs_path), arcname=str(rel))
+            text = json.dumps(payload, sort_keys=True, ensure_ascii=False, indent=2) + "\n"
+            meta.write_text(text)
 
-    def gc(self, current_hashes: set[str]) -> int:
-        """Remove cached tarballs not referenced by *current_hashes*."""
+    def diagnose_miss(self, name: str, current_payload: dict[str, object]) -> None:
+        """When the current hash misses for *name*, check if earlier cached
+        entries exist for the same package and print a diff of the hash inputs
+        to help diagnose what changed.
+        """
+        pkg_dir = self._pkg_dir(name)
+        if not pkg_dir.is_dir():
+            return
+
+        metas = sorted(pkg_dir.glob("*.json"))
+        if not metas:
+            return
+
+        print(f"\n--- Cache miss diagnosis for {name} ---", file=sys.stderr)
+        print("  Current hash inputs:", file=sys.stderr)
+        for k, v in sorted(current_payload.items()):
+            print(f"    {k}: {v!r}", file=sys.stderr)
+
+        for mp in metas:
+            try:
+                stored = json.loads(mp.read_text())
+            except (json.JSONDecodeError, OSError):
+                continue
+            print(f"\n  Cached entry: {mp.name}", file=sys.stderr)
+            print("  Cached hash inputs:", file=sys.stderr)
+            all_keys = sorted(set(current_payload) | set(stored))
+            for k in all_keys:
+                cur = current_payload.get(k)
+                old = stored.get(k)
+                if cur != old:
+                    print(f"    {k}: CURRENT={cur!r}  CACHED={old!r}", file=sys.stderr)
+                else:
+                    print(f"    {k}: {cur!r}  (unchanged)", file=sys.stderr)
+        print(f"--- End cache miss diagnosis for {name} ---\n", file=sys.stderr)
+
+    def gc(self, current_packages: dict[str, str]) -> int:
+        """Remove cached tarballs not referenced by *current_packages*.
+
+        *current_packages* is a mapping of ``{name: merkle_hash}`` for the
+        current build.  Tarballs and metadata for other hashes (within each
+        package directory) are removed.  Empty package directories are
+        also removed.  Old flat-format files in the cache root are cleaned up.
+        """
         removed = 0
-        for f in sorted(self.cache_dir.glob("*.tar.gz")):
-            key = f.stem
-            if key not in current_hashes:
+
+        for entry in sorted(self.cache_dir.iterdir()):
+            if entry.is_file() and entry.suffix in (".gz", ".json"):
+                print(f"Cache GC: removing stale old-format {entry}")
+                entry.unlink()
+                removed += 1
+                continue
+
+            if not entry.is_dir():
+                continue
+
+            pkg_dir = entry
+            current_key = current_packages.get(pkg_dir.name)
+
+            for f in sorted(pkg_dir.glob("*.tar.gz")):
+                key = f.stem
+                if current_key is not None and key == current_key:
+                    continue
                 print(f"Cache GC: removing stale {f}")
                 f.unlink()
                 removed += 1
+                meta = f.with_suffix(".json")
+                if meta.exists():
+                    meta.unlink()
+
+            for m in sorted(pkg_dir.glob("*.json")):
+                key = m.stem
+                if current_key is not None and key == current_key:
+                    continue
+                m.unlink()
+
+            remaining = list(pkg_dir.iterdir())
+            if not remaining:
+                pkg_dir.rmdir()
+
         return removed

@@ -64,11 +64,6 @@ def main() -> None:
     help="Output directory for binaries",
 )
 @click.option(
-    "--skip-deps",
-    multiple=True,
-    help="Skip building specific dependencies (must already be installed)",
-)
-@click.option(
     "--clean",
     is_flag=True,
     help="Clean build directory before starting",
@@ -139,7 +134,6 @@ def build(
     manifest: tuple[Path, ...],
     work_dir: Path,
     output_dir: Path,
-    skip_deps: tuple[str, ...],
     clean: bool,
     no_cache: bool,
     disguise: bool,
@@ -186,7 +180,6 @@ def build(
                 manifest=resolved,
                 work_dir=variant_work,
                 output_dir=output_dir,
-                skip_deps=list(skip_deps) if skip_deps else [],
                 clean=clean,
                 no_cache=no_cache,
                 options=options,
