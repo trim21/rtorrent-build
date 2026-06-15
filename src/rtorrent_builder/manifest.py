@@ -37,6 +37,12 @@ class GitHubReleaseSource:
 
 
 @dataclass(frozen=True, kw_only=True)
+class GenericRefSource:
+    git: str
+    ref: str
+
+
+@dataclass(frozen=True, kw_only=True)
 class URLSource:
     url: str
 
@@ -47,7 +53,14 @@ class GitSource:
     sha: str
 
 
-PackageSource = GitHubTagSource | GitHubRefSource | GitHubReleaseSource | URLSource | GitSource
+PackageSource = (
+    GitHubTagSource
+    | GitHubRefSource
+    | GitHubReleaseSource
+    | GenericRefSource
+    | URLSource
+    | GitSource
+)
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -184,6 +197,9 @@ def _collect_lock_entries(manifest_path: Path) -> dict[str, str]:
         if isinstance(pkg.source, GitHubRefSource):
             key = f"{pkg.source.github}#{pkg.source.ref}"
             entries[key] = pkg.source.ref
+        elif isinstance(pkg.source, GenericRefSource):
+            key = f"{pkg.source.git}#{pkg.source.ref}"
+            entries[key] = pkg.source.ref
         elif isinstance(pkg.source, (GitHubTagSource, GitHubReleaseSource)):
             key = f"{pkg.source.github}#tag"
             entries[key] = ""
@@ -211,6 +227,8 @@ def source_identity(pkg: LibInfo) -> str:
         return f"github:{pkg.source.github}#release={pkg.source.tag_range}"
     if isinstance(pkg.source, GitHubRefSource):
         return f"github:{pkg.source.github}#{pkg.source.ref}"
+    if isinstance(pkg.source, GenericRefSource):
+        return f"git:{pkg.source.git}#{pkg.source.ref}"
     if isinstance(pkg.source, URLSource):
         return f"url:{pkg.source.url}"
     raise ValueError("Package has no source")

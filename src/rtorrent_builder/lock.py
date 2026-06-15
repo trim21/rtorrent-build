@@ -9,6 +9,7 @@ from functools import cache
 from pathlib import Path
 
 from .manifest import (
+    GenericRefSource,
     GitHubRefSource,
     GitHubReleaseSource,
     GitHubTagSource,
@@ -83,6 +84,21 @@ def _resolve_ref(owner_repo: str, ref: str) -> str:
     raise ValueError(f"Ref {ref} not found in {owner_repo}")
 
 
+@cache
+def _resolve_generic_ref(url: str, ref: str) -> str:
+    result = subprocess.run(
+        ["git", "ls-remote", url, ref],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    for line in result.stdout.splitlines():
+        sha, name = line.split()
+        if name == ref or name == f"refs/heads/{ref}" or name == f"refs/tags/{ref}":
+            return sha
+    raise ValueError(f"Ref {ref} not found in {url}")
+
+
 def _resolve_github_source(source: PackageSource) -> tuple[str, str] | tuple[GitSource, str]:
     """Resolve a GitHub source to (url, version) or (GitSource, version)."""
     if isinstance(source, GitHubRefSource):
@@ -115,6 +131,9 @@ def _resolve_source(pkg_name: str, lib: LibInfo) -> tuple[PackageSource, str]:
     """Resolve a LibInfo's source to (source, version)."""
     if isinstance(lib.source, URLSource):
         return lib.source, lib.version
+    if isinstance(lib.source, GenericRefSource):
+        sha = _resolve_generic_ref(lib.source.git, lib.source.ref)
+        return GitSource(url=lib.source.git, sha=sha), sha[:12]
     if isinstance(lib.source, (GitHubRefSource, GitHubTagSource, GitHubReleaseSource)):
         resolved, version = _resolve_github_source(lib.source)
         if isinstance(resolved, GitSource):

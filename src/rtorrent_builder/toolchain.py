@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import re
 import shutil
 import subprocess
 import tarfile
@@ -16,6 +17,7 @@ from . import PROJECT_ROOT as _PROJECT_ROOT
 from ._types import Arch, Libc
 from .download import download_file
 from .manifest import (
+    GenericRefSource,
     GitHubRefSource,
     GitHubReleaseSource,
     GitHubTagSource,
@@ -26,9 +28,10 @@ from .manifest import (
 from .run import Commander
 
 
-def _git_repo_key(url: str) -> str:
-    path = url.removeprefix("https://").removesuffix(".git")
-    parts = path.split("/")
+def _git_repo_name(url: str) -> str:
+    clean = re.sub(r"^(?:[^@]+@[^:]+:|(?:ssh|https?|file)://[^/]+/)", "", url)
+    clean = clean.removesuffix(".git").strip("/")
+    parts = clean.split("/")
     return "-".join(parts[-2:])
 
 
@@ -129,7 +132,7 @@ class Toolchain:
     def prepare_source(self, name: str, lib: LibInfo) -> ResolvedSource:
         if isinstance(lib.source, GitSource):
             return self._prepare_git_source(name, lib.source, lib.version)
-        if isinstance(lib.source, (GitHubTagSource, GitHubReleaseSource)):
+        if isinstance(lib.source, (GenericRefSource, GitHubTagSource, GitHubReleaseSource)):
             msg = f"{type(lib.source).__name__} should be resolved to URLSource via lockfile first"
             raise TypeError(msg)
         if isinstance(lib.source, URLSource):
@@ -168,7 +171,9 @@ class Toolchain:
             if src_dir.exists():
                 print(f"Cleaning source dir: {src_dir}")
                 shutil.rmtree(src_dir)
-        elif isinstance(lib.source, (GitHubRefSource, GitHubTagSource, GitHubReleaseSource)):
+        elif isinstance(
+            lib.source, (GenericRefSource, GitHubRefSource, GitHubTagSource, GitHubReleaseSource)
+        ):
             for d in self.build_dir.glob(f"{name}-*"):
                 if d.is_dir():
                     print(f"Cleaning source dir: {d}")
@@ -200,9 +205,9 @@ class Toolchain:
     def _prepare_git_source(self, name: str, source: GitSource, version: str) -> ResolvedSource:
         git_url = source.url
         sha = source.sha
-        repo_key = _git_repo_key(git_url)
+        repo_name = _git_repo_name(git_url)
 
-        clone_dir = self._project_root / "sources" / repo_key
+        clone_dir = self._project_root / "sources" / repo_name
 
         if not (clone_dir / ".git").exists():
             clone_dir.parent.mkdir(parents=True, exist_ok=True)

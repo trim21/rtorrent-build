@@ -1,5 +1,23 @@
 {
   "$defs": {
+    "GenericRefSource": {
+      "properties": {
+        "git": {
+          "title": "Git",
+          "type": "string"
+        },
+        "ref": {
+          "title": "Ref",
+          "type": "string"
+        }
+      },
+      "required": [
+        "git",
+        "ref"
+      ],
+      "title": "GenericRefSource",
+      "type": "object"
+    },
     "GitHubRefSource": {
       "properties": {
         "github": {
@@ -50,6 +68,18 @@
         "tag_range": {
           "title": "Tag Range",
           "type": "string"
+        },
+        "url_template": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Url Template"
         }
       },
       "required": [
@@ -57,6 +87,24 @@
         "tag_range"
       ],
       "title": "GitHubTagSource",
+      "type": "object"
+    },
+    "GitSource": {
+      "properties": {
+        "url": {
+          "title": "Url",
+          "type": "string"
+        },
+        "sha": {
+          "title": "Sha",
+          "type": "string"
+        }
+      },
+      "required": [
+        "url",
+        "sha"
+      ],
+      "title": "GitSource",
       "type": "object"
     },
     "LibInfo": {
@@ -73,7 +121,13 @@
               "$ref": "#/$defs/GitHubReleaseSource"
             },
             {
+              "$ref": "#/$defs/GenericRefSource"
+            },
+            {
               "$ref": "#/$defs/URLSource"
+            },
+            {
+              "$ref": "#/$defs/GitSource"
             }
           ],
           "title": "Source"
@@ -94,6 +148,21 @@
           ],
           "default": null,
           "title": "Cxx Std"
+        },
+        "requires": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Requires"
         }
       },
       "required": [
@@ -141,6 +210,18 @@
       ],
       "default": null,
       "title": "Extends"
+    },
+    "executable_package": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Executable Package"
     },
     "target_glibc": {
       "anyOf": [
