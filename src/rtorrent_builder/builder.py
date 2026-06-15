@@ -341,6 +341,9 @@ def build_rtorrent(
         t = _Timing(name=name, start=time.monotonic() - build_origin)
         timings.append(t)
 
+        if name == manifest.executable_package and tc.shared_deps:
+            tc.build_cxx_shared_lib()
+
         pkg = pkgs[name]
         lib = pkg.to_libinfo()
         builder_cls = _BUILDER_MAP[name]

@@ -381,11 +381,30 @@ class Toolchain:
     @property
     def final_ldflags(self) -> str:
         if self.shared_deps:
-            return (
-                " -Wl,--whole-archive -lc++ -lc++abi -lunwind"
-                " -Wl,--no-whole-archive -Wl,--export-dynamic"
-            )
+            return " -lc++_shared -Wl,--export-dynamic"
         return ""
+
+    def build_cxx_shared_lib(self) -> None:
+        output = self.install_prefix / "lib" / "libc++_shared.so"
+        if output.exists():
+            return
+        print("Building libc++_shared.so (shared C++ runtime)")
+        subprocess.run(
+            [
+                self.zig_bin,
+                "c++",
+                "-shared",
+                "-fPIC",
+                "-o",
+                str(output),
+                "-Wl,--whole-archive",
+                "-lc++",
+                "-lc++abi",
+                "-lunwind",
+                "-Wl,--no-whole-archive",
+            ],
+            check=True,
+        )
 
     @property
     def executable_ldflags(self) -> str:
@@ -393,12 +412,7 @@ class Toolchain:
         if self.debug:
             base = f"-L{install_lib} -L{install_lib}64"
         elif self.shared_deps:
-            base = (
-                f"-L{install_lib} -L{install_lib}64"
-                " -Wl,--whole-archive -lc++ -lc++abi -lunwind"
-                " -Wl,--no-whole-archive"
-                " -Wl,--export-dynamic"
-            )
+            base = f"-L{install_lib} -L{install_lib}64 -lc++_shared -Wl,--export-dynamic"
         else:
             base = f"-flto -L{install_lib} -L{install_lib}64"
         if self.libc == Libc.musl:

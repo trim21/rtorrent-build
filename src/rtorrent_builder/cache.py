@@ -72,6 +72,7 @@ class CacheStore:
     def __init__(self, cache_dir: Path) -> None:
         self.cache_dir = cache_dir
         self.cache_dir.mkdir(parents=True, exist_ok=True)
+        (self.cache_dir / ".gitignore").write_text("*\n")
         self._lock = threading.Lock()
 
     def _pkg_dir(self, name: str) -> Path:
