@@ -13,9 +13,10 @@ class LuaJITBuilder(MakeBuilder):
         super().__init__(toolchain, lib, source, commander)
 
     def make_args(self) -> list[str]:
+        build_mode = "shared" if self.tc.shared_deps else "static"
         return [
             f"PREFIX={self.tc.install_prefix}",
-            "BUILDMODE=static",
+            f"BUILDMODE={build_mode}",
             f"CC={' '.join(self.tc.zig_cc)}",
             f"HOST_CC={self.tc.zig_bin} cc -fno-sanitize=undefined -O2",
             "XCFLAGS=-DLUAJIT_NO_UNWIND",

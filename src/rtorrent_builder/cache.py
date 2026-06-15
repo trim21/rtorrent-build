@@ -39,6 +39,7 @@ def compute_merkle_hash(
     arch: str,
     glibc_target: str,
     debug: bool,
+    shared_deps: bool,
     install_prefix: str,
     dep_hashes: dict[str, str],
 ) -> tuple[str, dict[str, object]]:
@@ -57,6 +58,7 @@ def compute_merkle_hash(
         "arch": arch,
         "glibc_target": glibc_target,
         "debug": debug,
+        "shared_deps": shared_deps,
         "prefix": install_prefix,
         "deps": dict(sorted(dep_hashes.items())),
     }

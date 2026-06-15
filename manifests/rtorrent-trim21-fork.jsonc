@@ -13,7 +13,7 @@
     },
     "rtorrent-libtorrent": {
       "source": {
-        "github": "trim21/libtorrent",
+        "git": "trim21@n5:projects/rtorrent-upstream/libtorrent/.git",
         "ref": "fix/poll-epoll-busy-loop"
       },
       "requires": ["openssl", "zlib", "curl"]

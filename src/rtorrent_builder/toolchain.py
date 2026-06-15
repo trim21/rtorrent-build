@@ -90,6 +90,7 @@ class Toolchain:
         libc: Libc = Libc.glibc,
         arch: Arch = Arch.v1,
         debug: bool = False,
+        shared_deps: bool = False,
     ) -> None:
         self.variant = variant
         self._toolchain_name = toolchain
@@ -100,6 +101,7 @@ class Toolchain:
         self.libc = libc
         self.arch = arch
         self.debug = debug
+        self.shared_deps = shared_deps
 
         self.install_prefix = work_dir / "install"
         self.build_dir = work_dir / "build"
@@ -320,6 +322,8 @@ class Toolchain:
             marker += f".{self._glibc_target}"
         if self.debug:
             marker += ".debug"
+        if self.shared_deps:
+            marker += ".shared"
         return marker
 
     def _validate_toolchain_marker(self) -> None:
@@ -371,6 +375,37 @@ class Toolchain:
         return str(self.venv_dir / "bin" / "meson")
 
     @property
+    def patchelf_bin(self) -> str:
+        return str(self.venv_dir / "bin" / "patchelf")
+
+    @property
+    def final_ldflags(self) -> str:
+        if self.shared_deps:
+            return (
+                " -Wl,--whole-archive -lc++ -lc++abi -lunwind"
+                " -Wl,--no-whole-archive -Wl,--export-dynamic"
+            )
+        return ""
+
+    @property
+    def executable_ldflags(self) -> str:
+        install_lib = str(self.install_prefix / "lib")
+        if self.debug:
+            base = f"-L{install_lib} -L{install_lib}64"
+        elif self.shared_deps:
+            base = (
+                f"-L{install_lib} -L{install_lib}64"
+                " -Wl,--whole-archive -lc++ -lc++abi -lunwind"
+                " -Wl,--no-whole-archive"
+                " -Wl,--export-dynamic"
+            )
+        else:
+            base = f"-flto -L{install_lib} -L{install_lib}64"
+        if self.libc == Libc.musl:
+            base += " -static"
+        return base
+
+    @property
     def zig_cc(self) -> list[str]:
         return [self.zig_bin, "cc", "-target", self._target_triple]
 
@@ -420,10 +455,16 @@ class Toolchain:
         wd = str(self.work_dir / "wrappers")
         if self.debug:
             cmake_cflags = "-fPIC -g -O0 -w"
-            cmake_ldflags = f"-L{install_lib} -L{install_lib64}"
+            exe_ldflags = f"-L{install_lib} -L{install_lib64}"
+            shared_ldflags = exe_ldflags
+        elif self.shared_deps:
+            cmake_cflags = "-fPIC -Os -g -w"
+            exe_ldflags = f"-L{install_lib} -L{install_lib64}"
+            shared_ldflags = f"-L{install_lib} -L{install_lib64} -Wl,--allow-shlib-undefined"
         else:
             cmake_cflags = "-fPIC -flto -w"
-            cmake_ldflags = f"-flto -L{install_lib} -L{install_lib64}"
+            exe_ldflags = f"-flto -L{install_lib} -L{install_lib64}"
+            shared_ldflags = exe_ldflags
 
         content = "\n".join(
             [
@@ -437,7 +478,8 @@ class Toolchain:
                 "",
                 f'set(CMAKE_C_FLAGS_INIT "{cmake_cflags}")',
                 f'set(CMAKE_CXX_FLAGS_INIT "{cmake_cflags}")',
-                f'set(CMAKE_EXE_LINKER_FLAGS_INIT "{cmake_ldflags}")',
+                f'set(CMAKE_EXE_LINKER_FLAGS_INIT "{exe_ldflags}")',
+                f'set(CMAKE_SHARED_LINKER_FLAGS_INIT "{shared_ldflags}")',
                 "",
                 'set(HAVE_FILE_OFFSET_BITS 0 CACHE INTERNAL "")',
                 "",
@@ -468,6 +510,9 @@ class Toolchain:
         if self.debug:
             ldflags = f"-L{install_lib} -L{install_lib}64"
             cflags = f"-fPIC -g -O0 -w -march={self.arch.march}"
+        elif self.shared_deps:
+            ldflags = f"-L{install_lib} -L{install_lib}64 -Wl,--allow-shlib-undefined"
+            cflags = f"-fPIC -Os -g -w -march={self.arch.march}"
         else:
             ldflags = f"-flto -L{install_lib} -L{install_lib}64"
             cflags = f"-fPIC -Os -g -flto -w -march={self.arch.march}"
@@ -476,6 +521,7 @@ class Toolchain:
             cflags += " -static"
 
         pkg_path = f"{install_lib}/pkgconfig:{install_lib}64/pkgconfig"
+        pkg_config = "pkg-config" if self.shared_deps else "pkg-config --static"
         return os.environ | {
             "CC": zig_cc_str,
             "CXX": zig_cxx_str,
@@ -486,7 +532,7 @@ class Toolchain:
             "CFLAGS": cflags,
             "CXXFLAGS": cflags,
             "LDFLAGS": ldflags,
-            "PKG_CONFIG": "pkg-config --static",
+            "PKG_CONFIG": pkg_config,
             "PKG_CONFIG_PATH": pkg_path,
             "PKG_CONFIG_LIBDIR": pkg_path,
             "PATH": f"{self.venv_dir}/bin:{os.environ.get('PATH', '')}",
@@ -496,10 +542,12 @@ class Toolchain:
     def cmake_env(self) -> dict[str, str]:
         pfx = str(self.install_prefix)
         pkg_path = f"{pfx}/lib/pkgconfig:{pfx}/lib64/pkgconfig"
+        pkg_config = "pkg-config" if self.shared_deps else "pkg-config --static"
         return os.environ | {
             "CMAKE_PREFIX_PATH": pfx,
             "PKG_CONFIG_PATH": pkg_path,
             "PKG_CONFIG_LIBDIR": pkg_path,
+            "PKG_CONFIG": pkg_config,
             "PATH": f"{self.venv_dir}/bin:{os.environ.get('PATH', '')}",
         }
 
@@ -513,6 +561,9 @@ class Toolchain:
         if self.debug:
             cflags = f"-fPIC -g -O0 -w -march={self.arch.march}"
             ldflags = f"-L{install_lib} -L{install_lib64}"
+        elif self.shared_deps:
+            cflags = f"-fPIC -Os -g -w -march={self.arch.march}"
+            ldflags = f"-L{install_lib} -L{install_lib64}"
         else:
             cflags = f"-fPIC -Os -g -flto -w -march={self.arch.march}"
             ldflags = f"-flto -L{install_lib} -L{install_lib64}"
@@ -520,6 +571,8 @@ class Toolchain:
         if self.libc == Libc.musl:
             ldflags += " -static"
             cflags += " -static"
+
+        default_library = "shared" if self.shared_deps else "static"
 
         content = "\n".join(
             [
@@ -534,7 +587,7 @@ class Toolchain:
                 f"cpp_args = [{', '.join(repr(f) for f in cflags.split())}]",
                 f"c_link_args = [{', '.join(repr(f) for f in ldflags.split())}]",
                 f"cpp_link_args = [{', '.join(repr(f) for f in ldflags.split())}]",
-                "default_library = 'static'",
+                f"default_library = '{default_library}'",
                 "buildtype = 'plain'",
                 "",
                 "[properties]",
@@ -553,9 +606,10 @@ class Toolchain:
     def meson_env(self) -> dict[str, str]:
         pfx = str(self.install_prefix)
         pkg_path = f"{pfx}/lib/pkgconfig:{pfx}/lib64/pkgconfig"
+        pkg_config = "pkg-config" if self.shared_deps else "pkg-config --static"
         return os.environ | {
             "PKG_CONFIG_PATH": pkg_path,
             "PKG_CONFIG_LIBDIR": pkg_path,
-            "PKG_CONFIG": "pkg-config --static",
+            "PKG_CONFIG": pkg_config,
             "PATH": f"{self.venv_dir}/bin:{os.environ.get('PATH', '')}",
         }

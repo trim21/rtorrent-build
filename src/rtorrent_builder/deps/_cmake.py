@@ -31,6 +31,8 @@ class CMakeBuilder(Builder):
         prefix = str(self.tc.install_prefix)
         cmd = self.commander
 
+        shared_libs = "ON" if self.tc.shared_deps else "OFF"
+
         cmd.run(
             [
                 self.tc.cmake_bin,
@@ -39,7 +41,7 @@ class CMakeBuilder(Builder):
                 *self.tc.cmake_common_args,
                 f"-DCMAKE_INSTALL_PREFIX={prefix}",
                 "-DCMAKE_BUILD_TYPE=RelWithDebInfo",
-                "-DBUILD_SHARED_LIBS=OFF",
+                f"-DBUILD_SHARED_LIBS={shared_libs}",
                 "-DBUILD_TESTING=OFF",
                 *self.cmake_args(prefix),
                 "-S",

@@ -2,17 +2,29 @@ from ._make import MakeBuilder
 
 
 class NcursesBuilder(MakeBuilder):
-    def cache_key_extra(self) -> list[str]:
-        return super().cache_key_extra() + [
+    def _shared_args(self) -> list[str]:
+        if self.tc.shared_deps:
+            return [
+                "--disable-static",
+                "--enable-shared",
+                "--without-static",
+                "--with-shared",
+            ]
+        return [
             "--enable-static",
             "--disable-shared",
+            "--with-static",
+            "--without-shared",
+        ]
+
+    def cache_key_extra(self) -> list[str]:
+        return super().cache_key_extra() + [
+            *self._shared_args(),
             "--with-termlib",
             "--with-normal",
             "--with-cxx",
             "--with-cxx-binding",
             "--enable-pc-files",
-            "--with-static",
-            "--without-shared",
             "--enable-widec",
             "--without-progs",
             "--without-tests",
@@ -25,8 +37,7 @@ class NcursesBuilder(MakeBuilder):
                 f"--prefix={self.tc.install_prefix}",
                 "--with-build-cc=cc",
                 "--with-build-cflags=-O2",
-                "--enable-static",
-                "--disable-shared",
+                *self._shared_args(),
                 "--with-termlib",
                 "--with-normal",
                 "--with-cxx",
@@ -34,8 +45,6 @@ class NcursesBuilder(MakeBuilder):
                 f"--with-default-terminfo-dir={self.tc.install_prefix}/share/terminfo",
                 "--enable-pc-files",
                 f"--with-pkg-config-libdir={self.tc.install_prefix}/lib/pkgconfig",
-                "--with-static",
-                "--without-shared",
                 "--enable-widec",
                 "--without-progs",
                 "--without-tests",

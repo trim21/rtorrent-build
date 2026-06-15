@@ -311,12 +311,6 @@ _DEPENDENCIES: dict[str, list[str]] = {
     "rtorrent": [
         "rtorrent-libtorrent",
     ],
-    "rtorrent-meson": [
-        "openssl",
-        "zlib",
-        "curl",
-        "luajit",
-    ],
 }
 
 

@@ -18,11 +18,15 @@ class QtBuilder(Builder):
         self.src_dir = source.src_dir
         self.commander = commander
 
+    def _shared_flags(self) -> list[str]:
+        if self.tc.shared_deps:
+            return ["-DBUILD_SHARED_LIBS=ON", "-DFEATURE_shared=ON"]
+        return ["-DBUILD_SHARED_LIBS=OFF", "-DFEATURE_shared=OFF"]
+
     def cache_key_extra(self) -> list[str]:
         return super().cache_key_extra() + [
             "-DCMAKE_BUILD_TYPE=Release",
-            "-DBUILD_SHARED_LIBS=OFF",
-            "-DFEATURE_shared=OFF",
+            *self._shared_flags(),
             "-DFEATURE_gui=OFF",
             "-DFEATURE_widgets=OFF",
             "-DFEATURE_printsupport=OFF",
@@ -55,8 +59,7 @@ class QtBuilder(Builder):
 
         configure_args = [
             "-DCMAKE_BUILD_TYPE=Release",
-            "-DBUILD_SHARED_LIBS=OFF",
-            "-DFEATURE_shared=OFF",
+            *self._shared_flags(),
             "-DFEATURE_gui=OFF",
             "-DFEATURE_widgets=OFF",
             "-DFEATURE_printsupport=OFF",

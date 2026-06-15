@@ -16,7 +16,8 @@ class OpensslBuilder(Builder):
         self.commander = commander
 
     def cache_key_extra(self) -> list[str]:
-        return super().cache_key_extra() + ["no-shared", "no-dso", "no-tests", "linux-x86_64"]
+        shared = "shared" if self.tc.shared_deps else "no-shared"
+        return super().cache_key_extra() + [shared, "no-dso", "no-tests", "linux-x86_64"]
 
     def build(self) -> None:
         print(f"Building {self.name} {self.version}")
@@ -28,9 +29,11 @@ class OpensslBuilder(Builder):
         zig_ar = " ".join(self.tc.zig_ar)
         zig_ranlib = " ".join(self.tc.zig_ranlib)
 
+        shared_flag = "shared" if self.tc.shared_deps else "no-shared"
+
         configure_args = [
             f"--prefix={self.tc.install_prefix}",
-            "no-shared",
+            shared_flag,
             "no-dso",
             "no-tests",
             "linux-x86_64",

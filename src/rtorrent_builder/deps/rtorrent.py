@@ -91,6 +91,9 @@ class RtorrentBuilder(Builder):
         if self.lib.cxx_std:
             make_env["CXXFLAGS"] = f"{env['CXXFLAGS']} -std={self.lib.cxx_std}"
 
+        if self.tc.shared_deps:
+            make_env["LDFLAGS"] = self.tc.executable_ldflags
+
         cmd.run(configure_args, cwd=str(self.src_dir), env=make_env)
 
         if self._opts.ua:

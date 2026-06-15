@@ -32,7 +32,6 @@ from .deps.qbittorrent import QbittorrentBuilder
 from .deps.qt import QtBuilder
 from .deps.qttools import QtToolsBuilder
 from .deps.rtorrent import RtorrentBuilder
-from .deps.rtorrent_meson import RtorrentMesonBuilder
 from .deps.zlib import ZlibBuilder
 from .deps.zstd import ZstdBuilder
 from .manifest import ResolvedManifest, deps_for, reachable_packages
@@ -58,7 +57,6 @@ _BUILDER_MAP: dict[str, type[Builder]] = {
     "qttools": QtToolsBuilder,
     "qbittorrent": QbittorrentBuilder,
     "rtorrent": RtorrentBuilder,
-    "rtorrent-meson": RtorrentMesonBuilder,
 }
 
 _ALLOWED_SOS = frozenset(
@@ -76,7 +74,40 @@ _ALLOWED_SOS = frozenset(
 )
 
 
-def _verify_linkage(binary: Path) -> None:
+def _fix_shared_rpaths(tc: Toolchain, binary: Path) -> None:
+    for d in (tc.install_prefix / "lib", tc.install_prefix / "lib64"):
+        if not d.exists():
+            continue
+        for so in sorted(p for p in d.glob("*.so*") if p.is_file()):
+            subprocess.run(
+                [tc.patchelf_bin, "--set-rpath", "$ORIGIN", str(so)],
+                check=True,
+                capture_output=True,
+            )
+
+    subprocess.run(
+        [tc.patchelf_bin, "--set-rpath", "$ORIGIN/rtorrent.libs", str(binary)],
+        check=True,
+        capture_output=True,
+    )
+    print("Fixed RPATH on shared libraries and binary")
+
+
+def _copy_shared_libs(tc: Toolchain, dest_dir: Path, libs_name: str) -> None:
+    libs_dir = dest_dir / libs_name
+    libs_dir.mkdir(parents=True, exist_ok=True)
+    for d in (tc.install_prefix / "lib", tc.install_prefix / "lib64"):
+        if not d.exists():
+            continue
+        for so in d.glob("*.so*"):
+            if so.is_file():
+                shutil.copy2(str(so), str(libs_dir / so.name))
+    print(f"Copied shared libraries to {libs_dir}")
+
+
+def _verify_linkage(
+    binary: Path, *, shared_deps: bool = False, install_prefix: Path | None = None
+) -> None:
     try:
         result = subprocess.run(
             ["readelf", "-d", str(binary)],
@@ -102,6 +133,31 @@ def _verify_linkage(binary: Path) -> None:
         print("Linkage check: binary is fully static (no NEEDED entries)")
         return
 
+    if shared_deps and install_prefix is not None:
+        built_sos: set[str] = set()
+        for d in (install_prefix / "lib", install_prefix / "lib64"):
+            if d.exists():
+                for f in d.iterdir():
+                    if f.is_file() and ".so" in f.name:
+                        built_sos.add(f.name)
+        unexpected = linked - _ALLOWED_SOS - built_sos
+        if unexpected:
+            print(
+                f"ERROR: binary links to unexpected system shared libraries: {sorted(unexpected)}"
+            )
+            print(
+                "Expected built SOs in prefix:\n  " + "\n  ".join(sorted(built_sos))
+                if built_sos
+                else "  (none found)"
+            )
+            print("readelf -d NEEDED entries:\n" + "\n".join(f"  {s}" for s in sorted(linked)))
+            raise SystemExit(1)
+        print(
+            f"Linkage check (shared-deps): {len(linked)} NEEDED ("
+            f"{len(linked & _ALLOWED_SOS)} system, {len(linked & built_sos)} built)"
+        )
+        return
+
     unexpected = linked - _ALLOWED_SOS
     if unexpected:
         print(f"ERROR: binary links to unexpected shared libraries: {sorted(unexpected)}")
@@ -113,8 +169,6 @@ def _verify_linkage(binary: Path) -> None:
 
 def _binary_path(tc: Toolchain, name: str) -> Path:
     if name == "rtorrent":
-        return tc.install_prefix / "bin" / "rtorrent"
-    if name == "rtorrent-meson":
         return tc.install_prefix / "bin" / "rtorrent"
     if name == "qbittorrent":
         return tc.install_prefix / "bin" / "qbittorrent-nox"
@@ -219,6 +273,7 @@ def build_rtorrent(
     arch: Arch = Arch.v1,
     docker_target_glibc: str | None = None,
     debug: bool = False,
+    shared_deps: bool = False,
     cache_dir: Path | None = None,
     jobs: int = 1,
 ) -> Path:
@@ -258,6 +313,7 @@ def build_rtorrent(
         libc=libc,
         arch=arch,
         debug=debug,
+        shared_deps=shared_deps,
     )
     tc.setup()
 
@@ -307,6 +363,7 @@ def build_rtorrent(
             arch=tc.arch.safe,
             glibc_target=tc._glibc_target,
             debug=tc.debug,
+            shared_deps=tc.shared_deps,
             install_prefix=str(tc.install_prefix.resolve()),
             dep_hashes=dep_hashes,
         )
@@ -394,7 +451,10 @@ def build_rtorrent(
     output_bin = output_dir / output_name
     if not binary.exists():
         raise FileNotFoundError(f"Binary not found: {binary}")
-    _verify_linkage(binary)
+    _verify_linkage(binary, shared_deps=shared_deps, install_prefix=tc.install_prefix)
+    if shared_deps:
+        _fix_shared_rpaths(tc, binary)
+        _copy_shared_libs(tc, output_dir, "rtorrent.libs")
     shutil.copy2(str(binary), str(output_bin))
     output_bin.chmod(0o755)
     print(f"Copied {binary} -> {output_bin}")

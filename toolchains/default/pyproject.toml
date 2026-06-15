@@ -7,6 +7,7 @@ dependencies = [
   "cmake<4",
   "meson>=1,<2",
   "ninja>=1,<2",
+  "patchelf>=0.17,<1",
   "ziglang==0.16.0",
 ]
 

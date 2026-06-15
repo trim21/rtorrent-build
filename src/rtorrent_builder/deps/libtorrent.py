@@ -45,12 +45,19 @@ class LibtorrentBuilder(Builder):
         if self.lib.cxx_std:
             env["CXXFLAGS"] = f"{env['CXXFLAGS']} -std={self.lib.cxx_std}"
 
+        if self.tc.shared_deps:
+            shared_flag = "--enable-shared"
+            static_flag = "--disable-static"
+        else:
+            shared_flag = "--disable-shared"
+            static_flag = "--enable-static"
+
         configure_args = [
             "./configure",
             f"--prefix={self.tc.install_prefix}",
             f"--with-zlib={self.tc.dep_prefix('zlib')}",
-            "--disable-shared",
-            "--enable-static",
+            shared_flag,
+            static_flag,
         ]
         if self.tc.debug:
             configure_args.append("--enable-debug")

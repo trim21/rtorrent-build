@@ -5,4 +5,7 @@ RUN apt-get update && apt-get install -y gdb && rm -rf /var/lib/apt/lists/*
 {% endif %}
 COPY --from=busybox /bin/busybox /usr/local/bin/busybox
 COPY {{ binary }} /usr/local/bin/rtorrent
+{% if shared_deps %}
+COPY rtorrent.libs/ /usr/local/bin/rtorrent.libs/
+{% endif %}
 ENTRYPOINT ["/usr/local/bin/rtorrent"]

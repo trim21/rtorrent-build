@@ -7,7 +7,7 @@ from ._cmake import CMakeBuilder
 
 class BoostBuilder(CMakeBuilder):
     def cmake_args(self, prefix: str) -> list[str]:
-        return [
-            "-DBUILD_SHARED_LIBS=OFF",
-            "-DBUILD_TESTING=OFF",
-        ]
+        flags = ["-DBUILD_TESTING=OFF"]
+        if not self.tc.shared_deps:
+            flags.append("-DBUILD_SHARED_LIBS=OFF")
+        return flags

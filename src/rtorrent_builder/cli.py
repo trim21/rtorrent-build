@@ -120,6 +120,14 @@ def main() -> None:
     help="Debug build: -g -O0, no LTO, enable debug in rtorrent/libtorrent",
 )
 @click.option(
+    "--linkage",
+    type=click.Choice(["static", "shared"]),
+    default="static",
+    show_default=True,
+    help="Linking mode: static (default) or shared (.so) for dependencies. "
+    "Shared is useful with --docker to avoid rebuilding the entire dep tree.",
+)
+@click.option(
     "--cache-dir",
     type=click.Path(path_type=Path),
     default=None,
@@ -148,12 +156,10 @@ def build(
     build_docker: bool,
     build_info: Path | None,
     debug: bool,
+    linkage: str,
     cache_dir: Path | None,
     jobs: int,
 ) -> None:
-    """Build one or more variants from manifest files."""
-    output_dir = output_dir.resolve()
-
     options: dict[str, str] = {}
     if disguise:
         options["rtorrent.disguise"] = "1"
@@ -193,6 +199,7 @@ def build(
                 arch=Arch(arch),
                 docker_target_glibc=glibc_override,
                 debug=debug,
+                shared_deps=linkage == "shared",
                 cache_dir=cache_dir,
                 jobs=jobs,
             )
@@ -212,6 +219,7 @@ def build(
                 arch=arch,
                 disguise=disguise,
                 debug=debug,
+                shared_deps=linkage == "shared",
                 resolved=resolved,
                 manifest_path=manifest_path,
             )
@@ -262,6 +270,7 @@ def _build_docker(
     arch: str,
     disguise: bool,
     debug: bool,
+    shared_deps: bool,
     resolved: ResolvedManifest,
     manifest_path: Path,
 ) -> list[str]:
@@ -290,7 +299,7 @@ def _build_docker(
     image_ref = f"rtorrent:{primary}"
     output_name = binary_path.stem
     print(f"Building Docker image: {image_ref}")
-    build_docker_image(binary_path, output_name, image_ref, debug=debug)
+    build_docker_image(binary_path, output_name, image_ref, debug=debug, shared_deps=shared_deps)
     for extra in tags[1:]:
         extra_ref = f"rtorrent:{extra}"
         print(f"Tagging: {extra_ref}")
