@@ -1,6 +1,6 @@
 {
   "executable_package": "rtorrent",
-  "manifest_hash": "04bac44b580e6b68a00bba2d2624f00850658bc34e1c6d811702d875e3d5a2a8",
+  "manifest_hash": "afa75dbbf5a123ef9fc69c7729b5b17b941a7439958a66225a3f3af32169804b",
   "packages": {
     "brotli": {
       "url": "https://github.com/google/brotli/archive/refs/tags/v1.2.0.tar.gz",
@@ -11,8 +11,11 @@
       "version": "1.34.6"
     },
     "curl": {
-      "url": "https://github.com/curl/curl/archive/refs/tags/curl-8_20_0.tar.gz",
-      "version": "8.20.0"
+      "src": {
+        "sha": "e6502eea11e99ff20005476c19fe870ef4570b3e",
+        "url": "https://github.com/curl/curl.git"
+      },
+      "version": "e6502eea11e9"
     },
     "libidn2": {
       "url": "https://ftp.gnu.org/gnu/libidn/libidn2-2.3.8.tar.gz",
@@ -40,10 +43,10 @@
         "lua"
       ],
       "src": {
-        "sha": "662d67e861588c7ddf1fcf3f0317561bbddef487",
+        "sha": "08828045f5c419bb8b3ae5b469a5d878100fe2a7",
         "url": "https://github.com/rakshasa/rtorrent.git"
       },
-      "version": "662d67e86158"
+      "version": "08828045f5c4"
     },
     "rtorrent-libtorrent": {
       "requires": [
@@ -52,10 +55,10 @@
         "curl"
       ],
       "src": {
-        "sha": "12b50f12fe4a1919cb31801837a5f6af1ab86c1d",
-        "url": "https://github.com/trim21/libtorrent.git"
+        "sha": "ecfa554fd7dad8b6825f4716603171ede3258cc1",
+        "url": "https://github.com/rakshasa/libtorrent.git"
       },
-      "version": "12b50f12fe4a"
+      "version": "ecfa554fd7da"
     },
     "zlib": {
       "url": "https://github.com/zlib-ng/zlib-ng/archive/refs/tags/2.3.3.tar.gz",
