@@ -41,8 +41,8 @@
     },
     "qbittorrent": {
       "cxx_std": "c++20",
-      "url": "https://github.com/qbittorrent/qBittorrent/archive/refs/tags/release-5.2.1.tar.gz",
-      "version": "5.2.1"
+      "url": "https://github.com/qbittorrent/qBittorrent/archive/refs/tags/release-5.2.2.tar.gz",
+      "version": "5.2.2"
     },
     "qt": {
       "url": "https://download.qt.io/official_releases/qt/6.8/6.8.3/submodules/qtbase-everywhere-src-6.8.3.tar.xz",
