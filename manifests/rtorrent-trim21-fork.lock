@@ -12,10 +12,10 @@
     },
     "curl": {
       "src": {
-        "sha": "e6502eea11e99ff20005476c19fe870ef4570b3e",
+        "sha": "b09f8ebedba58a28646079da03a4a15cbaffcf87",
         "url": "https://github.com/curl/curl.git"
       },
-      "version": "e6502eea11e9"
+      "version": "b09f8ebedba5"
     },
     "libidn2": {
       "url": "https://ftp.gnu.org/gnu/libidn/libidn2-2.3.8.tar.gz",
@@ -43,10 +43,10 @@
         "lua"
       ],
       "src": {
-        "sha": "08828045f5c419bb8b3ae5b469a5d878100fe2a7",
+        "sha": "d595ebf7d868fc4e713132f1025123a0d1a4b3d8",
         "url": "https://github.com/rakshasa/rtorrent.git"
       },
-      "version": "08828045f5c4"
+      "version": "d595ebf7d868"
     },
     "rtorrent-libtorrent": {
       "requires": [
@@ -55,10 +55,10 @@
         "curl"
       ],
       "src": {
-        "sha": "ecfa554fd7dad8b6825f4716603171ede3258cc1",
+        "sha": "a771b51c6e2fb994f661ae23210763ffad1cefb2",
         "url": "https://github.com/rakshasa/libtorrent.git"
       },
-      "version": "ecfa554fd7da"
+      "version": "a771b51c6e2f"
     },
     "zlib": {
       "url": "https://github.com/zlib-ng/zlib-ng/archive/refs/tags/2.3.3.tar.gz",
