@@ -19,6 +19,7 @@ from .deps.boost import BoostBuilder
 from .deps.brotli import BrotliBuilder
 from .deps.cares import CaresBuilder
 from .deps.curl import CurlBuilder
+from .deps.libdeflate import LibdeflateBuilder
 from .deps.libidn2 import Libidn2Builder
 from .deps.libtorrent import LibtorrentBuilder
 from .deps.libtorrent_rasterbar import LibtorrentRasterbarBuilder
@@ -33,6 +34,7 @@ from .deps.qtbase import QtBaseBuilder
 from .deps.qttools import QtToolsBuilder
 from .deps.rtorrent import RtorrentBuilder
 from .deps.rtorrent_meson import RtorrentMesonBuilder
+from .deps.transmission import TransmissionBuilder
 from .deps.zlib import ZlibBuilder
 from .deps.zstd import ZstdBuilder
 from .manifest import ResolvedManifest, deps_for, reachable_packages
@@ -49,6 +51,7 @@ _BUILDER_MAP: dict[str, type[Builder]] = {
     "luajit": LuaJITBuilder,
     "nghttp2": Nghttp2Builder,
     "libunistring": LibunistringBuilder,
+    "libdeflate": LibdeflateBuilder,
     "libidn2": Libidn2Builder,
     "rtorrent-libtorrent": LibtorrentBuilder,
     "boost": BoostBuilder,
@@ -59,6 +62,7 @@ _BUILDER_MAP: dict[str, type[Builder]] = {
     "qbittorrent": QbittorrentBuilder,
     "rtorrent": RtorrentBuilder,
     "rtorrent-meson": RtorrentMesonBuilder,
+    "transmission": TransmissionBuilder,
 }
 
 _ALLOWED_SOS = frozenset(
@@ -118,6 +122,8 @@ def _binary_path(tc: Toolchain, name: str) -> Path:
         return tc.install_prefix / "bin" / "rtorrent"
     if name == "qbittorrent":
         return tc.install_prefix / "bin" / "qbittorrent-nox"
+    if name == "transmission":
+        return tc.install_prefix / "bin" / "transmission-daemon"
     raise KeyError(f"No binary path known for top-level package: {name}")
 
 

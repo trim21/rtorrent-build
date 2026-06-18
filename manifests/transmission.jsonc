@@ -1,0 +1,22 @@
+{
+  "$schema": "../manifest.schema.json",
+  "extends": "base/common.jsonc",
+  "executable_package": "transmission",
+  "target_glibc": "2.28",
+  "packages": {
+    "libdeflate": {
+      "source": {
+        "github": "ebiggers/libdeflate",
+        "tag_range": ">=1.7,<2"
+      }
+    },
+    "transmission": {
+      "source": {
+        "github": "transmission/transmission",
+        "tag_range": ">=4,<5",
+        "asset": "transmission-{version}.tar.xz"
+      },
+      "cxx_std": "c++17"
+    }
+  }
+}

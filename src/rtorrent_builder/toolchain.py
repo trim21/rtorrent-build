@@ -413,16 +413,21 @@ class Toolchain:
             dirs.append(str(lib / "libunwind" / "include"))
         return ";".join(dirs)
 
+    @property
+    def cmake_cflags_init(self) -> str:
+        if self.debug:
+            return "-fPIC -g -O0 -w"
+        return "-fPIC -flto -w"
+
     def _write_toolchain_file(self) -> Path:
         path = self.work_dir / "zig-toolchain.cmake"
         install_lib = str(self.install_prefix / "lib")
         install_lib64 = str(self.install_prefix / "lib64")
         wd = str(self.work_dir / "wrappers")
+        cmake_cflags = self.cmake_cflags_init
         if self.debug:
-            cmake_cflags = "-fPIC -g -O0 -w"
             cmake_ldflags = f"-L{install_lib} -L{install_lib64}"
         else:
-            cmake_cflags = "-fPIC -flto -w"
             cmake_ldflags = f"-flto -L{install_lib} -L{install_lib64}"
 
         content = "\n".join(
@@ -494,13 +499,8 @@ class Toolchain:
 
     @property
     def cmake_env(self) -> dict[str, str]:
-        pfx = str(self.install_prefix)
-        pkg_path = f"{pfx}/lib/pkgconfig:{pfx}/lib64/pkgconfig"
-        return os.environ | {
-            "CMAKE_PREFIX_PATH": pfx,
-            "PKG_CONFIG_PATH": pkg_path,
-            "PKG_CONFIG_LIBDIR": pkg_path,
-            "PATH": f"{self.venv_dir}/bin:{os.environ.get('PATH', '')}",
+        return self.env | {
+            "CMAKE_PREFIX_PATH": str(self.install_prefix),
         }
 
     def _write_meson_native_file(self) -> Path:

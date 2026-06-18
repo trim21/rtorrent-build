@@ -317,6 +317,12 @@ _DEPENDENCIES: dict[str, list[str]] = {
         "curl",
         "luajit",
     ],
+    "libdeflate": [],
+    "transmission": [
+        "openssl",
+        "curl",
+        "libdeflate",
+    ],
 }
 
 
