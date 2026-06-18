@@ -1,6 +1,6 @@
-# rtorrent-static
+# rtorrent-build
 
-Statically-linked [rtorrent](https://github.com/rakshasa/rtorrent) and [qBittorrent](https://github.com/qbittorrent/qBittorrent) binaries for Linux amd64, built with [Zig](https://ziglang.org/) as the C/C++ toolchain.
+Statically (or glibc only) linked [rtorrent](https://github.com/rakshasa/rtorrent) and [qBittorrent](https://github.com/qbittorrent/qBittorrent) binaries for Linux amd64, built with [Zig](https://ziglang.org/) as the C/C++ toolchain.
 
 ## Docker Images
 
