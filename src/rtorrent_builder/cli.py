@@ -92,6 +92,7 @@ def main() -> None:
     type=click.Choice([e.value for e in CliLibc]),
     default=CliLibc.glibc.value,
     show_default=True,
+    envvar="RTORRENT_BUILD_LIBC",
     help="Target libc: glibc (dynamic), musl (fully static), current (host glibc)",
 )
 @click.option(
@@ -99,7 +100,8 @@ def main() -> None:
     type=click.Choice([e.value for e in Arch]),
     default=Arch.v1.value,
     show_default=True,
-    help="x86-64 microarchitecture level (v1=baseline, v2=SSE4, v3=AVX2)",
+    envvar="RTORRENT_BUILD_ARCH",
+    help="x86-64 microarchitecture level (v1=baseline, v2=SSE4, v3=AVX2, native=host CPU)",
 )
 @click.option(
     "--docker",

@@ -20,10 +20,13 @@ class Arch(Enum):
     v2 = "amd/v2"
     v3 = "amd/v3"
     v4 = "amd/v4"
+    native = "native"
 
     @property
     def march(self) -> str:
         """GCC/clang ``-march`` flag value (LLVM underscore form)."""
+        if self == Arch.native:
+            return "native"
         return {
             Arch.v1: "x86_64",
             Arch.v2: "x86_64_v2",
