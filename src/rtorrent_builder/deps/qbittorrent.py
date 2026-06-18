@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from ..utils import replace_in_file
 from ._cmake import CMakeBuilder
 
 
@@ -12,3 +13,14 @@ class QbittorrentBuilder(CMakeBuilder):
             "-DGUI=OFF",
             "-DWEBUI=ON",
         ]
+
+    def cache_key_extra(self) -> list[str]:
+        return super().cache_key_extra() + ["1"]
+
+    def build(self) -> None:
+        replace_in_file(
+            self.src_dir / "src/base/http/requestparser.cpp",
+            "    const QByteArray EOH = CRLF.repeated(2);\n",
+            '    const QByteArray EOH = QByteArrayLiteral("\\x0D\\x0A").repeated(2);\n',
+        )
+        super().build()
