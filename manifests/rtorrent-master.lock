@@ -40,10 +40,10 @@
         "lua"
       ],
       "src": {
-        "sha": "bf74686c290e5fc328444501e6393d9da260aab0",
+        "sha": "acb02379b89446db005106268af8809146559175",
         "url": "https://github.com/rakshasa/rtorrent.git"
       },
-      "version": "bf74686c290e"
+      "version": "acb02379b894"
     },
     "rtorrent-libtorrent": {
       "requires": [
@@ -52,10 +52,10 @@
         "curl"
       ],
       "src": {
-        "sha": "a771b51c6e2fb994f661ae23210763ffad1cefb2",
+        "sha": "a345ce513f9b9027c0a4cc9687c5dd8a67e9e713",
         "url": "https://github.com/rakshasa/libtorrent.git"
       },
-      "version": "a771b51c6e2f"
+      "version": "a345ce513f9b"
     },
     "zlib": {
       "url": "https://github.com/zlib-ng/zlib-ng/archive/refs/tags/2.3.3.tar.gz",

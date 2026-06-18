@@ -298,14 +298,14 @@ _DEPENDENCIES: dict[str, list[str]] = {
     "boost": [],
     "libtorrent-rasterbar": ["boost", "openssl", "curl"],
     "zstd": [],
-    "qt": ["zlib", "openssl", "zstd", "brotli"],
-    "qttools": ["qt"],
+    "qtbase": ["zlib", "openssl", "zstd", "brotli"],
+    "qttools": ["qtbase"],
     "qbittorrent": [
         "zlib",
         "openssl",
         "boost",
         "libtorrent-rasterbar",
-        "qt",
+        "qtbase",
         "qttools",
     ],
     "rtorrent": [

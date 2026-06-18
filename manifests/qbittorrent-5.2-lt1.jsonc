@@ -19,7 +19,7 @@
       },
       "cxx_std": "c++14"
     },
-    "qt": {
+    "qtbase": {
       "source": {
         "url": "https://download.qt.io/official_releases/qt/6.8/6.8.3/submodules/qtbase-everywhere-src-6.8.3.tar.xz"
       },

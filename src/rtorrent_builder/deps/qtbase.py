@@ -7,7 +7,7 @@ from ..run import Commander
 from ..toolchain import Builder, ResolvedSource, Toolchain
 
 
-class QtBuilder(Builder):
+class QtBaseBuilder(Builder):
     def __init__(
         self, toolchain: Toolchain, lib: LibInfo, source: ResolvedSource, commander: Commander
     ) -> None:

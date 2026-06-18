@@ -29,7 +29,7 @@ from .deps.ncurses import NcursesBuilder
 from .deps.nghttp2 import Nghttp2Builder
 from .deps.openssl import OpensslBuilder
 from .deps.qbittorrent import QbittorrentBuilder
-from .deps.qt import QtBuilder
+from .deps.qtbase import QtBaseBuilder
 from .deps.qttools import QtToolsBuilder
 from .deps.rtorrent import RtorrentBuilder
 from .deps.rtorrent_meson import RtorrentMesonBuilder
@@ -54,7 +54,7 @@ _BUILDER_MAP: dict[str, type[Builder]] = {
     "boost": BoostBuilder,
     "libtorrent-rasterbar": LibtorrentRasterbarBuilder,
     "zstd": ZstdBuilder,
-    "qt": QtBuilder,
+    "qtbase": QtBaseBuilder,
     "qttools": QtToolsBuilder,
     "qbittorrent": QbittorrentBuilder,
     "rtorrent": RtorrentBuilder,

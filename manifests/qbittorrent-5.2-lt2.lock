@@ -1,6 +1,6 @@
 {
   "executable_package": "qbittorrent",
-  "manifest_hash": "5dfcd1e5fd0f2e6fea46dbde41d0a14b1108dce1c128c3101944e37995960813",
+  "manifest_hash": "57904c1ebceaaa159e34c5ddb908dc824bbcd0f1e29725213b5ae450dc7deb14",
   "packages": {
     "boost": {
       "url": "https://github.com/boostorg/boost/releases/download/boost-1.91.0-1/boost-1.91.0-1-cmake.tar.gz",
@@ -44,7 +44,7 @@
       "url": "https://github.com/qbittorrent/qBittorrent/archive/refs/tags/release-5.2.2.tar.gz",
       "version": "5.2.2"
     },
-    "qt": {
+    "qtbase": {
       "url": "https://download.qt.io/official_releases/qt/6.8/6.8.3/submodules/qtbase-everywhere-src-6.8.3.tar.xz",
       "version": "6.8.3"
     },
