@@ -91,8 +91,16 @@ class CacheStore:
             return False
         print(f"Persistent cache hit for {name}")
         prefix.mkdir(parents=True, exist_ok=True)
-        with tarfile.open(archive, "r:gz") as tf:
-            tf.extractall(str(prefix))
+        try:
+            with tarfile.open(archive, "r:gz") as tf:
+                tf.extractall(str(prefix))
+        except (EOFError, tarfile.ReadError) as e:
+            print(f"Corrupt cache file for {name}: {e}", file=sys.stderr)
+            archive.unlink()
+            meta = self._meta_path(name, key)
+            if meta.exists():
+                meta.unlink()
+            return False
         return True
 
     def store_files(
