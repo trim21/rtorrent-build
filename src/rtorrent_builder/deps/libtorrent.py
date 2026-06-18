@@ -10,6 +10,8 @@ from ..utils import replace_in_file
 
 
 class LibtorrentBuilder(Builder):
+    default_deps: list[str] = ["openssl", "zlib"]
+
     def __init__(
         self, toolchain: Toolchain, lib: LibInfo, source: ResolvedSource, commander: Commander
     ) -> None:

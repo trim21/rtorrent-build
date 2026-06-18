@@ -65,6 +65,19 @@ _BUILDER_MAP: dict[str, type[Builder]] = {
     "transmission": TransmissionBuilder,
 }
 
+
+def compute_deps() -> tuple[dict[str, dict[str, list[str]]], dict[str, list[str]]]:
+    """Return (all_features, default_deps) extracted from builder classes."""
+    all_features: dict[str, dict[str, list[str]]] = {}
+    default_deps: dict[str, list[str]] = {}
+    for name, builder_cls in _BUILDER_MAP.items():
+        features = getattr(builder_cls, "features", None)
+        if features:
+            all_features[name] = features
+        default_deps[name] = getattr(builder_cls, "default_deps", [])
+    return all_features, default_deps
+
+
 _ALLOWED_SOS = frozenset(
     {
         "ld-linux-x86-64.so.2",
@@ -272,14 +285,29 @@ def build_rtorrent(
     _variant_marker.write_text(_variant_id)
 
     pkgs = manifest.packages
-    needed = reachable_packages(pkgs, manifest.executable_package)
+    all_features, default_deps = compute_deps()
+    needed = reachable_packages(
+        pkgs,
+        manifest.executable_package,
+        all_features=all_features,
+        default_deps=default_deps,
+    )
     missing = {n for n in needed if n in _BUILDER_MAP and n not in pkgs}
     if missing:
         msg = "WARNING: packages referenced as deps but not defined in manifest"
         print(f"{msg}: {missing}")
     names = [n for n in _BUILDER_MAP if n in needed and n in pkgs]
 
-    ts = TopologicalSorter({name: [d for d in deps_for(name, pkgs) if d in pkgs] for name in names})
+    ts = TopologicalSorter(
+        {
+            name: [
+                d
+                for d in deps_for(name, pkgs, all_features=all_features, default_deps=default_deps)
+                if d in pkgs
+            ]
+            for name in names
+        }
+    )
     ts.prepare()
 
     resolved: dict[str, ResolvedSource] = {}
@@ -302,7 +330,8 @@ def build_rtorrent(
         key_builder = builder_cls(tc, lib, key_source, tc.make_commander(name))
         cache_key = key_builder.cache_key_extra()
 
-        dep_hashes = {d: _pkg_hashes[d] for d in deps_for(name, pkgs) if d in _pkg_hashes}
+        deps = deps_for(name, pkgs, all_features=all_features, default_deps=default_deps)
+        dep_hashes = {d: _pkg_hashes[d] for d in deps if d in _pkg_hashes}
         merkle_hash, merkle_payload = compute_merkle_hash(
             name=name,
             version=pkg.version,

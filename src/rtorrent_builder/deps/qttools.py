@@ -2,6 +2,8 @@ from ._cmake import CMakeBuilder
 
 
 class QtToolsBuilder(CMakeBuilder):
+    default_deps: list[str] = ["qtbase"]
+
     def cmake_args(self) -> list[str]:
         return [
             "-DCMAKE_DISABLE_FIND_PACKAGE_Clang=ON",

@@ -4,6 +4,8 @@ from ._cmake import CMakeBuilder
 
 
 class LibdeflateBuilder(CMakeBuilder):
+    default_deps: list[str] = []
+
     def cmake_args(self) -> list[str]:
         return [
             "-DLIBDEFLATE_COMPRESSION_SUPPORT=ON",

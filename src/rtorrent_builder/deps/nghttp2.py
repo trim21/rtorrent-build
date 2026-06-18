@@ -2,6 +2,8 @@ from ._cmake import CMakeBuilder
 
 
 class Nghttp2Builder(CMakeBuilder):
+    default_deps: list[str] = ["zlib"]
+
     def cmake_args(self) -> list[str]:
         return [
             "-DENABLE_LIB_ONLY=ON",

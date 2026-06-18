@@ -10,6 +10,13 @@
         "tag_range": ">=1.7,<2"
       }
     },
+    "curl": {
+      "source": {
+        "github": "curl/curl",
+        "tag_range": ">=8,<9"
+      },
+      "features": ["idn2"]
+    },
     "transmission": {
       "source": {
         "github": "transmission/transmission",

@@ -17,6 +17,8 @@ def _semver(v: str) -> tuple[int, ...]:
 
 
 class RtorrentBuilder(Builder):
+    default_deps: list[str] = ["rtorrent-libtorrent"]
+
     def __init__(
         self, toolchain: Toolchain, lib: LibInfo, source: ResolvedSource, commander: Commander
     ) -> None:

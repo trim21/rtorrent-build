@@ -4,6 +4,13 @@
   "executable_package": "rtorrent",
   "target_glibc": "2.28",
   "packages": {
+    "curl": {
+      "source": {
+        "github": "curl/curl",
+        "tag_range": ">=8,<9"
+      },
+      "features": ["idn2"]
+    },
     "rtorrent": {
       "source": {
         "github": "rakshasa/rtorrent",

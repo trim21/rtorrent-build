@@ -4,6 +4,8 @@ from ._cmake import CMakeBuilder
 
 
 class TransmissionBuilder(CMakeBuilder):
+    default_deps: list[str] = ["openssl", "curl", "libdeflate"]
+
     def cmake_args(self) -> list[str]:
         return [
             "-DENABLE_CLI=OFF",

@@ -2,6 +2,8 @@ from ._cmake import CMakeBuilder
 
 
 class ZstdBuilder(CMakeBuilder):
+    default_deps: list[str] = []
+
     def cmake_args(self) -> list[str]:
         return [
             "-DZSTD_BUILD_PROGRAMS=OFF",

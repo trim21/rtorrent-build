@@ -2,6 +2,8 @@ from ._make import MakeBuilder
 
 
 class LuaBuilder(MakeBuilder):
+    default_deps: list[str] = []
+
     def make_args(self) -> list[str]:
         return ["generic", f"CC={' '.join(self.tc.zig_cc)}", *self.commander.nproc_args()]
 

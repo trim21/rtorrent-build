@@ -1,40 +1,51 @@
 {
   "executable_package": "rtorrent",
-  "manifest_hash": "4e37dae7a0f31accf379adee6802025563dfcb5a30c90ea698c58812be4a5b6c",
+  "manifest_hash": "a13952ba8a416996c90af42cec1ce1e94476f93d06f733fd7b40e10fdf6fc740",
   "packages": {
     "brotli": {
+      "features": [],
       "url": "https://github.com/google/brotli/archive/refs/tags/v1.2.0.tar.gz",
       "version": "1.2.0"
     },
     "cares": {
+      "features": [],
       "url": "https://github.com/c-ares/c-ares/archive/refs/tags/v1.34.6.tar.gz",
       "version": "1.34.6"
     },
     "curl": {
+      "features": [
+        "idn2"
+      ],
       "url": "https://github.com/curl/curl/archive/refs/tags/curl-8_20_0.tar.gz",
       "version": "8.20.0"
     },
     "libidn2": {
+      "features": [],
       "url": "https://ftp.gnu.org/gnu/libidn/libidn2-2.3.8.tar.gz",
       "version": "2.3.8"
     },
     "libunistring": {
+      "features": [],
       "url": "https://ftp.gnu.org/gnu/libunistring/libunistring-1.4.tar.gz",
       "version": "1.4"
     },
     "lua": {
+      "features": [],
       "url": "https://www.lua.org/ftp/lua-5.4.8.tar.gz",
       "version": "5.4.8"
     },
     "nghttp2": {
+      "features": [],
       "url": "https://github.com/nghttp2/nghttp2/archive/refs/tags/v1.69.0.tar.gz",
       "version": "1.69.0"
     },
     "openssl": {
+      "features": [],
       "url": "https://github.com/openssl/openssl/archive/refs/tags/openssl-3.6.3.tar.gz",
       "version": "3.6.3"
     },
     "rtorrent": {
+      "features": [],
       "requires": [
         "rtorrent-libtorrent",
         "lua"
@@ -46,6 +57,7 @@
       "version": "acb02379b894"
     },
     "rtorrent-libtorrent": {
+      "features": [],
       "requires": [
         "openssl",
         "zlib",
@@ -58,10 +70,12 @@
       "version": "852792860370"
     },
     "zlib": {
+      "features": [],
       "url": "https://github.com/zlib-ng/zlib-ng/archive/refs/tags/2.3.3.tar.gz",
       "version": "2.3.3"
     },
     "zstd": {
+      "features": [],
       "url": "https://github.com/facebook/zstd/archive/refs/tags/v1.5.7.tar.gz",
       "version": "1.5.7"
     }

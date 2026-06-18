@@ -1,49 +1,62 @@
 {
   "executable_package": "transmission",
-  "manifest_hash": "b884b662132100001cfd131a1f65bd9c5ad95b98c59a26398cc5a2872302b2c8",
+  "manifest_hash": "2b23328c73efb6d91ed56c621dcb36631cc70386d2c1dff494011770db9da50e",
   "packages": {
     "brotli": {
+      "features": [],
       "url": "https://github.com/google/brotli/archive/refs/tags/v1.2.0.tar.gz",
       "version": "1.2.0"
     },
     "cares": {
+      "features": [],
       "url": "https://github.com/c-ares/c-ares/archive/refs/tags/v1.34.6.tar.gz",
       "version": "1.34.6"
     },
     "curl": {
+      "features": [
+        "idn2"
+      ],
       "url": "https://github.com/curl/curl/archive/refs/tags/curl-8_20_0.tar.gz",
       "version": "8.20.0"
     },
     "libdeflate": {
+      "features": [],
       "url": "https://github.com/ebiggers/libdeflate/archive/refs/tags/v1.25.tar.gz",
       "version": "1.25"
     },
     "libidn2": {
+      "features": [],
       "url": "https://ftp.gnu.org/gnu/libidn/libidn2-2.3.8.tar.gz",
       "version": "2.3.8"
     },
     "libunistring": {
+      "features": [],
       "url": "https://ftp.gnu.org/gnu/libunistring/libunistring-1.4.tar.gz",
       "version": "1.4"
     },
     "nghttp2": {
+      "features": [],
       "url": "https://github.com/nghttp2/nghttp2/archive/refs/tags/v1.69.0.tar.gz",
       "version": "1.69.0"
     },
     "openssl": {
+      "features": [],
       "url": "https://github.com/openssl/openssl/archive/refs/tags/openssl-3.6.3.tar.gz",
       "version": "3.6.3"
     },
     "transmission": {
       "cxx_std": "c++17",
+      "features": [],
       "url": "https://github.com/transmission/transmission/releases/download/4.1.2/transmission-4.1.2.tar.xz",
       "version": "4.1.2"
     },
     "zlib": {
+      "features": [],
       "url": "https://github.com/zlib-ng/zlib-ng/archive/refs/tags/2.3.3.tar.gz",
       "version": "2.3.3"
     },
     "zstd": {
+      "features": [],
       "url": "https://github.com/facebook/zstd/archive/refs/tags/v1.5.7.tar.gz",
       "version": "1.5.7"
     }

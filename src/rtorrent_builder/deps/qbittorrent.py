@@ -7,6 +7,15 @@ from ._cmake import CMakeBuilder
 
 
 class QbittorrentBuilder(CMakeBuilder):
+    default_deps: list[str] = [
+        "zlib",
+        "openssl",
+        "boost",
+        "libtorrent-rasterbar",
+        "qtbase",
+        "qttools",
+    ]
+
     def cmake_args(self) -> list[str]:
         return [
             "-DCMAKE_CXX_STANDARD=20",

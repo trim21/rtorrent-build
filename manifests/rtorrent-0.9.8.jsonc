@@ -29,7 +29,8 @@
       "source": {
         "url": "https://github.com/curl/curl/releases/download/curl-7_88_1/curl-7.88.1.tar.gz"
       },
-      "version": "7.88.1"
+      "version": "7.88.1",
+      "features": ["idn2"]
     }
   }
 }

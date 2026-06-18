@@ -8,6 +8,7 @@ import subprocess
 from functools import cache
 from pathlib import Path
 
+from .builder import compute_deps
 from .manifest import (
     GenericRefSource,
     GitHubRefSource,
@@ -156,7 +157,13 @@ def resolve_manifest(manifest_path: Path) -> None:
     raw = _resolve_extends(raw, manifests_dir)
 
     if raw.executable_package:
-        reachable = reachable_packages(raw.packages, raw.executable_package)
+        all_features, default_deps = compute_deps()
+        reachable = reachable_packages(
+            raw.packages,
+            raw.executable_package,
+            all_features=all_features,
+            default_deps=default_deps,
+        )
     else:
         reachable = set(raw.packages)
 
@@ -176,6 +183,8 @@ def resolve_manifest(manifest_path: Path) -> None:
             entry["cxx_std"] = pkg.cxx_std
         if pkg.requires is not None:
             entry["requires"] = pkg.requires
+        if pkg.features is not None:
+            entry["features"] = pkg.features
         resolved_packages[name] = entry
         src_url = (
             resolved_source.url

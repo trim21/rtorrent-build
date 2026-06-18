@@ -8,6 +8,8 @@ from ..toolchain import Builder, ResolvedSource, Toolchain
 
 
 class QtBaseBuilder(Builder):
+    default_deps: list[str] = ["zlib", "openssl", "zstd", "brotli"]
+
     def __init__(
         self, toolchain: Toolchain, lib: LibInfo, source: ResolvedSource, commander: Commander
     ) -> None:

@@ -7,6 +7,8 @@ from ._cmake import CMakeBuilder
 
 
 class LibtorrentRasterbarBuilder(CMakeBuilder):
+    default_deps: list[str] = ["boost", "openssl", "curl"]
+
     def cmake_args(self) -> list[str]:
         args = [
             "-DBUILD_SHARED_LIBS=OFF",

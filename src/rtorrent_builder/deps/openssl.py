@@ -6,6 +6,8 @@ from ..toolchain import Builder, ResolvedSource, Toolchain
 
 
 class OpensslBuilder(Builder):
+    default_deps: list[str] = []
+
     def __init__(
         self, toolchain: Toolchain, lib: LibInfo, source: ResolvedSource, commander: Commander
     ) -> None:

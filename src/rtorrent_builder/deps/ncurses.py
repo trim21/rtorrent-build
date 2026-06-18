@@ -2,6 +2,8 @@ from ._make import MakeBuilder
 
 
 class NcursesBuilder(MakeBuilder):
+    default_deps: list[str] = []
+
     def cache_key_extra(self) -> list[str]:
         return super().cache_key_extra() + [
             "--enable-static",

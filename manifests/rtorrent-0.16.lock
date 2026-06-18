@@ -1,44 +1,56 @@
 {
   "executable_package": "rtorrent",
-  "manifest_hash": "877657dabad2ce915d738f295eb0876b42223eb385861af984f1ed76dc838c52",
+  "manifest_hash": "235837dc95907772f2fa6c9404af44eadcb107ae2a28137f9dbd5ae33d4f00e4",
   "packages": {
     "brotli": {
+      "features": [],
       "url": "https://github.com/google/brotli/archive/refs/tags/v1.2.0.tar.gz",
       "version": "1.2.0"
     },
     "cares": {
+      "features": [],
       "url": "https://github.com/c-ares/c-ares/archive/refs/tags/v1.34.6.tar.gz",
       "version": "1.34.6"
     },
     "curl": {
+      "features": [
+        "idn2"
+      ],
       "url": "https://github.com/curl/curl/archive/refs/tags/curl-8_20_0.tar.gz",
       "version": "8.20.0"
     },
     "libidn2": {
+      "features": [],
       "url": "https://ftp.gnu.org/gnu/libidn/libidn2-2.3.8.tar.gz",
       "version": "2.3.8"
     },
     "libunistring": {
+      "features": [],
       "url": "https://ftp.gnu.org/gnu/libunistring/libunistring-1.4.tar.gz",
       "version": "1.4"
     },
     "lua": {
+      "features": [],
       "url": "https://www.lua.org/ftp/lua-5.4.8.tar.gz",
       "version": "5.4.8"
     },
     "ncurses": {
+      "features": [],
       "url": "https://ftp.gnu.org/pub/gnu/ncurses/ncurses-6.6.tar.gz",
       "version": "6.6"
     },
     "nghttp2": {
+      "features": [],
       "url": "https://github.com/nghttp2/nghttp2/archive/refs/tags/v1.69.0.tar.gz",
       "version": "1.69.0"
     },
     "openssl": {
+      "features": [],
       "url": "https://github.com/openssl/openssl/archive/refs/tags/openssl-3.6.3.tar.gz",
       "version": "3.6.3"
     },
     "rtorrent": {
+      "features": [],
       "requires": [
         "rtorrent-libtorrent",
         "ncurses",
@@ -48,6 +60,7 @@
       "version": "0.16.14"
     },
     "rtorrent-libtorrent": {
+      "features": [],
       "requires": [
         "openssl",
         "zlib",
@@ -57,10 +70,12 @@
       "version": "0.16.14"
     },
     "zlib": {
+      "features": [],
       "url": "https://github.com/zlib-ng/zlib-ng/archive/refs/tags/2.3.3.tar.gz",
       "version": "2.3.3"
     },
     "zstd": {
+      "features": [],
       "url": "https://github.com/facebook/zstd/archive/refs/tags/v1.5.7.tar.gz",
       "version": "1.5.7"
     }

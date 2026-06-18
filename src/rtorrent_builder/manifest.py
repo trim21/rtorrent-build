@@ -69,6 +69,7 @@ class LibInfo:
     version: str = ""
     cxx_std: str | None = None
     requires: list[str] | None = None
+    features: list[str] = field(default_factory=list)
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -94,6 +95,7 @@ class ResolvedPackage:
     version: str = ""
     cxx_std: str | None = None
     requires: list[str] | None = None
+    features: list[str] = field(default_factory=list)
     src: GitSource | None = None
 
     def to_libinfo(self) -> LibInfo:
@@ -103,12 +105,14 @@ class ResolvedPackage:
                 version=self.version,
                 cxx_std=self.cxx_std,
                 requires=self.requires,
+                features=self.features,
             )
         return LibInfo(
             source=URLSource(url=self.url),
             version=self.version,
             cxx_std=self.cxx_std,
             requires=self.requires,
+            features=self.features,
         )
 
 
@@ -293,7 +297,7 @@ _DEPENDENCIES: dict[str, list[str]] = {
     "nghttp2": ["zlib"],
     "libunistring": [],
     "libidn2": ["libunistring"],
-    "curl": ["zlib", "openssl", "brotli", "cares", "zstd", "nghttp2", "libidn2"],
+    "curl": ["zlib", "openssl", "brotli", "cares", "zstd", "nghttp2"],
     "rtorrent-libtorrent": ["openssl", "zlib"],
     "boost": [],
     "libtorrent-rasterbar": ["boost", "openssl", "curl"],
@@ -326,14 +330,36 @@ _DEPENDENCIES: dict[str, list[str]] = {
 }
 
 
-def deps_for(name: str, packages: Mapping[str, LibInfo | ResolvedPackage]) -> list[str]:
+def deps_for(
+    name: str,
+    packages: Mapping[str, LibInfo | ResolvedPackage],
+    all_features: dict[str, dict[str, list[str]]] | None = None,
+    default_deps: dict[str, list[str]] | None = None,
+) -> list[str]:
     pkg = packages.get(name)
     if pkg and pkg.requires is not None:
-        return pkg.requires
-    return _DEPENDENCIES.get(name, [])
+        deps = list(pkg.requires)
+    elif default_deps is not None:
+        deps = list(default_deps.get(name, []))
+    else:
+        deps = list(_DEPENDENCIES.get(name, []))
+
+    if all_features and pkg and pkg.features:
+        pkg_features = all_features.get(name, {})
+        for feature_name in pkg.features:
+            for fd in pkg_features.get(feature_name, []):
+                if fd not in deps:
+                    deps.append(fd)
+
+    return deps
 
 
-def reachable_packages(packages: Mapping[str, LibInfo | ResolvedPackage], root: str) -> set[str]:
+def reachable_packages(
+    packages: Mapping[str, LibInfo | ResolvedPackage],
+    root: str,
+    all_features: dict[str, dict[str, list[str]]] | None = None,
+    default_deps: dict[str, list[str]] | None = None,
+) -> set[str]:
     """Collect packages reachable from *root* via requires edges."""
     visited: set[str] = set()
     queue = [root]
@@ -342,7 +368,7 @@ def reachable_packages(packages: Mapping[str, LibInfo | ResolvedPackage], root: 
         if name in visited:
             continue
         visited.add(name)
-        for dep in deps_for(name, packages):
+        for dep in deps_for(name, packages, all_features=all_features, default_deps=default_deps):
             if dep not in visited:
                 queue.append(dep)
     return visited

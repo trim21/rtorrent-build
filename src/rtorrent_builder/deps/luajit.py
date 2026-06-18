@@ -7,6 +7,8 @@ from ._make import MakeBuilder
 
 
 class LuaJITBuilder(MakeBuilder):
+    default_deps: list[str] = []
+
     def __init__(
         self, toolchain: Toolchain, lib: LibInfo, source: ResolvedSource, commander: Commander
     ) -> None:
