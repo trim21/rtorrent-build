@@ -106,6 +106,7 @@ jobs:
             --libc "${{ matrix.libc }}" \
             --arch "${{ matrix.arch.flag }}" \
             --docker \
+            --cache-gc \
             --build-info build-info.json
 
       - name: Log in to Container Registry

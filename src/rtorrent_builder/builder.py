@@ -214,6 +214,7 @@ def build_rtorrent(
     output_dir: Path,
     clean: bool = True,
     no_cache: bool = False,
+    cache_gc: bool = False,
     options: dict[str, str] | None = None,
     libc: Libc = Libc.glibc,
     arch: Arch = Arch.v1,
@@ -373,7 +374,7 @@ def build_rtorrent(
                 ts.done(name)
 
     total_elapsed = time.monotonic() - build_origin
-    if _cache_store:
+    if _cache_store and cache_gc:
         _cache_store.gc(_pkg_hashes)
     _render_timeline_table(timings, total_elapsed)
 

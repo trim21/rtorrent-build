@@ -82,6 +82,13 @@ def main() -> None:
     help="Disable build cache — rebuild all packages",
 )
 @click.option(
+    "--cache-gc",
+    is_flag=True,
+    default=False,
+    envvar="RTORRENT_CACHE_GC",
+    help="Run cache garbage collection after build (removes stale entries)",
+)
+@click.option(
     "--disguise/--no-disguise",
     default=False,
     envvar="RTORRENT_BUILD_DISGUISE",
@@ -145,6 +152,7 @@ def build(
     output_dir: Path,
     clean: bool,
     no_cache: bool,
+    cache_gc: bool,
     disguise: bool,
     libc: str,
     arch: str,
@@ -191,6 +199,7 @@ def build(
                 output_dir=output_dir,
                 clean=clean,
                 no_cache=no_cache,
+                cache_gc=cache_gc,
                 options=options,
                 libc=resolved_libc,
                 arch=Arch(arch),
