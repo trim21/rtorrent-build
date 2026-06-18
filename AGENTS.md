@@ -86,7 +86,7 @@ Final binary: `dist/{name}-{version}.{arch}.glibc.{glibc_version}` or `dist/{nam
 All dependencies and final binaries are built with:
 
 - `-fPIC` — position-independent code
-- `-Os` — optimize for size
+- `-O2` — optimize for speed (not size)
 - `-g` — emit debug info (preserved in final binary)
 - `-flto` — full link-time optimization (applied to both compile and link steps)
 - `-w` — suppress all compiler warnings

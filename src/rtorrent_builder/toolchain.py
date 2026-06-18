@@ -470,7 +470,7 @@ class Toolchain:
             cflags = f"-fPIC -g -O0 -w -march={self.arch.march}"
         else:
             ldflags = f"-flto -L{install_lib} -L{install_lib}64"
-            cflags = f"-fPIC -Os -g -flto -w -march={self.arch.march}"
+            cflags = f"-fPIC -O2 -g -flto -w -march={self.arch.march}"
         if self.libc == Libc.musl:
             ldflags += " -static"
             cflags += " -static"
@@ -514,7 +514,7 @@ class Toolchain:
             cflags = f"-fPIC -g -O0 -w -march={self.arch.march}"
             ldflags = f"-L{install_lib} -L{install_lib64}"
         else:
-            cflags = f"-fPIC -Os -g -flto -w -march={self.arch.march}"
+            cflags = f"-fPIC -O2 -g -flto -w -march={self.arch.march}"
             ldflags = f"-flto -L{install_lib} -L{install_lib64}"
 
         if self.libc == Libc.musl:
