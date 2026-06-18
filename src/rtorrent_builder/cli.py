@@ -1,6 +1,7 @@
 """CLI entry point for rtorrent-static builder."""
 
 import json
+import os
 import re
 import subprocess
 import sys
@@ -215,6 +216,13 @@ def build(
                 resolved=resolved,
                 manifest_path=manifest_path,
             )
+            summary_path = os.environ.get("GITHUB_STEP_SUMMARY")
+            if summary_path:
+                with open(summary_path, "a") as f:
+                    f.write(f"\n## Docker Image ({variant})\n\n")
+                    for t in tags:
+                        f.write(f"- `rtorrent:{t}`\n")
+                    f.write("\n")
             if build_info:
                 info = {"tags": tags}
                 build_info.parent.mkdir(parents=True, exist_ok=True)
