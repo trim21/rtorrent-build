@@ -58,3 +58,21 @@ Static binaries are published to [GitHub Releases](https://github.com/trim21/rto
 | `qb-5.2.1-lt-2.0.12.amd.v1-musl` | 5.2.1 | 2.0.12 | musl |
 
 All binaries are built with `-Os -flto -fPIC -g` and x86_64-v1 baseline, statically linked except for glibc-family `.so` deps.
+
+## Troubleshooting
+
+### qBittorrent: "unspecified system error" / HTTPS tracker failures
+
+This is caused by OpenSSL being unable to find a CA certificate bundle. The statically-linked OpenSSL is compiled with
+`--openssldir=/etc/ssl`, which matches Debian/Ubuntu/Arch/Alpine. If your distribution stores CA certificates
+elsewhere (e.g. RHEL/Fedora uses `/etc/pki/tls`), set the `SSL_CERT_FILE` environment variable:
+
+```bash
+# RHEL/Fedora
+SSL_CERT_FILE=/etc/pki/tls/certs/ca-bundle.crt qbittorrent-nox
+
+# Or point to a Mozilla CA bundle from the ca-certificates package
+SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt qbittorrent-nox
+```
+
+rtorrent is unaffected — it uses libcurl for HTTPS, which has its own CA bundle auto-detection.

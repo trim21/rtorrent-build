@@ -18,7 +18,13 @@ class OpensslBuilder(Builder):
         self.commander = commander
 
     def cache_key_extra(self) -> list[str]:
-        return super().cache_key_extra() + ["no-shared", "no-dso", "no-tests", "linux-x86_64"]
+        return super().cache_key_extra() + [
+            "no-shared",
+            "no-dso",
+            "no-tests",
+            "linux-x86_64",
+            "openssldir=/etc/ssl",
+        ]
 
     def build(self) -> None:
         print(f"Building {self.name} {self.version}")
@@ -32,6 +38,7 @@ class OpensslBuilder(Builder):
 
         configure_args = [
             f"--prefix={self.tc.install_prefix}",
+            "--openssldir=/etc/ssl",
             "no-shared",
             "no-dso",
             "no-tests",
