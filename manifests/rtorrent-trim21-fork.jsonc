@@ -11,16 +11,10 @@
       },
       "requires": ["rtorrent-libtorrent", "lua"]
     },
-    "curl": {
-      "source": {
-        "github": "curl/curl",
-        "ref": "refs/pull/22049/head"
-      }
-    },
     "rtorrent-libtorrent": {
       "source": {
-        "github": "rakshasa/libtorrent",
-        "ref": "master"
+        "github": "trim21/libtorrent",
+        "ref": "combined/perf-fixes"
       },
       "requires": ["openssl", "zlib", "curl"]
     }

@@ -288,17 +288,17 @@ def build_rtorrent(
         pkg = pkgs[name]
         lib = pkg.to_libinfo()
         builder_cls = _BUILDER_MAP[name]
-        commander = tc.make_commander(name)
 
-        source = tc.prepare_source(name, lib)
-        resolved[name] = source
-        builder = builder_cls(tc, lib, source, commander)
-        cache_key = builder.cache_key_extra()
+        # Compute cache key WITHOUT downloading source.
+        # cache_key_extra() does not need a real source directory.
+        key_source = ResolvedSource(name=name, version=pkg.version, src_dir=Path())
+        key_builder = builder_cls(tc, lib, key_source, tc.make_commander(name))
+        cache_key = key_builder.cache_key_extra()
 
         dep_hashes = {d: _pkg_hashes[d] for d in deps_for(name, pkgs) if d in _pkg_hashes}
         merkle_hash, merkle_payload = compute_merkle_hash(
             name=name,
-            version=source.version,
+            version=pkg.version,
             url=pkg.url,
             options=cache_key,
             toolchain_name=tc._toolchain_name,
@@ -313,7 +313,8 @@ def build_rtorrent(
         _pkg_hashes[name] = merkle_hash
 
         if not no_cache and tc.is_built_merkle(name, merkle_hash):
-            print(f"Already built {name} {source.version}")
+            print(f"Already built {name} {pkg.version}")
+            resolved[name] = ResolvedSource(name=name, version=pkg.version, src_dir=Path())
             t.gen_end = time.monotonic() - build_origin
             t.end = time.monotonic() - build_origin
             t.source = _BuildSource.marker
@@ -322,6 +323,7 @@ def build_rtorrent(
         if _cache_store and _cache_store.has(name, merkle_hash):
             _cache_store.restore(name, merkle_hash, tc.install_prefix)
             tc.mark_built_merkle(name, merkle_hash)
+            resolved[name] = ResolvedSource(name=name, version=pkg.version, src_dir=Path())
             t.gen_end = time.monotonic() - build_origin
             t.end = time.monotonic() - build_origin
             t.source = _BuildSource.cached
@@ -332,9 +334,9 @@ def build_rtorrent(
 
         before_files = _list_prefix_files(tc.install_prefix)
 
-        tc.clean_source(name, lib)
         source = tc.prepare_source(name, lib)
         resolved[name] = source
+        commander = tc.make_commander(name)
         builder = builder_cls(tc, lib, source, commander)
         t.gen_end = time.monotonic() - build_origin
         builder.build()
