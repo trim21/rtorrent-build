@@ -19,10 +19,10 @@ class CMakeBuilder(Builder):
         self.commander = commander
 
     @abstractmethod
-    def cmake_args(self, prefix: str) -> list[str]: ...
+    def cmake_args(self) -> list[str]: ...
 
     def cache_key_extra(self) -> list[str]:
-        return super().cache_key_extra() + self.cmake_args("$PREFIX")
+        return super().cache_key_extra() + self.cmake_args()
 
     def build(self) -> None:
         print(f"Building {self.name} {self.version}")
@@ -41,7 +41,7 @@ class CMakeBuilder(Builder):
                 "-DCMAKE_BUILD_TYPE=RelWithDebInfo",
                 "-DBUILD_SHARED_LIBS=OFF",
                 "-DBUILD_TESTING=OFF",
-                *self.cmake_args(prefix),
+                *self.cmake_args(),
                 "-S",
                 str(self.src_dir),
             ],

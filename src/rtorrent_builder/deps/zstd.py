@@ -2,7 +2,7 @@ from ._cmake import CMakeBuilder
 
 
 class ZstdBuilder(CMakeBuilder):
-    def cmake_args(self, prefix: str) -> list[str]:
+    def cmake_args(self) -> list[str]:
         return [
             "-DZSTD_BUILD_PROGRAMS=OFF",
             "-DZSTD_BUILD_TESTS=OFF",

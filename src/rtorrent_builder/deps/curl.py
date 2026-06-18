@@ -2,7 +2,7 @@ from ._cmake import CMakeBuilder
 
 
 class CurlBuilder(CMakeBuilder):
-    def cmake_args(self, prefix: str) -> list[str]:
+    def cmake_args(self) -> list[str]:
         tc = self.tc
         return [
             "-DCURL_USE_GTEST=OFF",

@@ -6,7 +6,7 @@ from ._cmake import CMakeBuilder
 
 
 class BoostBuilder(CMakeBuilder):
-    def cmake_args(self, prefix: str) -> list[str]:
+    def cmake_args(self) -> list[str]:
         return [
             "-DBUILD_SHARED_LIBS=OFF",
             "-DBUILD_TESTING=OFF",

@@ -3,7 +3,7 @@ from ._cmake import CMakeBuilder
 
 
 class BrotliBuilder(CMakeBuilder):
-    def cmake_args(self, prefix: str) -> list[str]:
+    def cmake_args(self) -> list[str]:
         return [
             "-DBROTLI_BUILD_TOOLS=OFF",
             "-DBROTLI_DISABLE_TESTS=ON",

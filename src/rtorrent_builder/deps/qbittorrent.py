@@ -6,11 +6,9 @@ from ._cmake import CMakeBuilder
 
 
 class QbittorrentBuilder(CMakeBuilder):
-    def cmake_args(self, prefix: str) -> list[str]:
+    def cmake_args(self) -> list[str]:
         return [
-            "-DCMAKE_CXX_STANDARD=17",
+            "-DCMAKE_CXX_STANDARD=20",
             "-DGUI=OFF",
-            "-DQT6=ON",
-            "-DWebUI=ON",
-            "-DTESTING=OFF",
+            "-DWEBUI=ON",
         ]

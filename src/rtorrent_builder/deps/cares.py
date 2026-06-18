@@ -4,7 +4,7 @@ from ._cmake import CMakeBuilder
 
 
 class CaresBuilder(CMakeBuilder):
-    def cmake_args(self, prefix: str) -> list[str]:
+    def cmake_args(self) -> list[str]:
         return [
             "-DCARES_STATIC=ON",
             "-DCARES_SHARED=OFF",

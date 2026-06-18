@@ -7,7 +7,7 @@ from ._cmake import CMakeBuilder
 
 
 class LibtorrentRasterbarBuilder(CMakeBuilder):
-    def cmake_args(self, prefix: str) -> list[str]:
+    def cmake_args(self) -> list[str]:
         args = [
             "-DBUILD_SHARED_LIBS=OFF",
             "-Ddeprecated-functions=OFF",
