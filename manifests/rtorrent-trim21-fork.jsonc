@@ -20,8 +20,8 @@
     },
     "rtorrent-libtorrent": {
       "source": {
-        "github": "trim21/libtorrent",
-        "ref": "combined/perf-fixes"
+        "github": "rakshasa/libtorrent",
+        "ref": "feature/callback-timeout-backoff"
       },
       "requires": ["openssl", "zlib", "curl"]
     }

@@ -1,6 +1,6 @@
 {
   "executable_package": "rtorrent",
-  "manifest_hash": "a13952ba8a416996c90af42cec1ce1e94476f93d06f733fd7b40e10fdf6fc740",
+  "manifest_hash": "6953fbe3c14ba11296a424527bf8e71b64dd345dfce16d2a1d93d0b90bab8f9c",
   "packages": {
     "brotli": {
       "features": [],
@@ -51,10 +51,10 @@
         "lua"
       ],
       "src": {
-        "sha": "acb02379b89446db005106268af8809146559175",
+        "sha": "8249070ff104834db6a58ce44ff6276cbe736eeb",
         "url": "https://github.com/rakshasa/rtorrent.git"
       },
-      "version": "acb02379b894"
+      "version": "8249070ff104"
     },
     "rtorrent-libtorrent": {
       "features": [],
@@ -64,10 +64,10 @@
         "curl"
       ],
       "src": {
-        "sha": "852792860370542d814d0da720268a03a8444541",
-        "url": "https://github.com/trim21/libtorrent.git"
+        "sha": "9be6391a50877bb526853ee1249ee4739bcd7e13",
+        "url": "https://github.com/rakshasa/libtorrent.git"
       },
-      "version": "852792860370"
+      "version": "9be6391a5087"
     },
     "zlib": {
       "features": [],
