@@ -18,6 +18,7 @@ from .docker import DISTROLESS_GLIBC_VERSION, build_docker_image
 from .lock import load_resolved_manifest, resolve_manifest
 from .manifest import (
     GenericRefSource,
+    GitHubPrSource,
     GitHubRefSource,
     ResolvedManifest,
     _load_jsonc_text,
@@ -296,7 +297,11 @@ def _build_docker(
     full_version = pkg.version
     raw = _raw_manifest_adapter.validate_python(_load_jsonc_text(manifest_path.read_text()))
     exe_pkg = raw.packages[resolved.executable_package]
-    is_ref = isinstance(exe_pkg.source, (GitHubRefSource, GenericRefSource)) if exe_pkg else False
+    is_ref = (
+        isinstance(exe_pkg.source, (GitHubRefSource, GitHubPrSource, GenericRefSource))
+        if exe_pkg
+        else False
+    )
     tags = _docker_version_tags(full_version, variant_name, arch_safe, is_ref=is_ref)
     if suffix:
         tags = [f"{t}{suffix}" for t in tags]

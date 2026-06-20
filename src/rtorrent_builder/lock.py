@@ -11,6 +11,7 @@ from pathlib import Path
 from .builder import compute_deps
 from .manifest import (
     GenericRefSource,
+    GitHubPrSource,
     GitHubRefSource,
     GitHubReleaseSource,
     GitHubTagSource,
@@ -100,6 +101,39 @@ def _resolve_generic_ref(url: str, ref: str) -> str:
     raise ValueError(f"Ref {ref} not found in {url}")
 
 
+def _resolve_pr(github: str, pr: int) -> tuple[GitSource, str]:
+    """Resolve a GitHub PR to its merge commit (refs/pull/{pr}/merge).
+
+    Falls back to the PR head commit if the merge ref is not available
+    (e.g. PR has conflicts or is not mergeable).
+    """
+    url = f"https://github.com/{github}.git"
+    merge_ref = f"refs/pull/{pr}/merge"
+    head_ref = f"refs/pull/{pr}/head"
+    result = subprocess.run(
+        ["git", "ls-remote", url, merge_ref, head_ref],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    merge_sha: str | None = None
+    head_sha: str | None = None
+    for line in result.stdout.splitlines():
+        sha, name = line.split()
+        if name == merge_ref:
+            merge_sha = sha
+        elif name == head_ref:
+            head_sha = sha
+
+    if merge_sha:
+        print(f"  PR #{pr} merge commit: {merge_sha[:12]}")
+        return GitSource(url=url, sha=merge_sha), merge_sha[:12]
+    if head_sha:
+        print(f"  WARNING: PR #{pr} has no merge commit (conflicts?), using head: {head_sha[:12]}")
+        return GitSource(url=url, sha=head_sha), head_sha[:12]
+    raise ValueError(f"PR #{pr} not found in {github}")
+
+
 def _resolve_github_source(source: PackageSource) -> tuple[str, str] | tuple[GitSource, str]:
     """Resolve a GitHub source to (url, version) or (GitSource, version)."""
     if isinstance(source, GitHubRefSource):
@@ -108,6 +142,8 @@ def _resolve_github_source(source: PackageSource) -> tuple[str, str] | tuple[Git
             url=f"https://github.com/{source.github}.git",
             sha=sha,
         ), sha[:12]
+    if isinstance(source, GitHubPrSource):
+        return _resolve_pr(source.github, source.pr)
     if isinstance(source, (GitHubTagSource, GitHubReleaseSource)):
         tags = _gh_tags(source.github)
         versions = [(t, _extract_version(t, source.github)) for t in tags]
@@ -135,7 +171,9 @@ def _resolve_source(pkg_name: str, lib: LibInfo) -> tuple[PackageSource, str]:
     if isinstance(lib.source, GenericRefSource):
         sha = _resolve_generic_ref(lib.source.git, lib.source.ref)
         return GitSource(url=lib.source.git, sha=sha), sha[:12]
-    if isinstance(lib.source, (GitHubRefSource, GitHubTagSource, GitHubReleaseSource)):
+    if isinstance(
+        lib.source, (GitHubRefSource, GitHubPrSource, GitHubTagSource, GitHubReleaseSource)
+    ):
         resolved, version = _resolve_github_source(lib.source)
         if isinstance(resolved, GitSource):
             return resolved, version

@@ -30,6 +30,12 @@ class GitHubRefSource:
 
 
 @dataclass(frozen=True, kw_only=True)
+class GitHubPrSource:
+    github: str
+    pr: int
+
+
+@dataclass(frozen=True, kw_only=True)
 class GitHubReleaseSource:
     github: str
     tag_range: str
@@ -56,6 +62,7 @@ class GitSource:
 PackageSource = (
     GitHubTagSource
     | GitHubRefSource
+    | GitHubPrSource
     | GitHubReleaseSource
     | GenericRefSource
     | URLSource
@@ -201,6 +208,9 @@ def _collect_lock_entries(manifest_path: Path) -> dict[str, str]:
         if isinstance(pkg.source, GitHubRefSource):
             key = f"{pkg.source.github}#{pkg.source.ref}"
             entries[key] = pkg.source.ref
+        elif isinstance(pkg.source, GitHubPrSource):
+            key = f"{pkg.source.github}#pr={pkg.source.pr}"
+            entries[key] = f"pr/{pkg.source.pr}"
         elif isinstance(pkg.source, GenericRefSource):
             key = f"{pkg.source.git}#{pkg.source.ref}"
             entries[key] = pkg.source.ref
@@ -231,6 +241,8 @@ def source_identity(pkg: LibInfo) -> str:
         return f"github:{pkg.source.github}#release={pkg.source.tag_range}"
     if isinstance(pkg.source, GitHubRefSource):
         return f"github:{pkg.source.github}#{pkg.source.ref}"
+    if isinstance(pkg.source, GitHubPrSource):
+        return f"github:{pkg.source.github}#pr={pkg.source.pr}"
     if isinstance(pkg.source, GenericRefSource):
         return f"git:{pkg.source.git}#{pkg.source.ref}"
     if isinstance(pkg.source, URLSource):
