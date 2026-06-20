@@ -2,7 +2,6 @@
 
 import concurrent.futures
 import os
-import re
 import shutil
 import subprocess
 import sys
@@ -93,36 +92,24 @@ _ALLOWED_SOS = frozenset(
 )
 
 
-def _verify_linkage(binary: Path) -> None:
-    try:
-        result = subprocess.run(
-            ["readelf", "-d", str(binary)],
-            capture_output=True,
-            text=True,
-            check=False,
-        )
-    except FileNotFoundError:
-        print("WARNING: readelf not found, skipping linkage check")
-        return
+def _verify_linkage(binary: Path, *, patchelf_bin: str) -> None:
+    result = subprocess.run(
+        [patchelf_bin, "--print-needed", str(binary)],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
 
-    if result.returncode != 0:
-        print("WARNING: readelf failed, skipping linkage check")
-        return
-
-    linked = set()
-    for line in result.stdout.splitlines():
-        m = re.search(r"\(NEEDED\)\s+Shared library: \[(.+?)\]", line)
-        if m:
-            linked.add(m.group(1))
+    linked = [line for line in result.stdout.splitlines() if line]
 
     if not linked:
         print("Linkage check: binary is fully static (no NEEDED entries)")
         return
 
-    unexpected = linked - _ALLOWED_SOS
+    unexpected = set(linked) - _ALLOWED_SOS
     if unexpected:
         print(f"ERROR: binary links to unexpected shared libraries: {sorted(unexpected)}")
-        print("readelf -d NEEDED entries:\n" + "\n".join(f"  {s}" for s in sorted(linked)))
+        print("patchelf --print-needed entries:\n" + "\n".join(f"  {s}" for s in sorted(linked)))
         raise SystemExit(1)
 
     print(f"Linkage check passed: {sorted(linked)}")
@@ -432,7 +419,7 @@ def build_rtorrent(
     output_bin = output_dir / output_name
     if not binary.exists():
         raise FileNotFoundError(f"Binary not found: {binary}")
-    _verify_linkage(binary)
+    _verify_linkage(binary, patchelf_bin=tc.patchelf_bin)
     shutil.copy2(str(binary), str(output_bin))
     output_bin.chmod(0o755)
     print(f"Copied {binary} -> {output_bin}")

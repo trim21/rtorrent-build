@@ -371,6 +371,10 @@ class Toolchain:
         return str(self.venv_dir / "bin" / "meson")
 
     @property
+    def patchelf_bin(self) -> str:
+        return str(self.venv_dir / "bin" / "patchelf")
+
+    @property
     def zig_cc(self) -> list[str]:
         return [self.zig_bin, "cc", "-target", self._target_triple]
 

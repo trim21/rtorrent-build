@@ -18,6 +18,11 @@ class LibtorrentRasterbarBuilder(CMakeBuilder):
             args.append(f"-DCMAKE_CXX_STANDARD={self.lib.cxx_std.removeprefix('c++')}")
         return args
 
+    def cache_key_extra(self) -> list[str]:
+        return super().cache_key_extra() + [
+            "patch:CMakeLists.txt:-Weverything+narrowing",
+        ]
+
     def build(self) -> None:
         replace_in_file(
             self.src_dir / "CMakeLists.txt",

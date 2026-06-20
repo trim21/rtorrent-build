@@ -31,6 +31,7 @@ class CMakeBuilder(Builder):
         prefix = str(self.tc.install_prefix)
         cmd = self.commander
 
+        build_type = "Debug" if self.tc.debug else "RelWithDebInfo"
         cmd.run(
             [
                 self.tc.cmake_bin,
@@ -38,7 +39,7 @@ class CMakeBuilder(Builder):
                 str(build_dir),
                 *self.tc.cmake_common_args,
                 f"-DCMAKE_INSTALL_PREFIX={prefix}",
-                "-DCMAKE_BUILD_TYPE=RelWithDebInfo",
+                f"-DCMAKE_BUILD_TYPE={build_type}",
                 "-DBUILD_SHARED_LIBS=OFF",
                 "-DBUILD_TESTING=OFF",
                 *self.cmake_args(),
