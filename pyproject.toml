@@ -23,6 +23,7 @@ rtorrent-build = "rtorrent_builder.cli:main"
 [tool.ruff]
 target-version = "py312"
 line-length = 100
+cache-dir = ".venv/cache/ruff"
 
 [tool.ruff.lint]
 select = [
