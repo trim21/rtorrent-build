@@ -415,9 +415,10 @@ class Toolchain:
 
     @property
     def cmake_cflags_init(self) -> str:
+        march = f"-march={self.arch.march}"
         if self.debug:
-            return "-fPIC -g -O0 -w"
-        return "-fPIC -flto -w"
+            return f"-fPIC -g -O0 -w {march}"
+        return f"-fPIC -flto -w {march}"
 
     def _write_toolchain_file(self) -> Path:
         path = self.work_dir / "zig-toolchain.cmake"

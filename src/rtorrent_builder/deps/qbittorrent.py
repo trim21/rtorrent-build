@@ -23,9 +23,6 @@ class QbittorrentBuilder(CMakeBuilder):
             "-DWEBUI=ON",
         ]
 
-    def cache_key_extra(self) -> list[str]:
-        return super().cache_key_extra() + ["1"]
-
     def build(self) -> None:
         replace_in_file(
             self.src_dir / "src/base/http/requestparser.cpp",

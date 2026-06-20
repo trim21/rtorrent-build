@@ -1,18 +1,10 @@
 from __future__ import annotations
 
-from ..manifest import LibInfo
-from ..run import Commander
-from ..toolchain import ResolvedSource, Toolchain
 from ._make import MakeBuilder
 
 
 class LuaJITBuilder(MakeBuilder):
     default_deps: list[str] = []
-
-    def __init__(
-        self, toolchain: Toolchain, lib: LibInfo, source: ResolvedSource, commander: Commander
-    ) -> None:
-        super().__init__(toolchain, lib, source, commander)
 
     def make_args(self) -> list[str]:
         return [
