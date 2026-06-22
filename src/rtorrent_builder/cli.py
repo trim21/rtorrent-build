@@ -217,6 +217,9 @@ def build(
                 f"\nBuild failed: {e.cmd[0] if e.cmd else '?'} exited with {e.returncode}\n"
                 f"Full log: {log_path}"
             ) from None
+        except Exception as e:
+            log_path = variant_work / "logs"
+            raise SystemExit(f"\nBuild failed: {e}\nFull log: {log_path}") from None
 
         if build_docker:
             tags = _build_docker(

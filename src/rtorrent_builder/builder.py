@@ -402,7 +402,14 @@ def build_rtorrent(
             )
             for future in done_set:
                 name = futures.pop(future)
-                future.result()
+                try:
+                    future.result()
+                except Exception:
+                    # Cancel all remaining futures so that no further
+                    # packages are built after a failure.
+                    for f in futures:
+                        f.cancel()
+                    raise
                 ts.done(name)
 
     total_elapsed = time.monotonic() - build_origin

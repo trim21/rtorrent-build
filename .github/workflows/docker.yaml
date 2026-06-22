@@ -89,9 +89,9 @@ jobs:
         uses: actions/cache@v5
         with:
           path: .rtorrent-cache/
-          key: docker-v1-a${{ matrix.debug }}-${{ matrix.arch.name }}-${{ matrix.libc }}-${{ matrix.variant }}-b${{ matrix.disguise }}
+          key: docker-v2-a${{ matrix.debug }}-${{ matrix.arch.name }}-${{ matrix.libc }}-${{ matrix.variant }}-b${{ matrix.disguise }}
           restore-keys: |
-            docker-v1-a${{ matrix.debug }}-${{ matrix.arch.name }}-${{ matrix.libc }}
+            docker-v2-a${{ matrix.debug }}-${{ matrix.arch.name }}-${{ matrix.libc }}
 
       - name: Build ${{ matrix.variant }} (${{ matrix.libc }}/${{ matrix.arch.name }})${{ matrix.disguise && ' disguised' || '' }}${{ matrix.debug && ' debug' || '' }}
         env:
