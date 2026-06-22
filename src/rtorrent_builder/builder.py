@@ -97,8 +97,18 @@ def _verify_linkage(binary: Path, *, patchelf_bin: str) -> None:
         [patchelf_bin, "--print-needed", str(binary)],
         capture_output=True,
         text=True,
-        check=True,
     )
+
+    if result.returncode != 0:
+        # patchelf fails when there is no .dynamic section at all (fully static binary).
+        if (
+            "cannot find section '.dynamic'. The input file is most likely statically linked"
+            in result.stderr
+        ):
+            print("Linkage check: binary is fully static (no dynamic section)")
+            return
+        print(f"Linkage check failed: {result.stderr.strip()}")
+        raise SystemExit(1)
 
     linked = [line for line in result.stdout.splitlines() if line]
 
