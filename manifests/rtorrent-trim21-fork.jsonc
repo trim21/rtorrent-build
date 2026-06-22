@@ -21,7 +21,7 @@
     "rtorrent-libtorrent": {
       "source": {
         "github": "rakshasa/libtorrent",
-        "ref": "feature/callback-timeout-backoff"
+        "ref": "master"
       },
       "requires": ["openssl", "zlib", "curl"]
     }
