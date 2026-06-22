@@ -139,8 +139,7 @@ def _binary_path(tc: Toolchain, name: str) -> Path:
 
 class _BuildSource(IntEnum):
     built = 0
-    marker = 1
-    cached = 2
+    cached = 1
 
 
 @dataclass
@@ -176,11 +175,6 @@ def _render_timeline_table(timings: list[_Timing], total_elapsed: float) -> None
             builds.append("-")
             totals.append("-")
             statuses.append("cached")
-        elif t.source == _BuildSource.marker:
-            gens.append("-")
-            builds.append("-")
-            totals.append("-")
-            statuses.append("marker")
         else:
             gens.append(_fmt_ts(t.gen_end - t.start))
             builds.append(_fmt_ts(t.end - t.gen_end))
@@ -242,24 +236,9 @@ def build_rtorrent(
     work_dir = work_dir.resolve()
     output_dir = output_dir.resolve()
 
-    _variant_id = f"{variant}.debug" if debug else variant
-    _variant_marker = work_dir / ".variant"
-
     if work_dir.exists():
-        if clean:
-            print(f"Cleaning work directory: {work_dir}")
-            shutil.rmtree(work_dir)
-        elif _variant_marker.exists():
-            stored_variant = _variant_marker.read_text()
-            if stored_variant != _variant_id:
-                print(
-                    f"Variant changed from {stored_variant!r} to {_variant_id!r}, "
-                    f"cleaning work directory..."
-                )
-                shutil.rmtree(work_dir)
-        else:
-            print("Work directory exists without variant marker, cleaning...")
-            shutil.rmtree(work_dir)
+        print(f"Cleaning work directory: {work_dir}")
+        shutil.rmtree(work_dir)
 
     work_dir.mkdir(parents=True, exist_ok=True)
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -277,9 +256,6 @@ def build_rtorrent(
         debug=debug,
     )
     tc.setup()
-
-    # Write variant marker after Toolchain init (which may have cleaned work_dir)
-    _variant_marker.write_text(_variant_id)
 
     pkgs = manifest.packages
     all_features, default_deps = compute_deps()
@@ -345,24 +321,15 @@ def build_rtorrent(
         )
         _pkg_hashes[name] = merkle_hash
 
-        if not no_cache and tc.is_built_merkle(name, merkle_hash):
-            print(f"Already built {name} {pkg.version}")
-            resolved[name] = ResolvedSource(name=name, version=pkg.version, src_dir=Path())
-            t.gen_end = time.monotonic() - build_origin
-            t.end = time.monotonic() - build_origin
-            t.source = _BuildSource.marker
-            return name
-
-        if _cache_store and _cache_store.has(name, merkle_hash):
+        if not no_cache and _cache_store and _cache_store.has(name, merkle_hash):
             _cache_store.restore(name, merkle_hash, tc.install_prefix)
-            tc.mark_built_merkle(name, merkle_hash)
             resolved[name] = ResolvedSource(name=name, version=pkg.version, src_dir=Path())
             t.gen_end = time.monotonic() - build_origin
             t.end = time.monotonic() - build_origin
             t.source = _BuildSource.cached
             return name
 
-        if _cache_store:
+        if _cache_store and not no_cache:
             _cache_store.diagnose_miss(name, merkle_payload)
 
         before_files = _list_prefix_files(tc.install_prefix)
@@ -373,10 +340,9 @@ def build_rtorrent(
         builder = builder_cls(tc, lib, source, commander)
         t.gen_end = time.monotonic() - build_origin
         builder.build()
-        tc.mark_built_merkle(name, merkle_hash)
         t.end = time.monotonic() - build_origin
 
-        if _cache_store:
+        if _cache_store and not no_cache:
             after_files = _list_prefix_files(tc.install_prefix)
             new_files = after_files - before_files
             if new_files:

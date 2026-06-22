@@ -72,11 +72,6 @@ def main() -> None:
     help="Output directory for binaries",
 )
 @click.option(
-    "--clean",
-    is_flag=True,
-    help="Clean build directory before starting",
-)
-@click.option(
     "--no-cache",
     is_flag=True,
     default=False,
@@ -151,7 +146,6 @@ def build(
     manifest: tuple[Path, ...],
     work_dir: Path,
     output_dir: Path,
-    clean: bool,
     no_cache: bool,
     cache_gc: bool,
     disguise: bool,
@@ -198,7 +192,6 @@ def build(
                 manifest=resolved,
                 work_dir=variant_work,
                 output_dir=output_dir,
-                clean=clean,
                 no_cache=no_cache,
                 cache_gc=cache_gc,
                 options=options,
