@@ -466,6 +466,7 @@ class Toolchain:
             "-G",
             "Ninja",
             "-DCMAKE_TOOLCHAIN_FILE=" + str(self._write_toolchain_file()),
+            "-DCMAKE_DEBUG_POSTFIX=",
         ]
 
     @property
