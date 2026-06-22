@@ -33,15 +33,17 @@ jobs:
       - name: Regenerate lock files
         run: uv run python scripts/lock.py
 
+      - name: Generate PR body
+        run: uv run python scripts/pr-body.py --output-file /tmp/pr-body.md
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+
       - name: Create PR if locks changed
         uses: peter-evans/create-pull-request@v8
         with:
           commit-message: "chore: update lock files"
           title: "chore: update lock files"
-          body: |
-            Automated lock file update.
-
-            This PR was created automatically by the daily lock refresh workflow.
+          body-path: /tmp/pr-body.md
           branch: auto/update-locks
           delete-branch: true
           token: "${{ secrets.PAT }}"
