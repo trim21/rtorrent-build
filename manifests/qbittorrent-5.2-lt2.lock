@@ -19,8 +19,8 @@
     },
     "curl": {
       "features": [],
-      "url": "https://github.com/curl/curl/archive/refs/tags/curl-8_20_0.tar.gz",
-      "version": "8.20.0"
+      "url": "https://github.com/curl/curl/archive/refs/tags/curl-8_21_0.tar.gz",
+      "version": "8.21.0"
     },
     "libtorrent-rasterbar": {
       "cxx_std": "c++17",
