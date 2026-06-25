@@ -19,6 +19,7 @@ def build_docker_image(
     image_tag: str,
     *,
     debug: bool = False,
+    labels: dict[str, str] | None = None,
 ) -> None:
     """Build a distroless (or debian-slim+gdb for debug) Docker image."""
     base_image = DEBUG_BASE if debug else DISTROLESS_BASE
@@ -29,6 +30,7 @@ def build_docker_image(
                 base_image=base_image,
                 binary=binary_path.name,
                 debug=debug,
+                labels=labels or {},
             )
         )
         build_context = binary_path.parent

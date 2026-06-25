@@ -310,7 +310,15 @@ def _build_docker(
     image_ref = f"rtorrent:{primary}"
     output_name = binary_path.stem
     print(f"Building Docker image: {image_ref}")
-    build_docker_image(binary_path, output_name, image_ref, debug=debug)
+    labels = {
+        f"com.rtorrent-static.package.{name}": pkg.version
+        for name, pkg in sorted(resolved.packages.items())
+        if pkg.version
+    } | {
+        "org.opencontainers.image.title": variant,
+        "org.opencontainers.image.version": full_version,
+    }
+    build_docker_image(binary_path, output_name, image_ref, debug=debug, labels=labels)
     for extra in tags[1:]:
         extra_ref = f"rtorrent:{extra}"
         print(f"Tagging: {extra_ref}")
