@@ -16,8 +16,8 @@
       "features": [
         "idn2"
       ],
-      "url": "https://github.com/curl/curl/archive/refs/tags/curl-8_20_0.tar.gz",
-      "version": "8.20.0"
+      "url": "https://github.com/curl/curl/archive/refs/tags/curl-8_21_0.tar.gz",
+      "version": "8.21.0"
     },
     "libidn2": {
       "features": [],
@@ -51,10 +51,10 @@
         "lua"
       ],
       "src": {
-        "sha": "ce4cd27697d36473fe10d50dfb1989012f5f12d5",
+        "sha": "8598873627f472606dcf849a79af4268f55a28ca",
         "url": "https://github.com/rakshasa/rtorrent.git"
       },
-      "version": "ce4cd27697d3"
+      "version": "8598873627f4"
     },
     "rtorrent-libtorrent": {
       "features": [],
@@ -64,10 +64,10 @@
         "curl"
       ],
       "src": {
-        "sha": "882efd1f39c78ef05e026edd93ff868a48aa5a97",
+        "sha": "769794e7027a198f4340304fccc8c21c1bc75d66",
         "url": "https://github.com/rakshasa/libtorrent.git"
       },
-      "version": "882efd1f39c7"
+      "version": "769794e7027a"
     },
     "zlib": {
       "features": [],
