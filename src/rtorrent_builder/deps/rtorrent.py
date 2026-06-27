@@ -53,6 +53,7 @@ class RtorrentBuilder(Builder):
         configure_args = [
             "./configure",
             f"--prefix={self.tc.install_prefix}",
+            "--disable-dependency-tracking",
             "--disable-shared",
             "--enable-static",
         ]

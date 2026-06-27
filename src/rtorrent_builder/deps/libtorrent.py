@@ -50,6 +50,7 @@ class LibtorrentBuilder(Builder):
         configure_args = [
             "./configure",
             f"--prefix={self.tc.install_prefix}",
+            "--disable-dependency-tracking",
             f"--with-zlib={self.tc.dep_prefix('zlib')}",
             "--disable-shared",
             "--enable-static",
