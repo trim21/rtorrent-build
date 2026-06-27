@@ -343,6 +343,22 @@ class Toolchain:
     def patchelf_bin(self) -> str:
         return str(self.venv_dir / "bin" / "patchelf")
 
+    @cached_property
+    def pkgconf_bin(self) -> str:
+        import subprocess
+
+        result = subprocess.run(
+            [
+                str(self.venv_dir / "bin" / "python"),
+                "-c",
+                "import pkgconf; print(pkgconf.get_executable())",
+            ],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        return result.stdout.strip()
+
     @property
     def zig_cc(self) -> list[str]:
         return [self.zig_bin, "cc", "-target", self._target_triple]
@@ -466,7 +482,7 @@ class Toolchain:
             "CFLAGS": cflags,
             "CXXFLAGS": cflags,
             "LDFLAGS": ldflags,
-            "PKG_CONFIG": "pkg-config --static",
+            "PKG_CONFIG": f"{self.pkgconf_bin} --static",
             "PKG_CONFIG_PATH": pkg_path,
             "PKG_CONFIG_LIBDIR": pkg_path,
             "PATH": f"{self.venv_dir}/bin:{os.environ.get('PATH', '')}",
@@ -531,6 +547,6 @@ class Toolchain:
         return os.environ | {
             "PKG_CONFIG_PATH": pkg_path,
             "PKG_CONFIG_LIBDIR": pkg_path,
-            "PKG_CONFIG": "pkg-config --static",
+            "PKG_CONFIG": f"{self.pkgconf_bin} --static",
             "PATH": f"{self.venv_dir}/bin:{os.environ.get('PATH', '')}",
         }

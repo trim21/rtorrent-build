@@ -25,6 +25,7 @@ class NcursesBuilder(MakeBuilder):
             [
                 "./configure",
                 f"--prefix={self.tc.install_prefix}",
+                "--disable-dependency-tracking",
                 "--with-build-cc=cc",
                 "--with-build-cflags=-O2",
                 "--enable-static",

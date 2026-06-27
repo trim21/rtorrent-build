@@ -9,6 +9,7 @@ class LibunistringBuilder(MakeBuilder):
             [
                 "./configure",
                 f"--prefix={self.tc.install_prefix}",
+                "--disable-dependency-tracking",
                 "--disable-shared",
                 "--enable-static",
             ],
