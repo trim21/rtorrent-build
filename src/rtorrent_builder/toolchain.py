@@ -343,6 +343,12 @@ class Toolchain:
     def patchelf_bin(self) -> str:
         return str(self.venv_dir / "bin" / "patchelf")
 
+    @cached_property
+    def pkgconf_bin(self) -> str:
+        for d in sorted((self.venv_dir / "lib").glob("python*/site-packages/pkgconf/.bin/pkgconf")):
+            return str(d)
+        raise FileNotFoundError(f"pkgconf native binary not found under {self.venv_dir}")
+
     @property
     def zig_cc(self) -> list[str]:
         return [self.zig_bin, "cc", "-target", self._target_triple]
@@ -466,7 +472,7 @@ class Toolchain:
             "CFLAGS": cflags,
             "CXXFLAGS": cflags,
             "LDFLAGS": ldflags,
-            "PKG_CONFIG": f"{self.venv_dir}/bin/pkgconf --static",
+            "PKG_CONFIG": f"{self.pkgconf_bin} --static",
             "PKG_CONFIG_PATH": pkg_path,
             "PKG_CONFIG_LIBDIR": pkg_path,
             "PATH": f"{self.venv_dir}/bin:{os.environ.get('PATH', '')}",
@@ -531,6 +537,6 @@ class Toolchain:
         return os.environ | {
             "PKG_CONFIG_PATH": pkg_path,
             "PKG_CONFIG_LIBDIR": pkg_path,
-            "PKG_CONFIG": f"{self.venv_dir}/bin/pkgconf --static",
+            "PKG_CONFIG": f"{self.pkgconf_bin} --static",
             "PATH": f"{self.venv_dir}/bin:{os.environ.get('PATH', '')}",
         }
