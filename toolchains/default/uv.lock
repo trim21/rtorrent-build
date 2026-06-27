@@ -29,6 +29,15 @@ wheels = [
 ]
 
 [[package]]
+name = "colorama"
+version = "0.4.6"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/d8/53/6f443c9a4a8358a93a6792e2acffb9d9d5cb0a5cfd8802644b7b1c9a02e4/colorama-0.4.6.tar.gz", hash = "sha256:08695f5cb7ed6e0531a20572697297273c47b8cae5a63ffc6d6ed5c201be6e44", size = 27697, upload-time = "2022-10-25T02:36:22.414Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/d1/d6/3965ed04c63042e047cb6a3e6ed1a63a35087b6a609aa3a15ed8ac56c221/colorama-0.4.6-py2.py3-none-any.whl", hash = "sha256:4f1d9991f5acc0ca119f9d443620b77f9d6b33703e51011c16baf57afb285fc6", size = 25335, upload-time = "2022-10-25T02:36:20.889Z" },
+]
+
+[[package]]
 name = "default-toolchain"
 version = "0.1.0"
 source = { virtual = "." }
@@ -37,6 +46,7 @@ dependencies = [
     { name = "meson" },
     { name = "ninja" },
     { name = "patchelf" },
+    { name = "pkgconf" },
     { name = "ziglang" },
 ]
 
@@ -46,6 +56,7 @@ requires-dist = [
     { name = "meson", specifier = ">=1,<2" },
     { name = "ninja", specifier = ">=1,<2" },
     { name = "patchelf", specifier = ">=0.17,<1" },
+    { name = "pkgconf", specifier = ">=2,<3" },
     { name = "ziglang", specifier = "==0.16.0" },
 ]
 
@@ -97,6 +108,34 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/87/93/897d612f6df7cfd987bdf668425127efeff8d8e4ad8bfbab1c69d2a0d861/patchelf-0.17.2.4-py3-none-manylinux2014_ppc64le.manylinux_2_17_ppc64le.musllinux_1_1_ppc64le.whl", hash = "sha256:680a266a70f60a7a4f4c448482c5bdba80cc8e6bb155a49dcc24238ba49927b0", size = 540276, upload-time = "2025-07-23T21:16:27.983Z" },
     { url = "https://files.pythonhosted.org/packages/5d/b8/2b92d11533482bac9ee989081d6880845287751b5f528adbd6bb27667fbd/patchelf-0.17.2.4-py3-none-manylinux2014_s390x.manylinux_2_17_s390x.musllinux_1_1_s390x.whl", hash = "sha256:d842b51f0401460f3b1f3a3a67d2c266a8f515a5adfbfa6e7b656cb3ac2ed8bc", size = 596632, upload-time = "2025-07-23T21:16:29.253Z" },
     { url = "https://files.pythonhosted.org/packages/14/e2/975d4bdb418f942b53e6187b95bd9e0d5e0488b7bc214685a1e43e2c2751/patchelf-0.17.2.4-py3-none-manylinux_2_31_riscv64.musllinux_1_1_riscv64.whl", hash = "sha256:7076d9e127230982e20a81a6e2358d3343004667ba510d9f822d4fdee29b0d71", size = 508281, upload-time = "2025-07-23T21:16:30.865Z" },
+]
+
+[[package]]
+name = "pkgconf"
+version = "2.5.1.post2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "colorama", marker = "os_name == 'nt'" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/ef/d6/1f76f6af22264c88fe316e9e1eb281b6aa9e17100d573dc2dbd918ffa0bf/pkgconf-2.5.1.post2.tar.gz", hash = "sha256:47533b00032e0be6e49e519d7265435a41b23809a937522a51f8b0936d3774ec", size = 155005, upload-time = "2026-04-02T02:15:56.202Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/08/04/e440fba9c13bdeea69bfe61904540b462647e99b0ab183301eea095e3c23/pkgconf-2.5.1.post2-py3-none-macosx_10_9_x86_64.whl", hash = "sha256:619ecd5367a3c819f3d1f52e91e542812cf6f274fdd31035f1ee969cdcfe48a2", size = 51809, upload-time = "2026-04-02T02:15:36.283Z" },
+    { url = "https://files.pythonhosted.org/packages/6f/ae/ad58f20a9931a11f6f4263c726dd5f8ffbf1c61347c0832459d9f1f02691/pkgconf-2.5.1.post2-py3-none-macosx_11_0_arm64.whl", hash = "sha256:28f81fd310f58f236867eed80e00062325d6cc626abb17ce754398030899a66f", size = 50098, upload-time = "2026-04-02T02:15:37.538Z" },
+    { url = "https://files.pythonhosted.org/packages/d4/f0/2b399c078bbc81e2b1f26477eeb3df20c71ab51c95c7b0e052b45b7f096f/pkgconf-2.5.1.post2-py3-none-manylinux1_i686.manylinux2014_i686.manylinux_2_17_i686.manylinux_2_5_i686.whl", hash = "sha256:d99b33809553399b357b5f044348bdef136b90f09934f01683ef3d977652929a", size = 66470, upload-time = "2026-04-02T02:15:38.687Z" },
+    { url = "https://files.pythonhosted.org/packages/38/6b/a504a763112217e227ad4a30e5149e55b850fc28f8eba9da09c8789f6b1d/pkgconf-2.5.1.post2-py3-none-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl", hash = "sha256:c64973b254a8ce3dea100e82af065346490985bb28f61bec5c415feb70c337ce", size = 62991, upload-time = "2026-04-02T02:15:39.971Z" },
+    { url = "https://files.pythonhosted.org/packages/48/46/cdee81ed35c2e722dd9cf830c44ca2898485f69a1605931dfef3efe830a4/pkgconf-2.5.1.post2-py3-none-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:641a479dd417ea50595a4c09cf2b64eb5159d1610f56da167d98f13e418836e5", size = 62486, upload-time = "2026-04-02T02:15:40.978Z" },
+    { url = "https://files.pythonhosted.org/packages/c7/83/855e8a5cfc82b009c2bc0b27cbb8b27bf962f2c508680c6ace285de948ba/pkgconf-2.5.1.post2-py3-none-manylinux2014_ppc64le.manylinux_2_17_ppc64le.manylinux_2_28_ppc64le.whl", hash = "sha256:05ab908cc1e6e987d59d7f765e190cb0e0210692846fdbaf93103129e08dadfb", size = 73037, upload-time = "2026-04-02T02:15:42.014Z" },
+    { url = "https://files.pythonhosted.org/packages/9a/d4/2d9bbd3ca2176827708c758d175a83b3a6dafdcd9954acc5eacc6b456594/pkgconf-2.5.1.post2-py3-none-manylinux2014_s390x.manylinux_2_17_s390x.manylinux_2_28_s390x.whl", hash = "sha256:90891dbfd3655327e3e8b0b410aa168cb80ee3e912acffbd8e0c8b48dd67f639", size = 66894, upload-time = "2026-04-02T02:15:43.219Z" },
+    { url = "https://files.pythonhosted.org/packages/35/3b/948839b6d4e7ce7fd2fc7d35f00602e073cfa06575044e29e5062b60ae1d/pkgconf-2.5.1.post2-py3-none-manylinux_2_27_armv7l.manylinux_2_31_armv7l.whl", hash = "sha256:bda6d0149d48286760983e010de37fc1e0f464b0934bac3feebaa1ac44da86eb", size = 56771, upload-time = "2026-04-02T02:15:44.261Z" },
+    { url = "https://files.pythonhosted.org/packages/cf/52/5bc3cbc096187887d3e857efec585a56db5ae13ff49f7c1e01070b1f0aeb/pkgconf-2.5.1.post2-py3-none-musllinux_1_2_aarch64.whl", hash = "sha256:4ac7d64757f7cc6d361eb79bf528dcbd2e10787bfd9b257bd492446e2e782a77", size = 63928, upload-time = "2026-04-02T02:15:45.602Z" },
+    { url = "https://files.pythonhosted.org/packages/1e/ee/d19c4e9b21f8afeb9c56bebf5dec64031ed534331a92cff8a8354822f511/pkgconf-2.5.1.post2-py3-none-musllinux_1_2_armv7l.whl", hash = "sha256:60e42dea0e8752be198390f974131f7d360f2b52e2a1e01761701ea6fa5aa2e6", size = 60268, upload-time = "2026-04-02T02:15:46.969Z" },
+    { url = "https://files.pythonhosted.org/packages/71/8e/ebb971014f86dbbb31ac0735f3c73bd3e2debc3821308bdcbcf3880727d2/pkgconf-2.5.1.post2-py3-none-musllinux_1_2_i686.whl", hash = "sha256:e295d42107a785382893fab938998ac0156247037c5607814f87bad266b609c0", size = 68394, upload-time = "2026-04-02T02:15:48.002Z" },
+    { url = "https://files.pythonhosted.org/packages/c5/45/fb4d4cd47019d2c24c35ebd750d2bc8c47e9ec30c196e3645f480eee0a5e/pkgconf-2.5.1.post2-py3-none-musllinux_1_2_ppc64le.whl", hash = "sha256:58e9fae69947084189a4c216aad4616778d70798be2c584e63aabb3faaca3ca3", size = 74045, upload-time = "2026-04-02T02:15:49.318Z" },
+    { url = "https://files.pythonhosted.org/packages/fd/05/ade6ca7e1d320c39a87feef504c4ab133442a99d568b4891a09b4e1b7b5a/pkgconf-2.5.1.post2-py3-none-musllinux_1_2_s390x.whl", hash = "sha256:b823e3e96c02cc1b13c4992dda6e8543fe65af2d7a291505777e81e01e255f3b", size = 66297, upload-time = "2026-04-02T02:15:50.301Z" },
+    { url = "https://files.pythonhosted.org/packages/8f/5a/1d248beae47c7524a9127f90289e81ae36ad1c49985e5f5931dff7469151/pkgconf-2.5.1.post2-py3-none-musllinux_1_2_x86_64.whl", hash = "sha256:1be7563d4d6ea3d4e7cd60c64befdd84429b44d71d74174477a2bd0b6ad96969", size = 64893, upload-time = "2026-04-02T02:15:51.641Z" },
+    { url = "https://files.pythonhosted.org/packages/ba/d2/087d120aed5c6143ee3ab078fc1551872747c6f72260c8216433015321dc/pkgconf-2.5.1.post2-py3-none-win32.whl", hash = "sha256:9acaf63e14c2e030ff8b682dc06aef157a926f1b888120aeaf4aaf0880d6de33", size = 53027, upload-time = "2026-04-02T02:15:52.664Z" },
+    { url = "https://files.pythonhosted.org/packages/9c/41/1d86935b50bcb25555b58f4a9ec40f7f78a9007bb0fd53a8c0c20707f4d6/pkgconf-2.5.1.post2-py3-none-win_amd64.whl", hash = "sha256:2bdc65083e0d6ddc1e5ab42a768b722d545085eb302dd22791c20095997acaa4", size = 53027, upload-time = "2026-04-02T02:15:53.75Z" },
+    { url = "https://files.pythonhosted.org/packages/67/fb/bdc20edab4dfd0df4e13f14fce91c4424d78ded56b564d6f3343259806c1/pkgconf-2.5.1.post2-py3-none-win_arm64.whl", hash = "sha256:52adc0a94803fbad8b48981582185c55a69a1648dd1d18b82367d87e474ef2d7", size = 48858, upload-time = "2026-04-02T02:15:54.81Z" },
 ]
 
 [[package]]

@@ -466,7 +466,7 @@ class Toolchain:
             "CFLAGS": cflags,
             "CXXFLAGS": cflags,
             "LDFLAGS": ldflags,
-            "PKG_CONFIG": "pkg-config --static",
+            "PKG_CONFIG": f"{self.venv_dir}/bin/pkgconf --static",
             "PKG_CONFIG_PATH": pkg_path,
             "PKG_CONFIG_LIBDIR": pkg_path,
             "PATH": f"{self.venv_dir}/bin:{os.environ.get('PATH', '')}",
@@ -531,6 +531,6 @@ class Toolchain:
         return os.environ | {
             "PKG_CONFIG_PATH": pkg_path,
             "PKG_CONFIG_LIBDIR": pkg_path,
-            "PKG_CONFIG": "pkg-config --static",
+            "PKG_CONFIG": f"{self.venv_dir}/bin/pkgconf --static",
             "PATH": f"{self.venv_dir}/bin:{os.environ.get('PATH', '')}",
         }
