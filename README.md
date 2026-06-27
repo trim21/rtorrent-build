@@ -5,59 +5,37 @@ Statically (or glibc only) linked [rtorrent](https://github.com/rakshasa/rtorren
 ## Docker Images
 
 Prebuilt distroless Docker images are available at [`ghcr.io/trim21/rtorrent`](https://github.com/trim21/rtorrent-static/pkgs/container/rtorrent).
+Images are built and pushed when a git tag (`v*`) is pushed.
+
+All images are based on `gcr.io/distroless/cc-debian13` (glibc 2.40) and include `busybox` for shell utilities.
 
 ### rtorrent 0.9.8
 
-| Tag | Arch | glibc |
-|---|---|---|
-| `ghcr.io/trim21/rtorrent:0.9.8.amd.v1` | x86_64-v1 | 2.17 |
-| `ghcr.io/trim21/rtorrent:0.9.8.amd.v3` | x86_64-v3 | 2.17 |
+| Tag | Arch |
+|---|---|
+| `ghcr.io/trim21/rtorrent:0.9.8.amd.v1` | x86_64-v1 |
+| `ghcr.io/trim21/rtorrent:0.9.8.amd.v3` | x86_64-v3 |
 
-### rtorrent 0.16 (0.16.13)
+### rtorrent 0.16 (0.16.15)
 
-| Tag | Arch | glibc |
-|---|---|---|
-| `ghcr.io/trim21/rtorrent:0.16.13.amd.v1` | x86_64-v1 | 2.28 |
-| `ghcr.io/trim21/rtorrent:0.16.amd.v1` | x86_64-v1 | 2.28 |
-| `ghcr.io/trim21/rtorrent:0.16.13.amd.v3` | x86_64-v3 | 2.28 |
-| `ghcr.io/trim21/rtorrent:0.16.amd.v3` | x86_64-v3 | 2.28 |
+| Tag | Arch |
+|---|---|
+| `ghcr.io/trim21/rtorrent:0.16.15.amd.v1` | x86_64-v1 |
+| `ghcr.io/trim21/rtorrent:0.16.15.amd.v3` | x86_64-v3 |
+| `ghcr.io/trim21/rtorrent:0.16.amd.v1` | x86_64-v1 |
+| `ghcr.io/trim21/rtorrent:0.16.amd.v3` | x86_64-v3 |
 
 ### rtorrent master (git snapshot)
 
-| Tag | Arch | glibc |
-|---|---|---|
-| `ghcr.io/trim21/rtorrent:master.amd.v1` | x86_64-v1 | 2.28 |
-| `ghcr.io/trim21/rtorrent:master.amd.v3` | x86_64-v3 | 2.28 |
-
-All images include `busybox` for shell utilities and are based on `gcr.io/distroless/cc-debian13`.
+| Tag | Arch |
+|---|---|
+| `ghcr.io/trim21/rtorrent:master.amd.v1` | x86_64-v1 |
+| `ghcr.io/trim21/rtorrent:master.amd.v3` | x86_64-v3 |
 
 ## GitHub Release Assets
 
 Static binaries are published to [GitHub Releases](https://github.com/trim21/rtorrent-static/releases) on tag pushes.
-
-### rtorrent
-
-| Binary | glibc target |
-|---|---|
-| `rtorrent-0.9.8.amd.v1.glibc.2.17` | 2.17 |
-| `rtorrent-0.9.8.amd.v1-musl` | musl |
-| `rtorrent-0.16.13.amd.v1.glibc.2.28` | 2.28 |
-| `rtorrent-0.16.13.amd.v1-musl` | musl |
-
-### qBittorrent
-
-| Binary | qBittorrent | libtorrent | glibc target |
-|---|---|---|---|
-| `qb-5.1.4-lt-1.2.20.amd.v1.glibc.2.34` | 5.1.4 | 1.2.20 | 2.34 |
-| `qb-5.1.4-lt-1.2.20.amd.v1-musl` | 5.1.4 | 1.2.20 | musl |
-| `qb-5.1.4-lt-2.0.12.amd.v1.glibc.2.34` | 5.1.4 | 2.0.12 | 2.34 |
-| `qb-5.1.4-lt-2.0.12.amd.v1-musl` | 5.1.4 | 2.0.12 | musl |
-| `qb-5.2.1-lt-1.2.20.amd.v1.glibc.2.34` | 5.2.1 | 1.2.20 | 2.34 |
-| `qb-5.2.1-lt-1.2.20.amd.v1-musl` | 5.2.1 | 1.2.20 | musl |
-| `qb-5.2.1-lt-2.0.12.amd.v1.glibc.2.34` | 5.2.1 | 2.0.12 | 2.34 |
-| `qb-5.2.1-lt-2.0.12.amd.v1-musl` | 5.2.1 | 2.0.12 | musl |
-
-All binaries are built with `-Os -flto -fPIC -g` and x86_64-v1 baseline, statically linked except for glibc-family `.so` deps.
+Binaries are built with `-O2 -flto -fPIC -g` and statically linked except for glibc-family `.so` deps (or fully static with musl).
 
 ## Troubleshooting
 
@@ -76,3 +54,17 @@ SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt qbittorrent-nox
 ```
 
 rtorrent is unaffected — it uses libcurl for HTTPS, which has its own CA bundle auto-detection.
+
+## Build Flags
+
+All binaries are built with `-O2 -flto -fPIC -g -w`:
+
+| Flag | Purpose |
+|---|---|
+| `-O2` | Optimize for speed |
+| `-flto` | Link-time optimization |
+| `-fPIC` | Position-independent code |
+| `-g` | Debug symbols (preserved in final binary) |
+| `-w` | Suppress all compiler warnings |
+
+Architecture-specific `-march` flags are set according to the target microarchitecture level.
