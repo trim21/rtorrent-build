@@ -345,9 +345,19 @@ class Toolchain:
 
     @cached_property
     def pkgconf_bin(self) -> str:
-        for d in sorted((self.venv_dir / "lib").glob("python*/site-packages/pkgconf/.bin/pkgconf")):
-            return str(d)
-        raise FileNotFoundError(f"pkgconf native binary not found under {self.venv_dir}")
+        import subprocess
+
+        result = subprocess.run(
+            [
+                str(self.venv_dir / "bin" / "python"),
+                "-c",
+                "import pkgconf; print(pkgconf.get_executable())",
+            ],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        return result.stdout.strip()
 
     @property
     def zig_cc(self) -> list[str]:
