@@ -58,12 +58,17 @@ jobs:
           path: assets/
           key: sources-${{ hashFiles('manifests/*.lock') }}
 
+      - name: Set cache month
+        id: cache-month
+        run: echo "month=$(date +%Y-%m)" >> $GITHUB_OUTPUT
+
       - name: Cache build artifacts (Merkle tree)
         uses: actions/cache@v6
         with:
           path: .rtorrent-cache/
-          key: build-v2-${{ matrix.arch.name }}-${{ matrix.libc }}-${{ matrix.variant }}
+          key: build-v2-${{ matrix.arch.name }}-${{ matrix.libc }}-${{ matrix.variant }}-${{ steps.cache-month.outputs.month }}
           restore-keys: |
+            build-v2-${{ matrix.arch.name }}-${{ matrix.libc }}-${{ matrix.variant }}
             build-v2-${{ matrix.arch.name }}-${{ matrix.libc }}
 
       - name: Build ${{ matrix.variant }} (${{ matrix.libc }}/${{ matrix.arch.name }})

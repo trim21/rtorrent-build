@@ -85,12 +85,17 @@ jobs:
           path: assets/
           key: docker-sources-${{ hashFiles('manifests/*.lock') }}
 
+      - name: Set cache month
+        id: cache-month
+        run: echo "month=$(date +%Y-%m)" >> $GITHUB_OUTPUT
+
       - name: Cache build artifacts (Merkle tree)
         uses: actions/cache@v6
         with:
           path: .rtorrent-cache/
-          key: docker-v2-a${{ matrix.debug }}-${{ matrix.arch.name }}-${{ matrix.libc }}-${{ matrix.variant }}-b${{ matrix.disguise }}
+          key: docker-v2-a${{ matrix.debug }}-${{ matrix.arch.name }}-${{ matrix.libc }}-${{ matrix.variant }}-b${{ matrix.disguise }}-${{ steps.cache-month.outputs.month }}
           restore-keys: |
+            docker-v2-a${{ matrix.debug }}-${{ matrix.arch.name }}-${{ matrix.libc }}-${{ matrix.variant }}-b${{ matrix.disguise }}
             docker-v2-a${{ matrix.debug }}-${{ matrix.arch.name }}-${{ matrix.libc }}
 
       - name: Build ${{ matrix.variant }} (${{ matrix.libc }}/${{ matrix.arch.name }})${{ matrix.disguise && ' disguised' || '' }}${{ matrix.debug && ' debug' || '' }}
