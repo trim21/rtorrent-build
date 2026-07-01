@@ -18,6 +18,7 @@ env:
 jobs:
   docker:
     strategy:
+      max-parallel: 4
       fail-fast: false
       matrix:
         variant:
