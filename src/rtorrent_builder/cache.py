@@ -1,6 +1,6 @@
 """Persistent cross-build cache with Merkle-tree dependency hashing.
 
-Each package's cache key includes its own identity (name, version, url, build
+Each package's cache key includes its own identity (name, version, build
 options) AND the hashes of all its transitive dependencies.  This means
 changing a leaf dependency (e.g. openssl) invalidates only its subtree, while
 unchanged subtrees remain cacheable.
@@ -31,7 +31,6 @@ def compute_merkle_hash(
     *,
     name: str,
     version: str,
-    url: str,
     options: list[str],
     toolchain_name: str,
     zig_version: str,
@@ -49,7 +48,6 @@ def compute_merkle_hash(
     payload: dict[str, object] = {
         "name": name,
         "version": version,
-        "url": url,
         "options": options,
         "toolchain": toolchain_name,
         "zig": zig_version,

@@ -1,5 +1,6 @@
 """Shared download utility with tqdm progress bar."""
 
+import hashlib
 import time
 from pathlib import Path
 
@@ -59,3 +60,30 @@ def download_file(url: str, dest: Path, desc: str = "") -> None:
             else:
                 print(f"Download failed after {MAX_RETRIES} attempts: {exc}")
     raise RuntimeError(f"Failed to download {url} after {MAX_RETRIES} attempts") from last_exc
+
+
+def compute_sha256(path: Path) -> str:
+    """Compute SHA-256 hash of a file, return lowercase hex string."""
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(65536), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def verify_integrity(path: Path, integrity: str) -> None:
+    """Verify *path* matches *integrity* (format: 'sha256:<hex>').
+
+    If *integrity* is empty, no check is performed (backward-compatible).
+    """
+    if not integrity:
+        return
+    algo, sep, expected = integrity.partition(":")
+    if not sep or algo != "sha256":
+        raise ValueError(f"Unsupported integrity algorithm: {integrity!r}")
+    actual = compute_sha256(path)
+    if actual != expected:
+        raise RuntimeError(
+            f"Integrity check failed for {path.name}: "
+            f"expected sha256:{expected}, got sha256:{actual}"
+        )

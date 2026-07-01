@@ -15,8 +15,9 @@ from pathlib import Path
 
 from . import PROJECT_ROOT as _PROJECT_ROOT
 from ._types import Arch, Libc
-from .download import download_file
+from .download import download_file, verify_integrity
 from .manifest import (
+    ChecksumSource,
     GenericRefSource,
     GitHubRefSource,
     GitHubReleaseSource,
@@ -132,7 +133,9 @@ class Toolchain:
             msg = f"{type(lib.source).__name__} should be resolved to URLSource via lockfile first"
             raise TypeError(msg)
         if isinstance(lib.source, URLSource):
-            return self._prepare_url_source(name, lib.source, lib.version)
+            return self._prepare_url_source(name, lib.source.url, lib.version)
+        if isinstance(lib.source, ChecksumSource):
+            return self._prepare_url_source(name, lib.source.url, lib.version, lib.source.integrity)
         raise TypeError(f"Unsupported source type: {type(lib.source)}")
 
     @staticmethod
@@ -175,11 +178,15 @@ class Toolchain:
                     print(f"Cleaning source dir: {d}")
                     shutil.rmtree(d)
 
-    def _prepare_url_source(self, name: str, source: URLSource, version: str) -> ResolvedSource:
-        archive = self.package_dir / f"{name}-{version}{self._archive_ext(source.url)}"
+    def _prepare_url_source(
+        self, name: str, url: str, version: str, integrity: str = ""
+    ) -> ResolvedSource:
+        archive = self.package_dir / f"{name}-{version}{self._archive_ext(url)}"
 
         if not archive.exists():
-            download_file(source.url, archive, desc=f"{name}-{version}")
+            download_file(url, archive, desc=f"{name}-{version}")
+
+        verify_integrity(archive, integrity)
 
         prefix = self._archive_prefix(archive)
         src_dir = self.build_dir / prefix

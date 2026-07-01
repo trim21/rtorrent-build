@@ -308,7 +308,6 @@ def build_rtorrent(
         merkle_hash, merkle_payload = compute_merkle_hash(
             name=name,
             version=pkg.version,
-            url=pkg.url,
             options=cache_key,
             toolchain_name=tc._toolchain_name,
             zig_version=tc.zig_version,

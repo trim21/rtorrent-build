@@ -59,6 +59,14 @@ class GitSource:
     sha: str
 
 
+@dataclass(frozen=True, kw_only=True)
+class ChecksumSource:
+    """Lock-level URL source with integrity hash."""
+
+    url: str
+    integrity: str
+
+
 PackageSource = (
     GitHubTagSource
     | GitHubRefSource
@@ -67,6 +75,7 @@ PackageSource = (
     | GenericRefSource
     | URLSource
     | GitSource
+    | ChecksumSource
 )
 
 
@@ -98,12 +107,11 @@ class Manifest:
 
 @dataclass(frozen=True, kw_only=True)
 class ResolvedPackage:
-    url: str = ""
     version: str = ""
     cxx_std: str | None = None
     requires: list[str] | None = None
     features: list[str] = field(default_factory=list)
-    src: GitSource | None = None
+    src: GitSource | ChecksumSource | None = None
 
     def to_libinfo(self) -> LibInfo:
         if self.src is not None:
@@ -114,13 +122,7 @@ class ResolvedPackage:
                 requires=self.requires,
                 features=self.features,
             )
-        return LibInfo(
-            source=URLSource(url=self.url),
-            version=self.version,
-            cxx_std=self.cxx_std,
-            requires=self.requires,
-            features=self.features,
-        )
+        raise ValueError("ResolvedPackage has no source")
 
 
 @dataclass(frozen=True, kw_only=True)

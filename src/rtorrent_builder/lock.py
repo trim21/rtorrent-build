@@ -2,14 +2,16 @@
 
 from __future__ import annotations
 
-import json
 import re
 import subprocess
 from functools import cache
 from pathlib import Path
 
+from . import PROJECT_ROOT
 from .builder import compute_deps
+from .download import compute_sha256, download_file
 from .manifest import (
+    ChecksumSource,
     GenericRefSource,
     GitHubPrSource,
     GitHubRefSource,
@@ -17,8 +19,10 @@ from .manifest import (
     GitHubTagSource,
     GitSource,
     LibInfo,
+    LockFile,
     PackageSource,
     ResolvedManifest,
+    ResolvedPackage,
     URLSource,
     _load_jsonc_text,
     _lockfile_adapter,
@@ -181,6 +185,19 @@ def _resolve_source(pkg_name: str, lib: LibInfo) -> tuple[PackageSource, str]:
     raise ValueError(f"Package {pkg_name!r} has no source")
 
 
+_ASSETS_DIR = PROJECT_ROOT / "assets"
+
+
+def _download_and_hash(url: str, name: str, version: str, assets_dir: Path) -> str:
+    """Download a tarball and return its integrity hash (sha256:<hex>)."""
+    assets_dir.mkdir(parents=True, exist_ok=True)
+    dest = assets_dir / f"{name}-{version}"
+    if not dest.exists():
+        download_file(url, dest, desc=f"{name}-{version}")
+    digest = compute_sha256(dest)
+    return f"sha256:{digest}"
+
+
 def resolve_manifest(manifest_path: Path) -> None:
     """Resolve a manifest to a URL-only lock file."""
     manifest_path = Path(manifest_path)
@@ -205,25 +222,31 @@ def resolve_manifest(manifest_path: Path) -> None:
     else:
         reachable = set(raw.packages)
 
-    resolved_packages: dict[str, dict] = {}
+    resolved_packages: dict[str, ResolvedPackage] = {}
     for name, pkg in raw.packages.items():
         if name not in reachable:
             continue
         resolved_source, version = _resolve_source(name, pkg)
-        entry: dict = {}
         if isinstance(resolved_source, GitSource):
-            entry["src"] = {"url": resolved_source.url, "sha": resolved_source.sha}
+            rpkg = ResolvedPackage(
+                version=version,
+                src=resolved_source,
+                cxx_std=pkg.cxx_std,
+                requires=pkg.requires,
+                features=pkg.features,
+            )
         elif isinstance(resolved_source, URLSource):
-            entry["url"] = resolved_source.url
-        if version:
-            entry["version"] = version
-        if pkg.cxx_std:
-            entry["cxx_std"] = pkg.cxx_std
-        if pkg.requires is not None:
-            entry["requires"] = pkg.requires
-        if pkg.features is not None:
-            entry["features"] = pkg.features
-        resolved_packages[name] = entry
+            integrity = _download_and_hash(resolved_source.url, name, version, _ASSETS_DIR)
+            rpkg = ResolvedPackage(
+                version=version,
+                src=ChecksumSource(url=resolved_source.url, integrity=integrity),
+                cxx_std=pkg.cxx_std,
+                requires=pkg.requires,
+                features=pkg.features,
+            )
+        else:
+            raise TypeError(f"Unexpected source type for {name}: {type(resolved_source)}")
+        resolved_packages[name] = rpkg
         src_url = (
             resolved_source.url
             if isinstance(resolved_source, URLSource | GitSource)
@@ -232,17 +255,18 @@ def resolve_manifest(manifest_path: Path) -> None:
         print(f"  {name}: {src_url[:60]}...")
 
     manifest_hash = compute_manifest_hash(manifest_path)
-    lock_data: dict[str, object] = {
-        "packages": resolved_packages,
-        "target_glibc": raw.target_glibc,
-        "toolchain": raw.toolchain,
-        "manifest_hash": manifest_hash,
-    }
-    if raw.executable_package is not None:
-        lock_data["executable_package"] = raw.executable_package
+    lockfile = LockFile(
+        packages=resolved_packages,
+        target_glibc=raw.target_glibc or "",
+        toolchain=raw.toolchain or "",
+        manifest_hash=manifest_hash,
+        executable_package=raw.executable_package or "",
+    )
 
     lock_path = manifest_path.with_suffix(".lock")
-    lock_path.write_bytes(json.dumps(lock_data, indent=2, sort_keys=True).encode() + b"\n")
+    lock_path.write_text(
+        _lockfile_adapter.dump_json(lockfile, indent=2, exclude_defaults=True).decode() + "\n"
+    )
     print(f"Wrote {lock_path}\n")
 
 
