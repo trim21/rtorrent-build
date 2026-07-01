@@ -3,9 +3,6 @@ FROM {{ base_image }}
 {% if debug %}
 RUN apt-get update && apt-get install -y gdb && rm -rf /var/lib/apt/lists/*
 {% endif %}
-{% for key, value in labels.items() %}
-LABEL {{ key }}="{{ value }}"
-{% endfor %}
 COPY --from=busybox /bin/busybox /usr/local/bin/busybox
 COPY {{ binary }} /usr/local/bin/rtorrent
 ENTRYPOINT ["/usr/local/bin/rtorrent"]

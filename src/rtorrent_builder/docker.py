@@ -30,7 +30,6 @@ def build_docker_image(
                 base_image=base_image,
                 binary=binary_path.name,
                 debug=debug,
-                labels=labels or {},
             )
         )
         build_context = binary_path.parent
@@ -41,6 +40,7 @@ def build_docker_image(
             image_tag,
             "-f",
             str(dockerfile),
+            *(f"--label={k}={v}" for k, v in (labels or {}).items()),
             str(build_context),
         ]
         print(f"$ {' '.join(cmd)}")
