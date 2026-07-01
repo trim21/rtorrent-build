@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import re
 import subprocess
 from functools import cache
@@ -264,9 +265,8 @@ def resolve_manifest(manifest_path: Path) -> None:
     )
 
     lock_path = manifest_path.with_suffix(".lock")
-    lock_path.write_text(
-        _lockfile_adapter.dump_json(lockfile, indent=2, exclude_defaults=True).decode() + "\n"
-    )
+    data = _lockfile_adapter.dump_python(lockfile, exclude_defaults=True)
+    lock_path.write_text(json.dumps(data, indent=2, sort_keys=True) + "\n")
     print(f"Wrote {lock_path}\n")
 
 
