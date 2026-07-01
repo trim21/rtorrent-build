@@ -3,65 +3,89 @@
   "manifest_hash": "3dff1b4180743407ef8d18f83e97025c7f1d9749b6cda79d879281ab4916ef4b",
   "packages": {
     "boost": {
-      "features": [],
-      "url": "https://github.com/boostorg/boost/releases/download/boost-1.86.0/boost-1.86.0-cmake.tar.gz",
+      "src": {
+        "integrity": "sha256:c62ce6e64d34414864fef946363db91cea89c1b90360eabed0515f0eda74c75c",
+        "url": "https://github.com/boostorg/boost/releases/download/boost-1.86.0/boost-1.86.0-cmake.tar.gz"
+      },
       "version": "1.86.0"
     },
     "brotli": {
-      "features": [],
-      "url": "https://github.com/google/brotli/archive/refs/tags/v1.2.0.tar.gz",
+      "src": {
+        "integrity": "sha256:816c96e8e8f193b40151dad7e8ff37b1221d019dbcb9c35cd3fadbfe6477dfec",
+        "url": "https://github.com/google/brotli/archive/refs/tags/v1.2.0.tar.gz"
+      },
       "version": "1.2.0"
     },
     "cares": {
-      "features": [],
-      "url": "https://github.com/c-ares/c-ares/archive/refs/tags/v1.34.6.tar.gz",
+      "src": {
+        "integrity": "sha256:4358939ff800b13b92f37d5fdda003718101faedfbdee792d6b79ddc1a53d890",
+        "url": "https://github.com/c-ares/c-ares/archive/refs/tags/v1.34.6.tar.gz"
+      },
       "version": "1.34.6"
     },
     "curl": {
-      "features": [],
-      "url": "https://github.com/curl/curl/archive/refs/tags/curl-8_21_0.tar.gz",
+      "src": {
+        "integrity": "sha256:ec753aa6f408a3ca9f0d6d5f7a77417aecd1544db13c03ae5d443612bf367364",
+        "url": "https://github.com/curl/curl/archive/refs/tags/curl-8_21_0.tar.gz"
+      },
       "version": "8.21.0"
     },
     "libtorrent-rasterbar": {
       "cxx_std": "c++14",
-      "features": [],
-      "url": "https://github.com/arvidn/libtorrent/releases/download/v1.2.20/libtorrent-rasterbar-1.2.20.tar.gz",
+      "src": {
+        "integrity": "sha256:ccbf8e8c21dc81635de95166b498922b4725f9725a23b2cfe2a6b2fead6fb9fc",
+        "url": "https://github.com/arvidn/libtorrent/releases/download/v1.2.20/libtorrent-rasterbar-1.2.20.tar.gz"
+      },
       "version": "1.2.20"
     },
     "nghttp2": {
-      "features": [],
-      "url": "https://github.com/nghttp2/nghttp2/archive/refs/tags/v1.69.0.tar.gz",
+      "src": {
+        "integrity": "sha256:e5ebde703437d4a0bb39e0e2ba03dfda0ee74beba2395003ec71efaf8fb15d03",
+        "url": "https://github.com/nghttp2/nghttp2/archive/refs/tags/v1.69.0.tar.gz"
+      },
       "version": "1.69.0"
     },
     "openssl": {
-      "features": [],
-      "url": "https://github.com/openssl/openssl/archive/refs/tags/openssl-3.6.3.tar.gz",
+      "src": {
+        "integrity": "sha256:c5524dd6bfaa8e8ff0f1be885c390d14f3ff0bd2de62a7311b65fcbb75cb7546",
+        "url": "https://github.com/openssl/openssl/archive/refs/tags/openssl-3.6.3.tar.gz"
+      },
       "version": "3.6.3"
     },
     "qbittorrent": {
       "cxx_std": "c++20",
-      "features": [],
-      "url": "https://github.com/qbittorrent/qBittorrent/archive/refs/tags/release-5.2.2.tar.gz",
+      "src": {
+        "integrity": "sha256:177efdadcd66fa66c473e97ee8ed117ce33ccb9a0a25a0716b62245ce506d1d7",
+        "url": "https://github.com/qbittorrent/qBittorrent/archive/refs/tags/release-5.2.2.tar.gz"
+      },
       "version": "5.2.2"
     },
     "qtbase": {
-      "features": [],
-      "url": "https://download.qt.io/official_releases/qt/6.8/6.8.3/submodules/qtbase-everywhere-src-6.8.3.tar.xz",
+      "src": {
+        "integrity": "sha256:56001b905601bb9023d399f3ba780d7fa940f3e4861e496a7c490331f49e0b80",
+        "url": "https://download.qt.io/official_releases/qt/6.8/6.8.3/submodules/qtbase-everywhere-src-6.8.3.tar.xz"
+      },
       "version": "6.8.3"
     },
     "qttools": {
-      "features": [],
-      "url": "https://download.qt.io/official_releases/qt/6.8/6.8.3/submodules/qttools-everywhere-src-6.8.3.tar.xz",
+      "src": {
+        "integrity": "sha256:02a4e219248b94f1333df843d25763f35251c1074cdc4fb5bda67d340f8c8b3a",
+        "url": "https://download.qt.io/official_releases/qt/6.8/6.8.3/submodules/qttools-everywhere-src-6.8.3.tar.xz"
+      },
       "version": "6.8.3"
     },
     "zlib": {
-      "features": [],
-      "url": "https://github.com/zlib-ng/zlib-ng/archive/refs/tags/2.3.3.tar.gz",
+      "src": {
+        "integrity": "sha256:f9c65aa9c852eb8255b636fd9f07ce1c406f061ec19a2e7d508b318ca0c907d1",
+        "url": "https://github.com/zlib-ng/zlib-ng/archive/refs/tags/2.3.3.tar.gz"
+      },
       "version": "2.3.3"
     },
     "zstd": {
-      "features": [],
-      "url": "https://github.com/facebook/zstd/archive/refs/tags/v1.5.7.tar.gz",
+      "src": {
+        "integrity": "sha256:37d7284556b20954e56e1ca85b80226768902e2edabd3b649e9e72c0c9012ee3",
+        "url": "https://github.com/facebook/zstd/archive/refs/tags/v1.5.7.tar.gz"
+      },
       "version": "1.5.7"
     }
   },
