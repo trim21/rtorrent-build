@@ -5,11 +5,15 @@ options) AND the hashes of all its transitive dependencies.  This means
 changing a leaf dependency (e.g. openssl) invalidates only its subtree, while
 unchanged subtrees remain cacheable.
 
-Cache entries are gzip-compressed tarballs containing only the files that a
+Cache entries are uncompressed tarballs containing only the files that a
 single package installed into the shared prefix, keyed by Merkle hash.  They
-use the ``.cache`` file extension (not ``.tar.gz``) to avoid being silently
+use the ``.cache`` file extension (not ``.tar``) to avoid being silently
 dropped by GitHub Actions cache tooling.  Multiple cache entries can be
 restored independently into the same prefix without conflict.
+
+Compression is intentionally avoided because the cached files are mostly
+compiled libraries (for which compression provides negligible savings) and
+decompression overhead slows down cache restoration.
 
 Each archive is accompanied by a .json metadata file recording the hash
 computation inputs, so that cache-miss root causes can be diagnosed.
@@ -90,7 +94,7 @@ class CacheStore:
         print(f"Persistent cache hit for {name}")
         prefix.mkdir(parents=True, exist_ok=True)
         try:
-            with tarfile.open(archive, "r:gz") as tf:
+            with tarfile.open(archive, "r:") as tf:
                 tf.extractall(str(prefix))
         except (EOFError, tarfile.ReadError) as e:
             print(f"Corrupt cache file for {name}: {e}", file=sys.stderr)
@@ -109,7 +113,7 @@ class CacheStore:
         prefix: Path,
         relative_files: set[Path],
     ) -> None:
-        """Create a gzip-compressed tarball and metadata JSON for *name* under *key*."""
+        """Create an uncompressed tarball and metadata JSON for *name* under *key*."""
         pkg_dir = self._pkg_dir(name)
         archive = self._archive_path(name, key)
         meta = self._meta_path(name, key)
@@ -118,7 +122,7 @@ class CacheStore:
             if archive.exists():
                 return
             print(f"Caching {name} ({len(relative_files)} files) -> {archive}")
-            with tarfile.open(archive, "w:gz") as tf:
+            with tarfile.open(archive, "w:") as tf:
                 for rel in sorted(relative_files):
                     abs_path = prefix / rel
                     if abs_path.exists():
@@ -179,14 +183,14 @@ class CacheStore:
         *current_packages* is a mapping of ``{name: merkle_hash}`` for the
         current build.  Archives and metadata for other hashes (within each
         package directory) are removed.  Empty package directories are
-        also removed.  Old flat-format files in the cache root are cleaned up.
+        also removed.
         """
         removed = 0
 
         for entry in sorted(self.cache_dir.iterdir()):
             if entry.is_file():
                 sfx = entry.suffix
-                if sfx in (CACHE_EXT, ".json") or entry.name.endswith(".tar.gz"):
+                if sfx in (CACHE_EXT, ".json"):
                     print(f"Cache GC: removing stale old-format {entry}")
                     entry.unlink()
                     removed += 1
