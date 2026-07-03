@@ -10,9 +10,8 @@ on:
         required: true
 
 jobs:
-  cancel:
-    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true
-    runs-on: ubuntu-slim
+  cleanup:
+    runs-on: ubuntu-latest
     permissions:
       actions: write
     steps:
@@ -21,3 +20,9 @@ jobs:
           workflow_id: all
           ignore_sha: true
           access_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Delete PR caches
+        if: github.event_name == 'pull_request'
+        run: gh cache delete --all --ref "refs/pull/${{ github.event.pull_request.number }}/merge"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
