@@ -27,6 +27,15 @@ jobs:
         libc: [glibc, musl]
         arch:
           - { flag: amd/v1, name: amd.v1 }
+        exclude:
+          - variant: qbittorrent-5.2-lt2
+            libc: musl
+          - variant: qbittorrent-5.2-lt1
+            libc: musl
+          - variant: qbittorrent-5.1-lt2
+            libc: musl
+          - variant: qbittorrent-5.1-lt1
+            libc: musl
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
