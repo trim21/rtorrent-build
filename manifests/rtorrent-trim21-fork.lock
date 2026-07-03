@@ -1,6 +1,6 @@
 {
   "executable_package": "rtorrent",
-  "manifest_hash": "e59cc36ea1b0fa83815e5316e0578a2e2f22c4a9e501a6100a74c94cc1554ed1",
+  "manifest_hash": "2cde889f52b57a5ce92262cd24a7b5324497c3725e8ef0a0fd0fb88bfd656ad9",
   "packages": {
     "brotli": {
       "src": {
@@ -56,10 +56,10 @@
     },
     "openssl": {
       "src": {
-        "integrity": "sha256:c5524dd6bfaa8e8ff0f1be885c390d14f3ff0bd2de62a7311b65fcbb75cb7546",
-        "url": "https://github.com/openssl/openssl/archive/refs/tags/openssl-3.6.3.tar.gz"
+        "integrity": "sha256:d8dee4712f66b113ab2060ca693febcfbf81edb08c323c1a87e7526364d0fef8",
+        "url": "https://github.com/openssl/openssl/archive/refs/tags/openssl-4.0.1.tar.gz"
       },
-      "version": "3.6.3"
+      "version": "4.0.1"
     },
     "rtorrent": {
       "requires": [

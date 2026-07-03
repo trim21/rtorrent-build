@@ -1,0 +1,11 @@
+{
+  "$schema": "../../manifest.schema.json",
+  "packages": {
+    "openssl": {
+      "source": {
+        "github": "openssl/openssl",
+        "tag_range": ">=3,<4"
+      }
+    }
+  }
+}

@@ -24,8 +24,8 @@ class QtBaseBuilder(CMakeBuilder):
             f"-DZLIB_ROOT={self.tc.dep_prefix('zlib')}",
             "-DFEATURE_openssl=ON",
             "-DFEATURE_openssl_linked=ON",
-            f"-DOPENSSL_ROOT_DIR={self.tc.dep_prefix('openssl')}",
             "-DINPUT_openssl=linked",
+            f"-DOPENSSL_ROOT_DIR={self.tc.dep_prefix('openssl')}",
             "-DFEATURE_system_openjpeg=OFF",
             "-DFEATURE_system_jpeg=OFF",
             "-DFEATURE_system_png=OFF",
@@ -33,6 +33,6 @@ class QtBaseBuilder(CMakeBuilder):
             "-DFEATURE_system_pcre2=OFF",
             "-DFEATURE_system_doubleconversion=OFF",
             "-DFEATURE_system_textmarkdown=OFF",
-            "-DFEATURE_reduce_relocations=OFF",
+            "-DFEATURE_reduce_relocations=ON",
             "-DFEATURE_brotli=ON",
         ]
