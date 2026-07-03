@@ -51,7 +51,7 @@ jobs:
         run: uv run python scripts/lock.py
 
       - name: Regenerate README
-        run: uv run python scripts/generate_readme.py generate --write
+        run: uv run python scripts/generate_readme.py --write
 
       - name: Generate PR body
         run: uv run python scripts/pr-body.py --output-file /tmp/pr-body.md
