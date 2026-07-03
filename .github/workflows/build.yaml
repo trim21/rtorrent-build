@@ -46,7 +46,7 @@ jobs:
           python-version: "3.12"
 
       - name: Install autotools
-        run: sudo apt-get update && sudo apt-get install -y autoconf automake libtool pkg-config
+        run: sudo apt-get update && sudo apt-get install -y autoconf automake libtool
 
       - name: Install uv
         uses: astral-sh/setup-uv@v8.2.0
