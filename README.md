@@ -65,64 +65,26 @@ All images are based on `gcr.io/distroless/cc-debian13` (glibc 2.40) and include
 | Tag | Arch |
 |---|---|
 | `master.amd.v1` | x86_64-v1 |
-| `master-123c327a8f93.amd.v1` | x86_64-v1 |
 | `master.amd.v3` | x86_64-v3 |
-| `master-123c327a8f93.amd.v3` | x86_64-v3 |
 
-
-## Build Flags
-
-All binaries are built with `-O2 -flto -fPIC -g -w`:
-
-| Flag | Purpose |
-|---|---|
-| `-O2` | Optimize for speed |
-| `-flto` | Link-time optimization |
-| `-fPIC` | Position-independent code |
-| `-g` | Debug symbols (preserved in final binary) |
-| `-w` | Suppress all compiler warnings |
-
-Architecture-specific `-march` flags are set according to the target microarchitecture level.
-
-## GitHub Release Assets
-
-Static binaries are published to [GitHub Releases](https://github.com/trim21/rtorrent-static/releases) on tag pushes. Binaries are built with `-O2 -flto -fPIC -g` and statically linked except for glibc-family `.so` deps (or fully static with musl).
 
 ## Build
 
 ```bash
-# Build variants
-python build.py build manifests/qbittorrent-5.1-lt1.jsonc
-python build.py build manifests/qbittorrent-5.1-lt2.jsonc
-python build.py build manifests/qbittorrent-5.2-lt1.jsonc
-python build.py build manifests/qbittorrent-5.2-lt2.jsonc
-python build.py build manifests/rtorrent-0.16.jsonc
-python build.py build manifests/rtorrent-0.9.8.jsonc
 python build.py build manifests/rtorrent-master.jsonc
-python build.py build manifests/transmission.jsonc
-# With options
-python build.py build manifests/rtorrent-master.jsonc --libc musl --arch amd/v2
-python build.py build manifests/rtorrent-master.jsonc --libc current  # host glibc
-python build.py build manifests/rtorrent-master.jsonc --docker         # distroless image
-python build.py build manifests/rtorrent-master.jsonc --disguise       # disguise UA
-python build.py build manifests/rtorrent-master.jsonc --no-cache
 ```
 
 ### CLI Options
 
-| Option | Description |
-|---|---|
-| `--libc glibc` | Dynamically link glibc (default) |
-| `--libc musl` | Fully static musl-linked binary |
-| `--libc current` | Target host glibc version |
-| `--arch amd/v1` | x86-64 baseline (default) |
-| `--arch amd/v2` | x86-64-v2 (SSE4.2) |
-| `--arch amd/v3` | x86-64-v3 (AVX2) |
-| `--docker` | Build distroless Docker image |
-| `--disguise` | Spoof rtorrent/0.9.8 User-Agent |
-| `--debug` | Debug build (-g -O0, no LTO) |
-| `--no-cache` | Disable build cache |
-| `-j N` | Max concurrent package builds |
+| Option | Values | Description |
+|---|---|---|
+| `--libc` | `glibc` (default), `musl`, `current` | glibc dynamic link / musl fully static / host glibc |
+| `--arch` | `amd/v1` (default), `amd/v2`, `amd/v3`, `amd/v4`, `native` | x86-64 microarchitecture level |
+| `--docker` | — | Build distroless Docker image |
+| `--disguise` | — | Spoof rtorrent/0.9.8 User-Agent |
+| `--debug/--no-debug` | — | Debug build: `-g -O0`, no LTO |
+| `--no-cache` | — | Disable build cache |
+| `-j N` | — | Max concurrent package builds (default: 1) |
 
 ## Troubleshooting
 

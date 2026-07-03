@@ -98,10 +98,7 @@ class VariantInfo:
     def docker_tags(self, arch_safe: str = "amd.v1") -> list[str]:
         variant_name = self.docker_variant_name
         if self.is_git_ref:
-            tags = [
-                f"{variant_name}.{arch_safe}",
-                f"{variant_name}-{self.app_version[:12]}.{arch_safe}",
-            ]
+            tags = [f"{variant_name}.{arch_safe}"]
         else:
             parts = self.app_version.split(".")
             prefixes: list[str] = []
@@ -203,10 +200,7 @@ def generate(*, write: bool) -> None:
     variants = collect_variants()
     apps = build_app_groups(variants)
     docker_apps = build_app_groups(variants, docker_only=True)
-    readme = (
-        _README_TEMPLATE.render(variants=variants, apps=apps, docker_apps=docker_apps).strip()
-        + "\n"
-    )
+    readme = _README_TEMPLATE.render(apps=apps, docker_apps=docker_apps).strip() + "\n"
     readme_path = PROJECT_ROOT / "README.md"
 
     if write:
