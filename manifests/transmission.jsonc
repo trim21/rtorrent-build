@@ -1,6 +1,6 @@
 {
   "$schema": "../manifest.schema.json",
-  "extends": "base/common.jsonc",
+  "extends": ["base/common.jsonc", "base/openssl3.jsonc"],
   "executable_package": "transmission",
   "target_glibc": "2.28",
   "packages": {

@@ -1,5 +1,5 @@
 {
-  "$schema": "../manifest.schema.json",
+  "$schema": "../../manifest.schema.json",
   "toolchain": "default",
   "packages": {
     "zlib": {
@@ -23,7 +23,7 @@
     "openssl": {
       "source": {
         "github": "openssl/openssl",
-        "tag_range": ">=3,<4"
+        "tag_range": ">=3,<5"
       }
     },
     "ncurses": {
