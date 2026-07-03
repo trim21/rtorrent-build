@@ -1,16 +1,5 @@
 version: "3"
 
-vars:
-  VARIANTS:
-    - rtorrent-0.9.8
-    - rtorrent-0.16
-    - rtorrent-master
-    - rtorrent-fork
-    - qbittorrent-5.2-lt2
-    - qbittorrent-5.2-lt1
-    - qbittorrent-5.1-lt2
-    - qbittorrent-5.1-lt1
-
 tasks:
   lock:
     desc: "Lock the build environment (e.g. task lock)"
@@ -18,16 +7,19 @@ tasks:
       - python scripts/lock.py {{.CLI_ARGS}}
 
   build:
-    desc: "Build a variant (e.g. task build VARIANT=rtorrent-0.16)"
+    desc: "Build a variant (e.g. task build VARIANT=manifests/rtorrent-0.16.jsonc)"
     cmds:
-      - python build.py {{.VARIANT}} {{.CLI_ARGS}}
+      - python build.py build {{.VARIANT}} {{.CLI_ARGS}}
     requires:
       vars: [VARIANT]
 
   all:
-    desc: Build all variants
+    desc: Build all variants (auto-discovered from manifests/)
+    run: always
+    sources:
+      - "manifests/*.jsonc"
     cmds:
-      - for: { var: VARIANTS }
+      - for: sources
         task: build
         vars:
           VARIANT: "{{.ITEM}}"

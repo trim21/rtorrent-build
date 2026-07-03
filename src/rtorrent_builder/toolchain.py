@@ -413,8 +413,8 @@ class Toolchain:
     def cmake_cflags_init(self) -> str:
         march = f"-march={self.arch.march}"
         if self.debug:
-            return f"-fPIC -g -O0 -w {march}"
-        return f"-fPIC -flto -w {march}"
+            return f"-fPIC -g -O0 -w -fno-semantic-interposition {march}"
+        return f"-fPIC -flto -w -fno-semantic-interposition {march}"
 
     def _write_toolchain_file(self) -> Path:
         path = self.work_dir / "zig-toolchain.cmake"
@@ -470,10 +470,12 @@ class Toolchain:
 
         if self.debug:
             ldflags = f"-L{install_lib} -L{install_lib}64"
-            cflags = f"-fPIC -g -O0 -w -march={self.arch.march}"
+            cflags = f"-fPIC -g -O0 -w -fno-semantic-interposition -march={self.arch.march}"
+            cppflags = f"-I{install_include}"
         else:
             ldflags = f"-flto -L{install_lib} -L{install_lib}64"
-            cflags = f"-fPIC -O2 -g -flto -w -march={self.arch.march}"
+            cflags = f"-fPIC -O2 -g -flto -w -fno-semantic-interposition -march={self.arch.march}"
+            cppflags = f"-I{install_include} -DNDEBUG"
         if self.libc == Libc.musl:
             ldflags += " -static"
             cflags += " -static"
@@ -485,7 +487,7 @@ class Toolchain:
             "AR": " ".join(self.zig_ar),
             "RANLIB": " ".join(self.zig_ranlib),
             "STRIP": f"{self.zig_bin} strip",
-            "CPPFLAGS": f"-I{install_include}",
+            "CPPFLAGS": cppflags,
             "CFLAGS": cflags,
             "CXXFLAGS": cflags,
             "LDFLAGS": ldflags,
@@ -509,10 +511,10 @@ class Toolchain:
         pkg_path = f"{install_lib}/pkgconfig:{install_lib64}/pkgconfig"
 
         if self.debug:
-            cflags = f"-fPIC -g -O0 -w -march={self.arch.march}"
+            cflags = f"-fPIC -g -O0 -w -fno-semantic-interposition -march={self.arch.march}"
             ldflags = f"-L{install_lib} -L{install_lib64}"
         else:
-            cflags = f"-fPIC -O2 -g -flto -w -march={self.arch.march}"
+            cflags = f"-fPIC -O2 -g -flto -w -fno-semantic-interposition -march={self.arch.march}"
             ldflags = f"-flto -L{install_lib} -L{install_lib64}"
 
         if self.libc == Libc.musl:

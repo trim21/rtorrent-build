@@ -11,3 +11,4 @@ assets/
 /sources/
 .cache/
 .envrc
+.task/

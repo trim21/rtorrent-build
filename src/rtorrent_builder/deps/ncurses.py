@@ -18,6 +18,7 @@ class NcursesBuilder(MakeBuilder):
             "--enable-widec",
             "--without-progs",
             "--without-tests",
+            "--without-manpages",
         ]
 
     def configure(self) -> None:
@@ -42,6 +43,7 @@ class NcursesBuilder(MakeBuilder):
                 "--enable-widec",
                 "--without-progs",
                 "--without-tests",
+                "--without-manpages",
             ],
             cwd=str(self.src_dir),
             env=self.build_env,
