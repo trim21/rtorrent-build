@@ -1,0 +1,16 @@
+{#
+  Jinja2 template for release notes.
+  Context: variant (VariantInfo)
+#}
+## {{ variant.executable }} {{ variant.app_version }}
+
+**Target glibc:** {{ variant.target_glibc }}
+
+<details><summary>Dependencies</summary>
+
+| Package | Version |
+|---|---|
+{% for pkg in variant.packages -%}
+| `{{ pkg.name }}` | {{ pkg.version }} |
+{% endfor -%}
+</details>

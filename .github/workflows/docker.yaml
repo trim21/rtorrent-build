@@ -47,16 +47,6 @@ jobs:
             arch: { flag: amd/v4, name: amd.v4 }
             disguise: true
             debug: false
-          - variant: rtorrent-trim21-fork
-            libc: glibc
-            arch: { flag: amd/v1, name: amd.v1 }
-            disguise: true
-            debug: false
-          - variant: rtorrent-trim21-fork
-            libc: glibc
-            arch: { flag: amd/v1, name: amd.v1 }
-            disguise: true
-            debug: true
     runs-on: ubuntu-latest
     permissions:
       contents: read

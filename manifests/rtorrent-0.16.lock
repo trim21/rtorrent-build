@@ -1,6 +1,6 @@
 {
   "executable_package": "rtorrent",
-  "manifest_hash": "cb94f38e4e7dbed1cd21220d9e73f67a31d1530eb4999ceb539ca98aea4c9c97",
+  "manifest_hash": "e7dcd4966278516bca45369a8dfd6a60ec38fd882709e5311f5d2858950760ea",
   "packages": {
     "brotli": {
       "src": {
@@ -107,6 +107,6 @@
       "version": "1.5.7"
     }
   },
-  "target_glibc": "2.28",
+  "target_glibc": "2.34",
   "toolchain": "default"
 }

@@ -2,7 +2,7 @@
   "$schema": "../manifest.schema.json",
   "extends": "base/common.jsonc",
   "executable_package": "rtorrent",
-  "target_glibc": "2.28",
+  "target_glibc": "2.34",
   "packages": {
     "curl": {
       "source": {
