@@ -153,6 +153,9 @@ def _format_body(
         for c in commits:
             sha: str = c["sha"]
             msg: str = c["commit"]["message"].split("\n")[0]
+            # Escape @ to prevent GitHub from treating usernames in commit
+            # messages as mentions in the PR body.
+            msg = msg.replace("@", "@<!-- -->")
             if len(msg) > 120:
                 msg = msg[:117] + "..."
             commit_url = f"https://github.com/{change.repo}/commit/{sha}"
