@@ -11,10 +11,10 @@
     },
     "cares": {
       "src": {
-        "integrity": "sha256:2f04ab21661e96378d6bb16b34b00e61764a0418f8d87765ee896fab5801153c",
-        "url": "https://github.com/c-ares/c-ares/archive/refs/tags/v1.34.7.tar.gz"
+        "integrity": "sha256:ddf8be8b179ef6ff656e7413da93cf0f3038c627aca29ce9aae30f66e5b32bc1",
+        "url": "https://github.com/c-ares/c-ares/archive/refs/tags/v1.34.8.tar.gz"
       },
-      "version": "1.34.7"
+      "version": "1.34.8"
     },
     "curl": {
       "features": [
@@ -67,10 +67,10 @@
         "lua"
       ],
       "src": {
-        "sha": "ea2d22cb870377b59b5d64031962575738aadb7d",
+        "sha": "3b6da6feac79c85e10ba817d57c9c4f8d1415352",
         "url": "https://github.com/rakshasa/rtorrent.git"
       },
-      "version": "ea2d22cb8703"
+      "version": "3b6da6feac79"
     },
     "rtorrent-libtorrent": {
       "requires": [
@@ -79,10 +79,10 @@
         "curl"
       ],
       "src": {
-        "sha": "09b150f4d2eaf1ae7107a400d6f645226466fbb6",
+        "sha": "4d9627bcadf8df4f8d68b97351ea3c348909d5db",
         "url": "https://github.com/rakshasa/libtorrent.git"
       },
-      "version": "09b150f4d2ea"
+      "version": "4d9627bcadf8"
     },
     "zlib": {
       "src": {
