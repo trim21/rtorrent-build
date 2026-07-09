@@ -8,7 +8,7 @@ Statically (or glibc only) linked [rtorrent](https://github.com/rakshasa/rtorren
 |---|---|---|
 | `rtorrent-0.16` | 0.16.17 | 2.34 |
 | `rtorrent-0.9.8` | 0.9.8 | 2.17 |
-| `rtorrent-master` | `c6bde213b4a7` (git) | 2.34 |
+| `rtorrent-master` | `1b25bc7f5688` (git) | 2.34 |
 
 
 ### qBittorrent
