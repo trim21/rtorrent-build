@@ -68,16 +68,19 @@ jobs:
           path: assets/
           key: sources-${{ hashFiles('manifests/*.lock') }}
 
-      - name: Set cache month
-        id: cache-month
-        run: echo "month=$(date +%Y-%m)" >> $GITHUB_OUTPUT
+      - name: Set cache week
+        id: cache-week
+        run: |
+          echo "this_week=$(date +%Y-W%V)" >> $GITHUB_OUTPUT
+          echo "last_week=$(date -d '7 days ago' +%Y-W%V)" >> $GITHUB_OUTPUT
 
       - name: Cache build artifacts (Merkle tree)
         uses: actions/cache@v6
         with:
           path: .rtorrent-cache/
-          key: build-v3-${{ matrix.arch.name }}-${{ matrix.libc }}-${{ matrix.variant }}-${{ steps.cache-month.outputs.month }}
+          key: build-v3-${{ matrix.arch.name }}-${{ matrix.libc }}-${{ matrix.variant }}-${{ steps.cache-week.outputs.this_week }}
           restore-keys: |
+            build-v3-${{ matrix.arch.name }}-${{ matrix.libc }}-${{ matrix.variant }}-${{ steps.cache-week.outputs.last_week }}
             build-v3-${{ matrix.arch.name }}-${{ matrix.libc }}-${{ matrix.variant }}
             build-v3-${{ matrix.arch.name }}-${{ matrix.libc }}
 
