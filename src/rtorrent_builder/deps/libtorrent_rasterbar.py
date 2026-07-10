@@ -13,9 +13,11 @@ class LibtorrentRasterbarBuilder(CMakeBuilder):
         args = [
             "-DBUILD_SHARED_LIBS=OFF",
             "-Ddeprecated-functions=OFF",
-            # libdatachannel examples/* are git submodules not included
+            # libdatachannel examples/* and test/* are git submodules not included
             # in the release tarball; disable them all to avoid CMake errors.
             "-DNO_EXAMPLES=ON",
+            "-DNO_TESTS=ON",
+            "-DNO_BENCHMARK=ON",
         ]
         if self.lib.cxx_std:
             args.append(f"-DCMAKE_CXX_STANDARD={self.lib.cxx_std.removeprefix('c++')}")
