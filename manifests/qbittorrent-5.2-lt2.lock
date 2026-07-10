@@ -1,6 +1,6 @@
 {
   "executable_package": "qbittorrent",
-  "manifest_hash": "55ae45be0e0386f50e17c40ef0d3d93ab435cbc24e4cb062904ba20a22b23b29",
+  "manifest_hash": "065a4db5c6846fb4b98e17a0db7515437278b9e84ac5b66d3e289c6b50c21fe0",
   "packages": {
     "boost": {
       "src": {
@@ -33,10 +33,10 @@
     "libtorrent-rasterbar": {
       "cxx_std": "c++17",
       "src": {
-        "integrity": "sha256:ceed657606b8df453ec5e775326e3c759a2779e1202fa04abe42ed262e7bf0b6",
-        "url": "https://github.com/arvidn/libtorrent/releases/download/v2.1.0/libtorrent-rasterbar-2.1.0.tar.gz"
+        "integrity": "sha256:892cb75c06318e2420de0faf9f63a908069d3d237676e2459fd30abe0cb3b1bf",
+        "url": "https://github.com/arvidn/libtorrent/releases/download/v2.0.13/libtorrent-rasterbar-2.0.13.tar.gz"
       },
-      "version": "2.1.0"
+      "version": "2.0.13"
     },
     "nghttp2": {
       "src": {
