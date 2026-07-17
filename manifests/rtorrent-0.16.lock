@@ -75,10 +75,10 @@
         "lua"
       ],
       "src": {
-        "integrity": "sha256:115cdb6bf70f5c0f43687ca57c974bc45a7ff970562a56b51b971b9bf51ef0a1",
-        "url": "https://github.com/rakshasa/rtorrent/releases/download/v0.16.17/rtorrent-0.16.17.tar.gz"
+        "integrity": "sha256:0c7d4902cc914fabe984284330333c7b82aec9951c55915712cdd10acaae65cb",
+        "url": "https://github.com/rakshasa/rtorrent/releases/download/v0.16.18/rtorrent-0.16.18.tar.gz"
       },
-      "version": "0.16.17"
+      "version": "0.16.18"
     },
     "rtorrent-libtorrent": {
       "requires": [
@@ -87,10 +87,10 @@
         "curl"
       ],
       "src": {
-        "integrity": "sha256:9efd7f3176a03f7935b5616ff57695524e99a3184e43ec01110d13d960d2abf6",
-        "url": "https://github.com/rakshasa/rtorrent/releases/download/v0.16.17/libtorrent-0.16.17.tar.gz"
+        "integrity": "sha256:d5077bfd8b9c20ff903e13fc1fa68be3f7da84e927f1a4f28cf24a8206edd05d",
+        "url": "https://github.com/rakshasa/rtorrent/releases/download/v0.16.18/libtorrent-0.16.18.tar.gz"
       },
-      "version": "0.16.17"
+      "version": "0.16.18"
     },
     "zlib": {
       "src": {
