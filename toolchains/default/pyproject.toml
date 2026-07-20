@@ -8,7 +8,7 @@ dependencies = [
   "meson>=1,<2",
   "ninja>=1,<2",
   "patchelf>=0.17,<1",
-  "pkgconf>=2,<3",
+  "pkgconf>=3,<4",
   "ziglang==0.16.0",
 ]
 
