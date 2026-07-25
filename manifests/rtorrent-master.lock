@@ -79,10 +79,10 @@
         "curl"
       ],
       "src": {
-        "sha": "b0915e0937f666ecbcf42f0a07a655eee8e36a77",
+        "sha": "ee52f06f49305b8b1ed7946775a75af0c33569eb",
         "url": "https://github.com/rakshasa/libtorrent.git"
       },
-      "version": "b0915e0937f6"
+      "version": "ee52f06f4930"
     },
     "zlib": {
       "src": {
