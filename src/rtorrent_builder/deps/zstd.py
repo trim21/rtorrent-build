@@ -12,6 +12,6 @@ class ZstdBuilder(CMakeBuilder):
             "-DZSTD_BUILD_SHARED=OFF",
         ]
 
-    def build(self) -> None:
+    def generate(self) -> None:
         self.src_dir = self.src_dir / "build" / "cmake"
-        super().build()
+        super().generate()

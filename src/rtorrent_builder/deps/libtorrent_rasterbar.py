@@ -28,10 +28,10 @@ class LibtorrentRasterbarBuilder(CMakeBuilder):
             "patch:CMakeLists.txt:-Weverything+narrowing",
         ]
 
-    def build(self) -> None:
+    def generate(self) -> None:
         replace_in_file(
             self.src_dir / "CMakeLists.txt",
             "\t\t-Weverything\n",
             "\t\t-Weverything\n\t\t-Wno-c++11-narrowing-const-reference\n",
         )
-        super().build()
+        super().generate()

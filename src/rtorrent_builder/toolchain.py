@@ -53,7 +53,13 @@ class Builder(ABC):
     ) -> None: ...
 
     @abstractmethod
+    def generate(self) -> None: ...
+
+    @abstractmethod
     def build(self) -> None: ...
+
+    @abstractmethod
+    def install(self) -> None: ...
 
     @property
     def patches_dir(self) -> Path | None:

@@ -43,11 +43,26 @@ class RtorrentBuilder(Builder):
             env=self.tc.env,
         )
 
-    def build(self) -> None:
+    def _build_env(self) -> dict[str, str]:
+        env = self.tc.env
+        cppflags = env["CPPFLAGS"]
+        wants_ncurses = self.lib.requires is not None and "ncurses" in self.lib.requires
+        if wants_ncurses:
+            cppflags += " -DNCURSES_WIDECHAR"
+
+        make_env = {
+            **env,
+            "CPPFLAGS": cppflags,
+            "PATH": f"{self.tc.dep_prefix('lua')}/bin:{env['PATH']}",
+        }
+        if self.lib.cxx_std:
+            make_env["CXXFLAGS"] = f"{env['CXXFLAGS']} -std={self.lib.cxx_std}"
+        return make_env
+
+    def generate(self) -> None:
         self._autoreconf()
 
-        print(f"Building {self.name} {self.version}")
-        env = self.tc.env
+        print(f"Generating {self.name} {self.version}")
         cmd = self.commander
 
         configure_args = [
@@ -79,22 +94,7 @@ class RtorrentBuilder(Builder):
                 "--with-lua",
             ]
 
-        lua_prefix = self.tc.dep_prefix("lua")
-
-        cppflags = env["CPPFLAGS"]
-        if wants_ncurses:
-            cppflags += " -DNCURSES_WIDECHAR"
-
-        make_env = {
-            **env,
-            "CPPFLAGS": cppflags,
-            "PATH": f"{lua_prefix}/bin:{env['PATH']}",
-        }
-
-        if self.lib.cxx_std:
-            make_env["CXXFLAGS"] = f"{env['CXXFLAGS']} -std={self.lib.cxx_std}"
-
-        cmd.run(configure_args, cwd=str(self.src_dir), env=make_env)
+        cmd.run(configure_args, cwd=str(self.src_dir), env=self._build_env())
 
         if self._opts.ua:
             config_h = self.src_dir / "config.h"
@@ -104,13 +104,16 @@ class RtorrentBuilder(Builder):
                 f'#define USER_AGENT std::string("{self._opts.ua}")',
             )
 
-        cmd.run(
-            ["make", *cmd.nproc_args()],
+    def build(self) -> None:
+        self.commander.run(
+            ["make", *self.commander.nproc_args()],
             cwd=str(self.src_dir),
-            env=make_env,
+            env=self._build_env(),
         )
-        cmd.run(
+
+    def install(self) -> None:
+        self.commander.run(
             ["make", "install"],
             cwd=str(self.src_dir),
-            env=make_env,
+            env=self._build_env(),
         )
