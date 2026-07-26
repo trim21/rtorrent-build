@@ -5,6 +5,7 @@ import os
 import shutil
 import subprocess
 import sys
+import threading
 import time
 from dataclasses import dataclass
 from enum import IntEnum
@@ -210,10 +211,33 @@ def _render_timeline_table(timings: list[_Timing], total_elapsed: float) -> None
             f.write(out)
 
 
-def _list_prefix_files(prefix: Path) -> set[Path]:
+_FileState = tuple[int, int, int, int, int, str | None]
+
+
+def _snapshot_prefix(prefix: Path) -> dict[Path, _FileState]:
     if not prefix.exists():
-        return set()
-    return {p.relative_to(prefix) for p in prefix.rglob("*") if p.is_file()}
+        return {}
+    result: dict[Path, _FileState] = {}
+    for path in prefix.rglob("*"):
+        if not path.is_file() and not path.is_symlink():
+            continue
+        stat = path.stat(follow_symlinks=False)
+        link_target = os.readlink(path) if path.is_symlink() else None
+        result[path.relative_to(prefix)] = (
+            stat.st_mode,
+            stat.st_size,
+            stat.st_mtime_ns,
+            stat.st_ctime_ns,
+            stat.st_ino,
+            link_target,
+        )
+    return result
+
+
+def _changed_prefix_files(
+    before: dict[Path, _FileState], after: dict[Path, _FileState]
+) -> set[Path]:
+    return {path for path, state in after.items() if before.get(path) != state}
 
 
 def build_rtorrent(
@@ -288,6 +312,7 @@ def build_rtorrent(
     build_origin = time.monotonic()
     _pkg_hashes: dict[str, str] = {}
     _cache_store = CacheStore(cache_dir) if cache_dir else None
+    _install_lock = threading.Lock()
 
     def _build_pkg(name: str) -> str:
         t = _Timing(name=name, start=time.monotonic() - build_origin)
@@ -321,33 +346,39 @@ def build_rtorrent(
         _pkg_hashes[name] = merkle_hash
 
         if not no_cache and _cache_store and _cache_store.has(name, merkle_hash):
-            _cache_store.restore(name, merkle_hash, tc.install_prefix)
-            resolved[name] = ResolvedSource(name=name, version=pkg.version, src_dir=Path())
-            t.gen_end = time.monotonic() - build_origin
-            t.end = time.monotonic() - build_origin
-            t.source = _BuildSource.cached
-            return name
+            with _install_lock:
+                restored = _cache_store.restore(name, merkle_hash, tc.install_prefix)
+            if restored:
+                resolved[name] = ResolvedSource(name=name, version=pkg.version, src_dir=Path())
+                t.gen_end = time.monotonic() - build_origin
+                t.end = time.monotonic() - build_origin
+                t.source = _BuildSource.cached
+                return name
 
         if _cache_store and not no_cache:
             _cache_store.diagnose_miss(name, merkle_payload)
-
-        before_files = _list_prefix_files(tc.install_prefix)
 
         source = tc.prepare_source(name, lib)
         resolved[name] = source
         commander = tc.make_commander(name)
         builder = builder_cls(tc, lib, source, commander)
+        builder.generate()
         t.gen_end = time.monotonic() - build_origin
         builder.build()
-        t.end = time.monotonic() - build_origin
 
-        if _cache_store and not no_cache:
-            after_files = _list_prefix_files(tc.install_prefix)
-            new_files = after_files - before_files
-            if new_files:
+        # Keep attribution and archiving in the same critical section as installation.
+        with _install_lock:
+            before = _snapshot_prefix(tc.install_prefix)
+            builder.install()
+            after = _snapshot_prefix(tc.install_prefix)
+            installed_files = _changed_prefix_files(before, after)
+            if not installed_files:
+                raise RuntimeError(f"Package {name!r} did not install or update any files")
+            if _cache_store and not no_cache:
                 _cache_store.store_files(
-                    name, merkle_hash, merkle_payload, tc.install_prefix, new_files
+                    name, merkle_hash, merkle_payload, tc.install_prefix, installed_files
                 )
+        t.end = time.monotonic() - build_origin
 
         return name
 

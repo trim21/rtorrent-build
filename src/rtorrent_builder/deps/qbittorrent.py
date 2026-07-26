@@ -23,10 +23,10 @@ class QbittorrentBuilder(CMakeBuilder):
             "-DWEBUI=ON",
         ]
 
-    def build(self) -> None:
+    def generate(self) -> None:
         replace_in_file(
             self.src_dir / "src/base/http/requestparser.cpp",
             "    const QByteArray EOH = CRLF.repeated(2);\n",
             '    const QByteArray EOH = QByteArrayLiteral("\\x0D\\x0A").repeated(2);\n',
         )
-        super().build()
+        super().generate()

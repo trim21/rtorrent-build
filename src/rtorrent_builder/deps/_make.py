@@ -25,6 +25,9 @@ class MakeBuilder(Builder):
     def configure(self) -> None:
         pass
 
+    def generate(self) -> None:
+        self.configure()
+
     @abstractmethod
     def make_args(self) -> list[str]: ...
 
@@ -33,8 +36,10 @@ class MakeBuilder(Builder):
 
     def build(self) -> None:
         print(f"Building {self.name} {self.version}")
-        cmd = self.commander
-        self.configure()
-        cmd.run(["make", *self.make_args()], cwd=str(self.src_dir), env=self.build_env)
-        cmd.run(["make", *self.install_args()], cwd=str(self.src_dir), env=self.build_env)
+        self.commander.run(["make", *self.make_args()], cwd=str(self.src_dir), env=self.build_env)
+
+    def install(self) -> None:
+        self.commander.run(
+            ["make", *self.install_args()], cwd=str(self.src_dir), env=self.build_env
+        )
         print(f"Built {self.name} {self.version}")

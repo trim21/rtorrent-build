@@ -37,10 +37,10 @@ class LibtorrentBuilder(Builder):
             env=self.tc.env,
         )
 
-    def build(self) -> None:
+    def generate(self) -> None:
         self._autoreconf()
 
-        print(f"Building {self.name} {self.version}")
+        print(f"Generating {self.name} {self.version}")
         env = dict(self.tc.env)
         cmd = self.commander
 
@@ -70,12 +70,17 @@ class LibtorrentBuilder(Builder):
                 f'#define PEER_NAME "{self._opts.peer_name}"',
             )
 
-        cmd.run(
-            ["make", *cmd.nproc_args()],
-            cwd=str(self.src_dir),
-            env=env,
-        )
-        cmd.run(
+    def build(self) -> None:
+        env = dict(self.tc.env)
+        if self.lib.cxx_std:
+            env["CXXFLAGS"] = f"{env['CXXFLAGS']} -std={self.lib.cxx_std}"
+        self.commander.run(["make", *self.commander.nproc_args()], cwd=str(self.src_dir), env=env)
+
+    def install(self) -> None:
+        env = dict(self.tc.env)
+        if self.lib.cxx_std:
+            env["CXXFLAGS"] = f"{env['CXXFLAGS']} -std={self.lib.cxx_std}"
+        self.commander.run(
             ["make", "install"],
             cwd=str(self.src_dir),
             env=env,

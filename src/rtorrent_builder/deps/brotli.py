@@ -13,8 +13,8 @@ class BrotliBuilder(CMakeBuilder):
 
     _REQUIRES_PRIVATE = "Requires.private: libbrotlicommon"
 
-    def build(self) -> None:
-        super().build()
+    def install(self) -> None:
+        super().install()
         for pc in ["libbrotlidec.pc", "libbrotlienc.pc"]:
             pc_path = self.tc.install_prefix / "lib" / "pkgconfig" / pc
             if pc_path.exists():

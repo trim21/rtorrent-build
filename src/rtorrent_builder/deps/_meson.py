@@ -26,10 +26,13 @@ class MesonBuilder(Builder):
         extra += self.meson_args("$PREFIX")
         return extra
 
-    def build(self) -> None:
-        print(f"Building {self.name} {self.version}")
+    @property
+    def meson_build_dir(self) -> str:
+        return str(self.src_dir / "build")
+
+    def generate(self) -> None:
+        print(f"Generating {self.name} {self.version}")
         self._apply_patches()
-        build_dir = self.src_dir / "build"
         prefix = str(self.tc.install_prefix)
         cmd = self.commander
 
@@ -37,7 +40,7 @@ class MesonBuilder(Builder):
             [
                 self.tc.meson_bin,
                 "setup",
-                str(build_dir),
+                self.meson_build_dir,
                 "--prefix",
                 prefix,
                 *self.tc.meson_native_file_args,
@@ -46,6 +49,21 @@ class MesonBuilder(Builder):
             ],
             env=self.tc.meson_env,
         )
-        cmd.run([self.tc.meson_bin, "compile", "-C", str(build_dir), *cmd.nproc_args()])
-        cmd.run([self.tc.meson_bin, "install", "-C", str(build_dir)])
+
+    def build(self) -> None:
+        print(f"Building {self.name} {self.version}")
+        self.commander.run(
+            [
+                self.tc.meson_bin,
+                "compile",
+                "-C",
+                self.meson_build_dir,
+                *self.commander.nproc_args(),
+            ]
+        )
+
+    def install(self) -> None:
+        self.commander.run(
+            [self.tc.meson_bin, "install", "-C", self.meson_build_dir],
+        )
         print(f"Built {self.name} {self.version}")
