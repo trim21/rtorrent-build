@@ -234,10 +234,30 @@ def _snapshot_prefix(prefix: Path) -> dict[Path, _FileState]:
     return result
 
 
-def _changed_prefix_files(
+def _classify_prefix_changes(
     before: dict[Path, _FileState], after: dict[Path, _FileState]
-) -> set[Path]:
-    return {path for path, state in after.items() if before.get(path) != state}
+) -> tuple[set[Path], set[Path]]:
+    """Return (new_files, modified_files) relative to the prefix root."""
+    new_files: set[Path] = set()
+    modified_files: set[Path] = set()
+    for path, state in after.items():
+        prev = before.get(path)
+        if prev is None:
+            new_files.add(path)
+        elif prev != state:
+            modified_files.add(path)
+    return new_files, modified_files
+
+
+def _claim_files(owners: dict[str, str], pkg_name: str, files: set[str]) -> None:
+    """Record *files* as installed by *pkg_name*, raising on cross-package conflict."""
+    for rel in files:
+        owner = owners.get(rel)
+        if owner is not None and owner != pkg_name:
+            raise RuntimeError(
+                f"Package {pkg_name!r} overwrites {rel} previously installed by {owner!r}"
+            )
+        owners[rel] = pkg_name
 
 
 def build_rtorrent(
@@ -311,6 +331,7 @@ def build_rtorrent(
     timings: list[_Timing] = []
     build_origin = time.monotonic()
     _pkg_hashes: dict[str, str] = {}
+    _file_owners: dict[str, str] = {}
     _cache_store = CacheStore(cache_dir) if cache_dir else None
     _install_lock = threading.Lock()
 
@@ -347,8 +368,10 @@ def build_rtorrent(
 
         if not no_cache and _cache_store and _cache_store.has(name, merkle_hash):
             with _install_lock:
-                restored = _cache_store.restore(name, merkle_hash, tc.install_prefix)
-            if restored:
+                restored_files = _cache_store.restore(name, merkle_hash, tc.install_prefix)
+                if restored_files is not None:
+                    _claim_files(_file_owners, name, restored_files)
+            if restored_files is not None:
                 resolved[name] = ResolvedSource(name=name, version=pkg.version, src_dir=Path())
                 t.gen_end = time.monotonic() - build_origin
                 t.end = time.monotonic() - build_origin
@@ -371,9 +394,11 @@ def build_rtorrent(
             before = _snapshot_prefix(tc.install_prefix)
             builder.install()
             after = _snapshot_prefix(tc.install_prefix)
-            installed_files = _changed_prefix_files(before, after)
+            new_files, modified_files = _classify_prefix_changes(before, after)
+            installed_files = new_files | modified_files
             if not installed_files:
                 raise RuntimeError(f"Package {name!r} did not install or update any files")
+            _claim_files(_file_owners, name, {str(f) for f in installed_files})
             if _cache_store and not no_cache:
                 _cache_store.store_files(
                     name, merkle_hash, merkle_payload, tc.install_prefix, installed_files

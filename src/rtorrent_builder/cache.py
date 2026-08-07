@@ -86,15 +86,21 @@ class CacheStore:
     def has(self, name: str, key: str) -> bool:
         return self._archive_path(name, key).exists()
 
-    def restore(self, name: str, key: str, prefix: Path) -> bool:
-        """Extract cached package files into *prefix*.  Returns True on success."""
+    def restore(self, name: str, key: str, prefix: Path) -> set[str] | None:
+        """Extract cached package files into *prefix*.
+
+        Returns the set of restored relative paths, or None on cache miss or
+        corrupt archive (in which case the archive is removed so the package
+        gets rebuilt).
+        """
         archive = self._archive_path(name, key)
         if not archive.exists():
-            return False
+            return None
         print(f"Persistent cache hit for {name}")
         prefix.mkdir(parents=True, exist_ok=True)
         try:
             with tarfile.open(archive, "r:*") as tf:
+                members = [m.name for m in tf.getmembers() if m.isfile() or m.issym()]
                 tf.extractall(str(prefix))
         except (EOFError, tarfile.ReadError) as e:
             print(f"Corrupt cache file for {name}: {e}", file=sys.stderr)
@@ -102,8 +108,8 @@ class CacheStore:
             meta = self._meta_path(name, key)
             if meta.exists():
                 meta.unlink()
-            return False
-        return True
+            return None
+        return set(members)
 
     def store_files(
         self,
