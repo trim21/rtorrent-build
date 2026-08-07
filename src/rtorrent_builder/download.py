@@ -11,16 +11,32 @@ MAX_RETRIES = 5
 RETRY_DELAY = 3
 
 
-def download_file(url: str, dest: Path, desc: str = "") -> None:
+def download_file(url: str, dest: Path, desc: str = "", integrity: str = "") -> None:
     """Download a file from *url* to *dest* with a tqdm progress bar.
 
     Downloads to a ``.part`` temp file first, then atomically renames to
     *dest* on success so an interrupted download is never mistaken for
     a complete one. Retries up to 5 times on failure.
+
+    When *integrity* (format: 'sha256:<hex>') is given, the file is verified
+    against it before being accepted: a cached *dest* that fails the check is
+    deleted and re-downloaded, and a freshly downloaded file that fails is
+    retried. A malformed *integrity* spec raises immediately instead of
+    retrying.
     """
     if dest.exists():
-        print(f"Using cached {dest}")
-        return
+        if integrity:
+            try:
+                verify_integrity(dest, integrity)
+            except RuntimeError as exc:
+                print(f"Cached {dest} failed integrity check: {exc}, re-downloading")
+                dest.unlink()
+            else:
+                print(f"Using cached {dest}")
+                return
+        else:
+            print(f"Using cached {dest}")
+            return
 
     part = dest.with_suffix(dest.suffix + ".part")
     last_exc: Exception | None = None
@@ -44,9 +60,12 @@ def download_file(url: str, dest: Path, desc: str = "") -> None:
                     for chunk in response.iter_bytes(chunk_size=65536):
                         f.write(chunk)
                         bar.update(len(chunk))
+            verify_integrity(part, integrity)
             part.rename(dest)
             print(f"Downloaded {dest}")
             return
+        except ValueError:
+            raise
         except Exception as exc:
             last_exc = exc
             if part.exists():

@@ -15,7 +15,7 @@ from pathlib import Path
 
 from . import PROJECT_ROOT as _PROJECT_ROOT
 from ._types import Arch, Libc
-from .download import download_file, verify_integrity
+from .download import download_file
 from .manifest import (
     ChecksumSource,
     GenericRefSource,
@@ -189,10 +189,7 @@ class Toolchain:
     ) -> ResolvedSource:
         archive = self.package_dir / f"{name}-{version}{self._archive_ext(url)}"
 
-        if not archive.exists():
-            download_file(url, archive, desc=f"{name}-{version}")
-
-        verify_integrity(archive, integrity)
+        download_file(url, archive, desc=f"{name}-{version}", integrity=integrity)
 
         prefix = self._archive_prefix(archive)
         src_dir = self.build_dir / prefix
