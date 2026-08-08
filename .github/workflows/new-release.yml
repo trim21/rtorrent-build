@@ -44,4 +44,5 @@ jobs:
           token: "${{ secrets.PAT }}"
           title: "feat: add manifest for latest rtorrent release"
           branch: auto/rtorrent-release
+          labels: ci:auto-merge
           body: Automated manifest creation for the latest rtorrent release.

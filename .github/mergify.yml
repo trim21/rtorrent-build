@@ -1,0 +1,21 @@
+pull_request_rules:
+  - name: label conflicts
+    conditions:
+      - conflict
+    actions:
+      label:
+        toggle:
+          - conflict
+
+  - name: automatic merge
+    conditions:
+      - "#commits-behind=0"
+      - base=master
+      - or:
+          - "#approved-reviews-by>=1"
+          - label=ci:auto-merge
+      - check-success=build-checks
+      - check-success=docker-checks
+    actions:
+      merge:
+        method: squash

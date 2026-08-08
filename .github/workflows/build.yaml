@@ -97,6 +97,12 @@ jobs:
           path: "dist/*"
           if-no-files-found: error
 
+  build-checks:
+    needs: [build]
+    runs-on: ubuntu-slim
+    steps:
+      - run: echo "all build checks passed"
+
   release:
     needs: build
     if: startsWith(github.ref, 'refs/tags/')
