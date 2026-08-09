@@ -66,4 +66,5 @@ jobs:
           body-path: /tmp/pr-body.md
           branch: auto/update-locks
           delete-branch: true
+          labels: ci:auto-merge
           token: "${{ secrets.PAT }}"
