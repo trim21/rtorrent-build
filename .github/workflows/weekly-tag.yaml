@@ -1,0 +1,39 @@
+name: weekly tag
+
+on:
+  schedule:
+    - cron: "8 17 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.PAT }}
+
+      - name: Check for new commits since last tag
+        id: check
+        run: |
+          latest="$(git tag --sort=-version:refname | head -1)"
+          if [ -n "$latest" ] && [ "$(git rev-parse "$latest")" = "$(git rev-parse HEAD)" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create and push tag
+        if: steps.check.outputs.skip != 'true'
+        run: |
+          base="v$(date -u +%Y.%m.%d)"
+          n=0
+          while git rev-parse "${base}.${n}" >/dev/null 2>&1; do
+            n=$((n + 1))
+          done
+          git tag "${base}.${n}"
+          git push origin "${base}.${n}"
