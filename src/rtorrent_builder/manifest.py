@@ -40,6 +40,7 @@ class GitHubReleaseSource:
     github: str
     tag_range: str
     asset: str
+    allow_backfill_source: bool = False
 
 
 @dataclass(frozen=True, kw_only=True)

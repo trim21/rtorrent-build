@@ -1,0 +1,26 @@
+{
+  "$schema": "../manifest.schema.json",
+  "extends": [
+    "base/common.jsonc",
+    "./qbittorrent-5.2-lt2.jsonc",
+    "base/openssl3.jsonc"
+  ],
+  "executable_package": "qbittorrent",
+  "target_glibc": "2.34",
+  "packages": {
+    "libtorrent-rasterbar": {
+      "source": {
+        "github": "arvidn/libtorrent",
+        "ref": "RC_2_1"
+      },
+      "cxx_std": "c++17"
+    },
+    "qbittorrent": {
+      "source": {
+        "github": "qbittorrent/qBittorrent",
+        "ref": "master"
+      },
+      "cxx_std": "c++20"
+    }
+  }
+}

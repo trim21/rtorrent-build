@@ -1,5 +1,24 @@
 {
   "$defs": {
+    "ChecksumSource": {
+      "description": "Lock-level URL source with integrity hash.",
+      "properties": {
+        "url": {
+          "title": "Url",
+          "type": "string"
+        },
+        "integrity": {
+          "title": "Integrity",
+          "type": "string"
+        }
+      },
+      "required": [
+        "url",
+        "integrity"
+      ],
+      "title": "ChecksumSource",
+      "type": "object"
+    },
     "GenericRefSource": {
       "properties": {
         "git": {
@@ -16,6 +35,24 @@
         "ref"
       ],
       "title": "GenericRefSource",
+      "type": "object"
+    },
+    "GitHubPrSource": {
+      "properties": {
+        "github": {
+          "title": "Github",
+          "type": "string"
+        },
+        "pr": {
+          "title": "Pr",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "github",
+        "pr"
+      ],
+      "title": "GitHubPrSource",
       "type": "object"
     },
     "GitHubRefSource": {
@@ -49,6 +86,11 @@
         "asset": {
           "title": "Asset",
           "type": "string"
+        },
+        "allow_backfill_source": {
+          "default": false,
+          "title": "Allow Backfill Source",
+          "type": "boolean"
         }
       },
       "required": [
@@ -118,6 +160,9 @@
               "$ref": "#/$defs/GitHubRefSource"
             },
             {
+              "$ref": "#/$defs/GitHubPrSource"
+            },
+            {
               "$ref": "#/$defs/GitHubReleaseSource"
             },
             {
@@ -128,6 +173,9 @@
             },
             {
               "$ref": "#/$defs/GitSource"
+            },
+            {
+              "$ref": "#/$defs/ChecksumSource"
             }
           ],
           "title": "Source"
@@ -163,6 +211,13 @@
           ],
           "default": null,
           "title": "Requires"
+        },
+        "features": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Features",
+          "type": "array"
         }
       },
       "required": [

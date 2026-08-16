@@ -8,6 +8,8 @@ import subprocess
 from functools import cache
 from pathlib import Path
 
+import httpx
+
 from . import PROJECT_ROOT
 from .builder import compute_deps
 from .download import compute_sha256, download_file
@@ -139,6 +141,19 @@ def _resolve_pr(github: str, pr: int) -> tuple[GitSource, str]:
     raise ValueError(f"PR #{pr} not found in {github}")
 
 
+def _url_exists(url: str) -> bool:
+    """Return False only when *url* is explicitly missing (HTTP 404/410).
+
+    Other errors are treated as reachable so the normal download path
+    surfaces them instead of mis-triggering a source backfill.
+    """
+    try:
+        response = httpx.head(url, follow_redirects=True, timeout=30)
+        return response.status_code not in (404, 410)
+    except httpx.HTTPError:
+        return True
+
+
 def _resolve_github_source(source: PackageSource) -> tuple[str, str] | tuple[GitSource, str]:
     """Resolve a GitHub source to (url, version) or (GitSource, version)."""
     if isinstance(source, GitHubRefSource):
@@ -161,6 +176,10 @@ def _resolve_github_source(source: PackageSource) -> tuple[str, str] | tuple[Git
         if isinstance(source, GitHubReleaseSource):
             asset = source.asset.format(tag=tag, version=best)
             url = f"https://github.com/{source.github}/releases/download/{tag}/{asset}"
+            if source.allow_backfill_source and not _url_exists(url):
+                sha = _resolve_ref(source.github, tag)
+                print(f"  Release asset {asset} missing for {tag}, backfilling from git")
+                return GitSource(url=f"https://github.com/{source.github}.git", sha=sha), best
         elif isinstance(source, GitHubTagSource) and source.url_template:
             url = source.url_template.format(tag=tag, version=best)
         else:

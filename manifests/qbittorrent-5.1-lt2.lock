@@ -1,13 +1,13 @@
 {
   "executable_package": "qbittorrent",
-  "manifest_hash": "1e9d6fdb050d2f7a1f8fe400253f90db125c9d30912db5ab4c3b624bb90c7277",
+  "manifest_hash": "747e2ee91176d9b9b132c153240f060eed9aeb498abe5553217e5672d387ddb2",
   "packages": {
     "boost": {
       "src": {
-        "integrity": "sha256:8a82bd11a720c70923806c36ee5c26dbd2d630c1eaa1d8fad9a7bd5529908a26",
-        "url": "https://github.com/boostorg/boost/releases/download/boost-1.91.0-1/boost-1.91.0-1-cmake.tar.gz"
+        "integrity": "sha256:f51707c27359a0df0cac1beada86de31bb5eed5e8285592dadec384df99c2984",
+        "url": "https://github.com/boostorg/boost/releases/download/boost-1.92.0/boost-1.92.0-cmake.tar.gz"
       },
-      "version": "1.91.0"
+      "version": "1.92.0"
     },
     "brotli": {
       "src": {
@@ -33,10 +33,10 @@
     "libtorrent-rasterbar": {
       "cxx_std": "c++17",
       "src": {
-        "integrity": "sha256:892cb75c06318e2420de0faf9f63a908069d3d237676e2459fd30abe0cb3b1bf",
-        "url": "https://github.com/arvidn/libtorrent/releases/download/v2.0.13/libtorrent-rasterbar-2.0.13.tar.gz"
+        "sha": "aab2a10e2f60d9eac78e885a696736d043527794",
+        "url": "https://github.com/arvidn/libtorrent.git"
       },
-      "version": "2.0.13"
+      "version": "2.0.14"
     },
     "nghttp2": {
       "src": {

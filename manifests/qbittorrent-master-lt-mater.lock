@@ -1,6 +1,6 @@
 {
   "executable_package": "qbittorrent",
-  "manifest_hash": "e76d2738097d6cbb377f49cee7a898ae3d154fd5572e2250a3791a873886965a",
+  "manifest_hash": "50b2657501f6f9bec044dfa65e6f96d644a4e50dd6310c190cf3ecdd86ffce31",
   "packages": {
     "boost": {
       "src": {
@@ -33,10 +33,10 @@
     "libtorrent-rasterbar": {
       "cxx_std": "c++17",
       "src": {
-        "sha": "aab2a10e2f60d9eac78e885a696736d043527794",
+        "sha": "53f7528b0d7219f6cf12b22a05a957ed11a6c2cb",
         "url": "https://github.com/arvidn/libtorrent.git"
       },
-      "version": "2.0.14"
+      "version": "53f7528b0d72"
     },
     "nghttp2": {
       "src": {
@@ -55,10 +55,10 @@
     "qbittorrent": {
       "cxx_std": "c++20",
       "src": {
-        "integrity": "sha256:a5f540cdfb0053f0ce1a1c62ccd92d08214f16bcb2c512569ec54d81531e541f",
-        "url": "https://github.com/qbittorrent/qBittorrent/archive/refs/tags/release-5.2.3.tar.gz"
+        "sha": "26d3d3ee8cf64edbc9b4a1e7d3763248b93967c2",
+        "url": "https://github.com/qbittorrent/qBittorrent.git"
       },
-      "version": "5.2.3"
+      "version": "26d3d3ee8cf6"
     },
     "qtbase": {
       "src": {

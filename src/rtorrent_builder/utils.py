@@ -3,6 +3,22 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
+from packaging.version import InvalidVersion, Version
+
+
+def parse_version(v: str) -> Version:
+    """Parse *v* via packaging; unparseable values (e.g. git shas) resolve
+    to a maximum version so version gates default to the newest path."""
+    try:
+        return Version(v)
+    except InvalidVersion:
+        return Version("999999")
+
+
+def conditional_args(specs: dict[str, bool]) -> list[str]:
+    """Expand *specs* to args whose condition is enabled."""
+    return [arg for arg, enabled in specs.items() if enabled]
+
 
 def replace_in_file(
     path: Path, old: str | re.Pattern[str], new: str, *, required: bool = True

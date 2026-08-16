@@ -218,7 +218,7 @@ class Toolchain:
         if not (clone_dir / ".git").exists():
             clone_dir.parent.mkdir(parents=True, exist_ok=True)
             print(f"Cloning {git_url}...")
-            self._commander.run(["git", "clone", git_url, str(clone_dir)])
+            self._commander.run(["git", "clone", "--filter=blob:none", git_url, str(clone_dir)])
 
         print(f"Fetching {sha[:12]}...")
         self._commander.run(["git", "-C", str(clone_dir), "fetch", "--prune", "origin", sha])
@@ -232,31 +232,27 @@ class Toolchain:
 
             if (clone_dir / ".gitmodules").exists():
                 print("Updating submodules...")
-                self._commander.run(
-                    [
-                        "git",
-                        "-C",
-                        str(clone_dir),
-                        "submodule",
-                        "update",
-                        "--init",
-                        "--recursive",
-                    ]
-                )
+                self._commander.run([
+                    "git",
+                    "-C",
+                    str(clone_dir),
+                    "submodule",
+                    "update",
+                    "--init",
+                    "--recursive",
+                ])
 
             if not tarball.exists():
                 print(f"Creating archive {tarball}")
-                self._commander.run(
-                    [
-                        "tar",
-                        "-czf",
-                        str(tarball),
-                        "--exclude=.git",
-                        "-C",
-                        str(clone_dir.parent),
-                        clone_dir.name,
-                    ]
-                )
+                self._commander.run([
+                    "tar",
+                    "-czf",
+                    str(tarball),
+                    "--exclude=.git",
+                    "-C",
+                    str(clone_dir.parent),
+                    clone_dir.name,
+                ])
 
             print(f"Extracting {tarball}")
             with tarfile.open(tarball) as tf:
@@ -430,28 +426,26 @@ class Toolchain:
         else:
             cmake_ldflags = f"-flto -L{install_lib} -L{install_lib64}"
 
-        content = "\n".join(
-            [
-                "cmake_policy(SET CMP0167 NEW)",
-                "",
-                f'set(CMAKE_C_COMPILER "{wd}/zig-cc")',
-                f'set(CMAKE_CXX_COMPILER "{wd}/zig-c++")',
-                f'set(CMAKE_ASM_COMPILER "{wd}/zig-cc")',
-                f'set(CMAKE_AR "{wd}/zig-ar")',
-                f'set(CMAKE_RANLIB "{wd}/zig-ranlib")',
-                "",
-                f'set(CMAKE_C_FLAGS_INIT "{cmake_cflags}")',
-                f'set(CMAKE_CXX_FLAGS_INIT "{cmake_cflags}")',
-                f'set(CMAKE_EXE_LINKER_FLAGS_INIT "{cmake_ldflags}")',
-                "",
-                'set(HAVE_FILE_OFFSET_BITS 0 CACHE INTERNAL "")',
-                "",
-                f'set(CMAKE_C_IMPLICIT_INCLUDE_DIRECTORIES "{self._zig_include_dirs("cc")}")',
-                f'set(CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES "{self._zig_include_dirs("c++")}")',
-                'set(CMAKE_SYSTEM_IGNORE_PATH "/usr/include")',
-                "",
-            ]
-        )
+        content = "\n".join([
+            "cmake_policy(SET CMP0167 NEW)",
+            "",
+            f'set(CMAKE_C_COMPILER "{wd}/zig-cc")',
+            f'set(CMAKE_CXX_COMPILER "{wd}/zig-c++")',
+            f'set(CMAKE_ASM_COMPILER "{wd}/zig-cc")',
+            f'set(CMAKE_AR "{wd}/zig-ar")',
+            f'set(CMAKE_RANLIB "{wd}/zig-ranlib")',
+            "",
+            f'set(CMAKE_C_FLAGS_INIT "{cmake_cflags}")',
+            f'set(CMAKE_CXX_FLAGS_INIT "{cmake_cflags}")',
+            f'set(CMAKE_EXE_LINKER_FLAGS_INIT "{cmake_ldflags}")',
+            "",
+            'set(HAVE_FILE_OFFSET_BITS 0 CACHE INTERNAL "")',
+            "",
+            f'set(CMAKE_C_IMPLICIT_INCLUDE_DIRECTORIES "{self._zig_include_dirs("cc")}")',
+            f'set(CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES "{self._zig_include_dirs("c++")}")',
+            'set(CMAKE_SYSTEM_IGNORE_PATH "/usr/include")',
+            "",
+        ])
         path.write_text(content)
         return path
 
@@ -524,27 +518,25 @@ class Toolchain:
             ldflags += " -static"
             cflags += " -static"
 
-        content = "\n".join(
-            [
-                "[binaries]",
-                f"c = '{wd}/zig-cc'",
-                f"cpp = '{wd}/zig-c++'",
-                f"ar = '{wd}/zig-ar'",
-                f"ranlib = '{wd}/zig-ranlib'",
-                "",
-                "[built-in options]",
-                f"c_args = [{', '.join(repr(f) for f in cflags.split())}]",
-                f"cpp_args = [{', '.join(repr(f) for f in cflags.split())}]",
-                f"c_link_args = [{', '.join(repr(f) for f in ldflags.split())}]",
-                f"cpp_link_args = [{', '.join(repr(f) for f in ldflags.split())}]",
-                "default_library = 'static'",
-                "buildtype = 'plain'",
-                "",
-                "[properties]",
-                f"pkg_config_path = '{pkg_path}'",
-                "",
-            ]
-        )
+        content = "\n".join([
+            "[binaries]",
+            f"c = '{wd}/zig-cc'",
+            f"cpp = '{wd}/zig-c++'",
+            f"ar = '{wd}/zig-ar'",
+            f"ranlib = '{wd}/zig-ranlib'",
+            "",
+            "[built-in options]",
+            f"c_args = [{', '.join(repr(f) for f in cflags.split())}]",
+            f"cpp_args = [{', '.join(repr(f) for f in cflags.split())}]",
+            f"c_link_args = [{', '.join(repr(f) for f in ldflags.split())}]",
+            f"cpp_link_args = [{', '.join(repr(f) for f in ldflags.split())}]",
+            "default_library = 'static'",
+            "buildtype = 'plain'",
+            "",
+            "[properties]",
+            f"pkg_config_path = '{pkg_path}'",
+            "",
+        ])
         path.write_text(content)
         return path
 

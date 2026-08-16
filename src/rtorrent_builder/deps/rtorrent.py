@@ -2,18 +2,13 @@
 
 import re
 
+from packaging.version import Version
+
 from .._options import RtorrentOptions
 from ..manifest import LibInfo
 from ..run import Commander
 from ..toolchain import Builder, ResolvedSource, Toolchain
-from ..utils import replace_in_file
-
-
-def _semver(v: str) -> tuple[int, ...]:
-    try:
-        return tuple(int(x) for x in v.split("."))
-    except ValueError:
-        return (9999,)
+from ..utils import conditional_args, parse_version, replace_in_file
 
 
 class RtorrentBuilder(Builder):
@@ -65,34 +60,23 @@ class RtorrentBuilder(Builder):
         print(f"Generating {self.name} {self.version}")
         cmd = self.commander
 
-        configure_args = [
-            "./configure",
-            f"--prefix={self.tc.install_prefix}",
-            "--disable-dependency-tracking",
-            "--disable-shared",
-            "--enable-static",
-        ]
-        if self.tc.debug:
-            configure_args.append("--enable-debug")
-        else:
-            configure_args.append("--disable-debug")
-
         has_curses_stub = (self.src_dir / "src" / "display" / "curses_stub.h").exists()
         wants_ncurses = self.lib.requires is not None and "ncurses" in self.lib.requires
+        v = parse_version(self.version)
 
-        if wants_ncurses:
-            configure_args.append("--with-ncursesw")
-        elif has_curses_stub:
-            configure_args.append("--without-ncurses")
-        else:
-            configure_args.append("--with-ncursesw")
-
-        v = _semver(self.version)
-        if v >= (0, 16):
-            configure_args += [
-                "--with-xmlrpc-tinyxml2",
-                "--with-lua",
-            ]
+        configure_args = conditional_args({
+            "./configure": True,
+            f"--prefix={self.tc.install_prefix}": True,
+            "--disable-dependency-tracking": True,
+            "--disable-shared": True,
+            "--enable-static": True,
+            "--enable-debug": self.tc.debug,
+            "--disable-debug": not self.tc.debug,
+            "--with-ncursesw": wants_ncurses or not has_curses_stub,
+            "--without-ncurses": not wants_ncurses and has_curses_stub,
+            "--with-xmlrpc-tinyxml2": v >= Version("0.16"),
+            "--with-lua": v >= Version("0.16"),
+        })
 
         cmd.run(configure_args, cwd=str(self.src_dir), env=self._build_env())
 

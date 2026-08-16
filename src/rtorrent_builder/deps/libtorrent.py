@@ -2,11 +2,13 @@
 
 import re
 
+from packaging.version import Version
+
 from .._options import LibtorrentOptions
 from ..manifest import LibInfo
 from ..run import Commander
 from ..toolchain import Builder, ResolvedSource, Toolchain
-from ..utils import replace_in_file
+from ..utils import conditional_args, parse_version, replace_in_file
 
 
 class LibtorrentBuilder(Builder):
@@ -47,18 +49,17 @@ class LibtorrentBuilder(Builder):
         if self.lib.cxx_std:
             env["CXXFLAGS"] = f"{env['CXXFLAGS']} -std={self.lib.cxx_std}"
 
-        configure_args = [
-            "./configure",
-            f"--prefix={self.tc.install_prefix}",
-            "--disable-dependency-tracking",
-            f"--with-zlib={self.tc.dep_prefix('zlib')}",
-            "--disable-shared",
-            "--enable-static",
-        ]
-        if self.tc.debug:
-            configure_args.append("--enable-debug")
-        else:
-            configure_args.append("--disable-debug")
+        configure_args = conditional_args({
+            "./configure": True,
+            f"--prefix={self.tc.install_prefix}": True,
+            "--disable-dependency-tracking": True,
+            "--disable-shared": True,
+            "--enable-static": True,
+            f"--with-zlib={self.tc.dep_prefix('zlib')}": parse_version(self.version)
+            < Version("0.16"),
+            "--enable-debug": self.tc.debug,
+            "--disable-debug": not self.tc.debug,
+        })
 
         cmd.run(configure_args, cwd=str(self.src_dir), env=env)
 
