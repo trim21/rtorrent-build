@@ -1,6 +1,6 @@
 {
   "executable_package": "rtorrent",
-  "manifest_hash": "a09ff4bd5ac6a4c4b33f8391cfb44957985e0cdfee44cf7177ff1072711df3b6",
+  "manifest_hash": "4246b0ccc0dad3ed8ebf4dad644e5ae4ee95b75e44d7d4c14dab100b1a2e6e92",
   "packages": {
     "brotli": {
       "src": {

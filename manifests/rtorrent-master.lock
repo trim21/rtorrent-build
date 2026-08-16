@@ -1,6 +1,6 @@
 {
   "executable_package": "rtorrent",
-  "manifest_hash": "83076997970374201866a6f6fa974e0d38d06ad0f686e3cc2a804b07fb0abe01",
+  "manifest_hash": "f6431a8800e8eb051eb3aa098e656a4a76bd1968c5bad6021dd86a952994e0bb",
   "packages": {
     "brotli": {
       "src": {
@@ -62,6 +62,7 @@
       "version": "4.0.1"
     },
     "rtorrent": {
+      "is_sha": true,
       "requires": [
         "rtorrent-libtorrent",
         "lua"
@@ -74,6 +75,7 @@
       "version": "58e627f2be26"
     },
     "rtorrent-libtorrent": {
+      "is_sha": true,
       "requires": [
         "openssl",
         "zlib",

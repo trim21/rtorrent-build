@@ -260,6 +260,7 @@ def resolve_manifest(manifest_path: Path) -> None:
             rpkg = ResolvedPackage(
                 version=version,
                 src=resolved_source,
+                is_sha=version == resolved_source.sha[:12],
                 cxx_std=pkg.cxx_std,
                 requires=pkg.requires,
                 features=pkg.features,

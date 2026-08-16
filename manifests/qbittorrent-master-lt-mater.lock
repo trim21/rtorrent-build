@@ -1,6 +1,6 @@
 {
   "executable_package": "qbittorrent",
-  "manifest_hash": "50b2657501f6f9bec044dfa65e6f96d644a4e50dd6310c190cf3ecdd86ffce31",
+  "manifest_hash": "1aeeaaae309f55a2716b8dcc27e1b3bd5edb4b55c8d29eacc764b6aefcd437cf",
   "packages": {
     "boost": {
       "src": {
@@ -32,6 +32,7 @@
     },
     "libtorrent-rasterbar": {
       "cxx_std": "c++17",
+      "is_sha": true,
       "src": {
         "ref": "RC_2_1",
         "sha": "ff33f914a3c8397a742bf5e78a66d02d4835988c",
@@ -55,6 +56,7 @@
     },
     "qbittorrent": {
       "cxx_std": "c++20",
+      "is_sha": true,
       "src": {
         "ref": "master",
         "sha": "26d3d3ee8cf64edbc9b4a1e7d3763248b93967c2",
