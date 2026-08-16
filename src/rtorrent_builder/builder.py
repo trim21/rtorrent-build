@@ -78,19 +78,17 @@ def compute_deps() -> tuple[dict[str, dict[str, list[str]]], dict[str, list[str]
     return all_features, default_deps
 
 
-_ALLOWED_SOS = frozenset(
-    {
-        "ld-linux-x86-64.so.2",
-        "libc.so.6",
-        "libm.so.6",
-        "libdl.so.2",
-        "libpthread.so.0",
-        "librt.so.1",
-        "libresolv.so.2",
-        "libnsl.so.1",
-        "libutil.so.1",
-    }
-)
+_ALLOWED_SOS = frozenset({
+    "ld-linux-x86-64.so.2",
+    "libc.so.6",
+    "libm.so.6",
+    "libdl.so.2",
+    "libpthread.so.0",
+    "librt.so.1",
+    "libresolv.so.2",
+    "libnsl.so.1",
+    "libutil.so.1",
+})
 
 
 def _verify_linkage(binary: Path, *, patchelf_bin: str) -> None:
@@ -315,16 +313,14 @@ def build_rtorrent(
         print(f"{msg}: {missing}")
     names = [n for n in _BUILDER_MAP if n in needed and n in pkgs]
 
-    ts = TopologicalSorter(
-        {
-            name: [
-                d
-                for d in deps_for(name, pkgs, all_features=all_features, default_deps=default_deps)
-                if d in pkgs
-            ]
-            for name in names
-        }
-    )
+    ts = TopologicalSorter({
+        name: [
+            d
+            for d in deps_for(name, pkgs, all_features=all_features, default_deps=default_deps)
+            if d in pkgs
+        ]
+        for name in names
+    })
     ts.prepare()
 
     resolved: dict[str, ResolvedSource] = {}

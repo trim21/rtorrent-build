@@ -52,15 +52,13 @@ class MesonBuilder(Builder):
 
     def build(self) -> None:
         print(f"Building {self.name} {self.version}")
-        self.commander.run(
-            [
-                self.tc.meson_bin,
-                "compile",
-                "-C",
-                self.meson_build_dir,
-                *self.commander.nproc_args(),
-            ]
-        )
+        self.commander.run([
+            self.tc.meson_bin,
+            "compile",
+            "-C",
+            self.meson_build_dir,
+            *self.commander.nproc_args(),
+        ])
 
     def install(self) -> None:
         self.commander.run(

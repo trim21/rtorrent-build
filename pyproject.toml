@@ -44,6 +44,7 @@ extend-ignore = ['SIM108']
 quote-style = "double"
 indent-style = "space"
 line-ending = "lf"
+preview = true
 
 [tool.pyright]
 typeCheckingMode = "basic"
