@@ -218,7 +218,7 @@ class Toolchain:
         if not (clone_dir / ".git").exists():
             clone_dir.parent.mkdir(parents=True, exist_ok=True)
             print(f"Cloning {git_url}...")
-            self._commander.run(["git", "clone", git_url, str(clone_dir)])
+            self._commander.run(["git", "clone", "--filter=blob:none", git_url, str(clone_dir)])
 
         print(f"Fetching {sha[:12]}...")
         self._commander.run(["git", "-C", str(clone_dir), "fetch", "--prune", "origin", sha])

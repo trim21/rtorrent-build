@@ -63,7 +63,7 @@ class Commander:
                 cwd=str(cwd) if cwd else None,
                 env=env,
                 stdout=subprocess.PIPE,
-                stderr=subprocess.STDOUT,
+                # stderr=subprocess.STDOUT,
             )
 
             assert proc.stdout is not None
