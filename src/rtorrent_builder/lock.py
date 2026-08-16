@@ -108,7 +108,7 @@ def _resolve_generic_ref(url: str, ref: str) -> str:
     raise ValueError(f"Ref {ref} not found in {url}")
 
 
-def _resolve_pr(github: str, pr: int) -> tuple[GitSource, str]:
+def _resolve_pr(github: str, pr: int) -> tuple[GitSource, str, bool]:
     """Resolve a GitHub PR to its merge commit (refs/pull/{pr}/merge).
 
     Falls back to the PR head commit if the merge ref is not available
@@ -134,10 +134,10 @@ def _resolve_pr(github: str, pr: int) -> tuple[GitSource, str]:
 
     if merge_sha:
         print(f"  PR #{pr} merge commit: {merge_sha[:12]}")
-        return GitSource(url=url, sha=merge_sha), merge_sha[:12]
+        return GitSource(url=url, sha=merge_sha), merge_sha[:12], True
     if head_sha:
         print(f"  WARNING: PR #{pr} has no merge commit (conflicts?), using head: {head_sha[:12]}")
-        return GitSource(url=url, sha=head_sha), head_sha[:12]
+        return GitSource(url=url, sha=head_sha), head_sha[:12], True
     raise ValueError(f"PR #{pr} not found in {github}")
 
 
@@ -154,19 +154,33 @@ def _url_exists(url: str) -> bool:
         return True
 
 
-def _resolve_github_source(source: PackageSource) -> tuple[str, str] | tuple[GitSource, str]:
-    """Resolve a GitHub source to (url, version) or (GitSource, version)."""
+def _resolve_github_source(
+    source: PackageSource,
+) -> tuple[str, str, bool] | tuple[GitSource, str, bool]:
+    """Resolve a GitHub source to (url, version, is_sha) or (GitSource, version, is_sha)."""
     if isinstance(source, GitHubRefSource):
         sha = _resolve_ref(source.github, source.ref)
         if source.ref in _gh_tags(source.github):
-            version = _extract_version(source.ref, source.github) or sha[:12]
-        else:
-            version = sha[:12]
-        return GitSource(
-            url=f"https://github.com/{source.github}.git",
-            sha=sha,
-            ref=source.ref,
-        ), version
+            version = _extract_version(source.ref, source.github)
+            if version is not None:
+                return (
+                    GitSource(
+                        url=f"https://github.com/{source.github}.git",
+                        sha=sha,
+                        ref=source.ref,
+                    ),
+                    version,
+                    False,
+                )
+        return (
+            GitSource(
+                url=f"https://github.com/{source.github}.git",
+                sha=sha,
+                ref=source.ref,
+            ),
+            sha[:12],
+            True,
+        )
     if isinstance(source, GitHubPrSource):
         return _resolve_pr(source.github, source.pr)
     if isinstance(source, (GitHubTagSource, GitHubReleaseSource)):
@@ -184,33 +198,37 @@ def _resolve_github_source(source: PackageSource) -> tuple[str, str] | tuple[Git
             if source.allow_backfill_source and not _url_exists(url):
                 sha = _resolve_ref(source.github, tag)
                 print(f"  Release asset {asset} missing for {tag}, backfilling from git")
-                return GitSource(
-                    url=f"https://github.com/{source.github}.git",
-                    sha=sha,
-                    ref=tag,
-                ), best
+                return (
+                    GitSource(
+                        url=f"https://github.com/{source.github}.git",
+                        sha=sha,
+                        ref=tag,
+                    ),
+                    best,
+                    False,
+                )
         elif isinstance(source, GitHubTagSource) and source.url_template:
             url = source.url_template.format(tag=tag, version=best)
         else:
             url = f"https://github.com/{source.github}/archive/refs/tags/{tag}.tar.gz"
-        return url, best
+        return url, best, False
     raise TypeError(f"Unsupported git source type: {type(source)}")
 
 
-def _resolve_source(pkg_name: str, lib: LibInfo) -> tuple[PackageSource, str]:
-    """Resolve a LibInfo's source to (source, version)."""
+def _resolve_source(pkg_name: str, lib: LibInfo) -> tuple[PackageSource, str, bool]:
+    """Resolve a LibInfo's source to (source, version, is_sha)."""
     if isinstance(lib.source, URLSource):
-        return lib.source, lib.version
+        return lib.source, lib.version, False
     if isinstance(lib.source, GenericRefSource):
         sha = _resolve_generic_ref(lib.source.git, lib.source.ref)
-        return GitSource(url=lib.source.git, sha=sha, ref=lib.source.ref), sha[:12]
+        return GitSource(url=lib.source.git, sha=sha, ref=lib.source.ref), sha[:12], True
     if isinstance(
         lib.source, (GitHubRefSource, GitHubPrSource, GitHubTagSource, GitHubReleaseSource)
     ):
-        resolved, version = _resolve_github_source(lib.source)
+        resolved, version, is_sha = _resolve_github_source(lib.source)
         if isinstance(resolved, GitSource):
-            return resolved, version
-        return URLSource(url=resolved), version
+            return resolved, version, is_sha
+        return URLSource(url=resolved), version, is_sha
     raise ValueError(f"Package {pkg_name!r} has no source")
 
 
@@ -255,12 +273,12 @@ def resolve_manifest(manifest_path: Path) -> None:
     for name, pkg in raw.packages.items():
         if name not in reachable:
             continue
-        resolved_source, version = _resolve_source(name, pkg)
+        resolved_source, version, is_sha = _resolve_source(name, pkg)
         if isinstance(resolved_source, GitSource):
             rpkg = ResolvedPackage(
                 version=version,
                 src=resolved_source,
-                is_sha=version == resolved_source.sha[:12],
+                is_sha=is_sha,
                 cxx_std=pkg.cxx_std,
                 requires=pkg.requires,
                 features=pkg.features,
@@ -270,6 +288,7 @@ def resolve_manifest(manifest_path: Path) -> None:
             rpkg = ResolvedPackage(
                 version=version,
                 src=ChecksumSource(url=resolved_source.url, integrity=integrity),
+                is_sha=is_sha,
                 cxx_std=pkg.cxx_std,
                 requires=pkg.requires,
                 features=pkg.features,
