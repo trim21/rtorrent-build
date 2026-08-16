@@ -1,6 +1,6 @@
 {
   "executable_package": "qbittorrent",
-  "manifest_hash": "2fb941157b324ac64229abc2d86e613cefcc124da5d6469a90345d2a79c376a3",
+  "manifest_hash": "e76d2738097d6cbb377f49cee7a898ae3d154fd5572e2250a3791a873886965a",
   "packages": {
     "boost": {
       "src": {
@@ -33,10 +33,10 @@
     "libtorrent-rasterbar": {
       "cxx_std": "c++17",
       "src": {
-        "integrity": "sha256:892cb75c06318e2420de0faf9f63a908069d3d237676e2459fd30abe0cb3b1bf",
-        "url": "https://github.com/arvidn/libtorrent/archive/refs/tags/v2.0.13.tar.gz"
+        "sha": "aab2a10e2f60d9eac78e885a696736d043527794",
+        "url": "https://github.com/arvidn/libtorrent.git"
       },
-      "version": "2.0.13"
+      "version": "2.0.14"
     },
     "nghttp2": {
       "src": {

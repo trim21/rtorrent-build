@@ -1,6 +1,6 @@
 {
   "executable_package": "transmission",
-  "manifest_hash": "2b23328c73efb6d91ed56c621dcb36631cc70386d2c1dff494011770db9da50e",
+  "manifest_hash": "507b6e92ab146e7cbb682154884cc382979ba15c32f2552bdfa69677c20cae49",
   "packages": {
     "brotli": {
       "src": {
