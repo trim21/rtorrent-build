@@ -158,10 +158,15 @@ def _resolve_github_source(source: PackageSource) -> tuple[str, str] | tuple[Git
     """Resolve a GitHub source to (url, version) or (GitSource, version)."""
     if isinstance(source, GitHubRefSource):
         sha = _resolve_ref(source.github, source.ref)
+        if source.ref in _gh_tags(source.github):
+            version = _extract_version(source.ref, source.github) or sha[:12]
+        else:
+            version = sha[:12]
         return GitSource(
             url=f"https://github.com/{source.github}.git",
             sha=sha,
-        ), sha[:12]
+            ref=source.ref,
+        ), version
     if isinstance(source, GitHubPrSource):
         return _resolve_pr(source.github, source.pr)
     if isinstance(source, (GitHubTagSource, GitHubReleaseSource)):
@@ -179,7 +184,11 @@ def _resolve_github_source(source: PackageSource) -> tuple[str, str] | tuple[Git
             if source.allow_backfill_source and not _url_exists(url):
                 sha = _resolve_ref(source.github, tag)
                 print(f"  Release asset {asset} missing for {tag}, backfilling from git")
-                return GitSource(url=f"https://github.com/{source.github}.git", sha=sha), best
+                return GitSource(
+                    url=f"https://github.com/{source.github}.git",
+                    sha=sha,
+                    ref=tag,
+                ), best
         elif isinstance(source, GitHubTagSource) and source.url_template:
             url = source.url_template.format(tag=tag, version=best)
         else:
@@ -194,7 +203,7 @@ def _resolve_source(pkg_name: str, lib: LibInfo) -> tuple[PackageSource, str]:
         return lib.source, lib.version
     if isinstance(lib.source, GenericRefSource):
         sha = _resolve_generic_ref(lib.source.git, lib.source.ref)
-        return GitSource(url=lib.source.git, sha=sha), sha[:12]
+        return GitSource(url=lib.source.git, sha=sha, ref=lib.source.ref), sha[:12]
     if isinstance(
         lib.source, (GitHubRefSource, GitHubPrSource, GitHubTagSource, GitHubReleaseSource)
     ):

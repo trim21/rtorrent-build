@@ -9,6 +9,7 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 
 import json5
+from packaging.version import InvalidVersion, Version
 from pydantic import TypeAdapter
 
 
@@ -58,6 +59,7 @@ class URLSource:
 class GitSource:
     url: str
     sha: str
+    ref: str | None = None
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -87,6 +89,30 @@ class LibInfo:
     cxx_std: str | None = None
     requires: list[str] | None = None
     features: list[str] = field(default_factory=list)
+
+    @property
+    def is_sha(self) -> bool:
+        """True when *version* is a git sha rather than a real release
+        version; version gates treat such packages as newest. A GitSource
+        may still carry a real version (asset backfill), hence the check is
+        on the version string, not the source type."""
+        if not self.version:
+            return False
+        try:
+            Version(self.version)
+        except InvalidVersion:
+            return True
+        return False
+
+    @property
+    def ref_name(self) -> str | None:
+        """The git ref (branch or tag name) this package was locked from,
+        when it came from a git source."""
+        if isinstance(self.source, GitSource):
+            return self.source.ref
+        if isinstance(self.source, (GitHubRefSource, GenericRefSource)):
+            return self.source.ref
+        return None
 
 
 @dataclass(frozen=True, kw_only=True)

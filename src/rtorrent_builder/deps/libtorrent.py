@@ -2,13 +2,12 @@
 
 import re
 
-from packaging.version import Version
-
 from .._options import LibtorrentOptions
 from ..manifest import LibInfo
 from ..run import Commander
 from ..toolchain import Builder, ResolvedSource, Toolchain
-from ..utils import conditional_args, parse_version, replace_in_file
+from ..utils import conditional_args, replace_in_file
+from ..version_range import matches
 
 
 class LibtorrentBuilder(Builder):
@@ -55,8 +54,9 @@ class LibtorrentBuilder(Builder):
             "--disable-dependency-tracking": True,
             "--disable-shared": True,
             "--enable-static": True,
-            f"--with-zlib={self.tc.dep_prefix('zlib')}": parse_version(self.version)
-            < Version("0.16"),
+            f"--with-zlib={self.tc.dep_prefix('zlib')}": not (
+                self.lib.is_sha and matches(self.version, "<0.16")
+            ),
             "--enable-debug": self.tc.debug,
             "--disable-debug": not self.tc.debug,
         })

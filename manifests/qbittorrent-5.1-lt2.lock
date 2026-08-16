@@ -33,6 +33,7 @@
     "libtorrent-rasterbar": {
       "cxx_std": "c++17",
       "src": {
+        "ref": "v2.0.14",
         "sha": "aab2a10e2f60d9eac78e885a696736d043527794",
         "url": "https://github.com/arvidn/libtorrent.git"
       },
