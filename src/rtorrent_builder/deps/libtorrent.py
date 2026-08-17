@@ -54,9 +54,8 @@ class LibtorrentBuilder(Builder):
             "--disable-dependency-tracking": True,
             "--disable-shared": True,
             "--enable-static": True,
-            f"--with-zlib={self.tc.dep_prefix('zlib')}": not (
-                self.lib.is_sha and matches(self.version, "<0.16")
-            ),
+            f"--with-zlib={self.tc.dep_prefix('zlib')}": (not self.lib.is_sha)
+            and matches(self.version, "<0.16"),
             "--enable-debug": self.tc.debug,
             "--disable-debug": not self.tc.debug,
         })
