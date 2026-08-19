@@ -33,9 +33,8 @@
     "libtorrent-rasterbar": {
       "cxx_std": "c++17",
       "src": {
-        "ref": "v2.0.14",
-        "sha": "aab2a10e2f60d9eac78e885a696736d043527794",
-        "url": "https://github.com/arvidn/libtorrent.git"
+        "integrity": "sha256:1b0b21b9755b5fbec23ca9ba2d2d10434ecb6711c39f37f5fc9d5aa25cf369c9",
+        "url": "https://github.com/arvidn/libtorrent/releases/download/v2.0.14/libtorrent-rasterbar-2.0.14.tar.gz"
       },
       "version": "2.0.14"
     },
