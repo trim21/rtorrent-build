@@ -35,10 +35,10 @@
       "is_sha": true,
       "src": {
         "ref": "RC_2_1",
-        "sha": "7c0b819ae3d841a4d51e6667d1e635fba3fb9eeb",
+        "sha": "131f240b468ddd3f7dd1df83478ad4a7c48cb6e9",
         "url": "https://github.com/arvidn/libtorrent.git"
       },
-      "version": "7c0b819ae3d8"
+      "version": "131f240b468d"
     },
     "nghttp2": {
       "src": {
