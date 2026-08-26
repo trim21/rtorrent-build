@@ -6,9 +6,9 @@ Statically (or glibc only) linked [rtorrent](https://github.com/rakshasa/rtorren
 
 | Variant | Version | Glibc Target |
 |---|---|---|
-| `rtorrent-0.16` | 0.16.20 | 2.34 |
+| `rtorrent-0.16` | 0.16.21 | 2.34 |
 | `rtorrent-0.9.8` | 0.9.8 | 2.17 |
-| `rtorrent-master` | `ac1b2685d5ed` (git) | 2.34 |
+| `rtorrent-master` | `c8da93bd3038` (git) | 2.34 |
 
 
 ### qBittorrent
@@ -43,10 +43,10 @@ All images are based on `gcr.io/distroless/cc-debian13` (glibc 2.40) and include
 |---|---|
 | `0.amd.v1` | x86_64-v1 |
 | `0.16.amd.v1` | x86_64-v1 |
-| `0.16.20.amd.v1` | x86_64-v1 |
+| `0.16.21.amd.v1` | x86_64-v1 |
 | `0.amd.v3` | x86_64-v3 |
 | `0.16.amd.v3` | x86_64-v3 |
-| `0.16.20.amd.v3` | x86_64-v3 |
+| `0.16.21.amd.v3` | x86_64-v3 |
 
 
 #### rtorrent 0.9.8

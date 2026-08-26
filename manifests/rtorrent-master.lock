@@ -69,10 +69,10 @@
       ],
       "src": {
         "ref": "master",
-        "sha": "ac1b2685d5ed224b36c2ded94694c1ff8350ca1d",
+        "sha": "c8da93bd30388333e88067fdbedc095b4c9fecf6",
         "url": "https://github.com/rakshasa/rtorrent.git"
       },
-      "version": "ac1b2685d5ed"
+      "version": "c8da93bd3038"
     },
     "rtorrent-libtorrent": {
       "is_sha": true,
@@ -83,10 +83,10 @@
       ],
       "src": {
         "ref": "master",
-        "sha": "f8c55650db60775bcde3b3944352b5a35f5ee608",
+        "sha": "4e0aebb4c61e726f538512e9d65b6c335ba6c7d9",
         "url": "https://github.com/rakshasa/libtorrent.git"
       },
-      "version": "f8c55650db60"
+      "version": "4e0aebb4c61e"
     },
     "zlib": {
       "src": {
