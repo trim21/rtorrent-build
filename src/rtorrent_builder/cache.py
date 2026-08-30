@@ -66,6 +66,62 @@ def compute_merkle_hash(
     return hashlib.sha256(raw.encode()).hexdigest(), payload
 
 
+def _print_diff(current: dict[str, object], stored: dict[str, object]) -> None:
+    """Print only the hash inputs that differ between this build and a cached entry.
+
+    Keys equal on both sides are omitted entirely; dict and list values are
+    expanded item-by-item so a single changed dependency or build option is
+    visible without re-printing the whole collection.
+    """
+    found = False
+    for key in sorted(set(current) | set(stored)):
+        if key not in stored:
+            print(f"    {key}(Added): {current[key]!r}", file=sys.stderr)
+            found = True
+            continue
+        if key not in current:
+            print(f"    {key}(Removed): {stored[key]!r}", file=sys.stderr)
+            found = True
+            continue
+
+        cur, old = current[key], stored[key]
+        if cur == old:
+            continue
+        found = True
+
+        if isinstance(cur, dict) and isinstance(old, dict):
+            print(f"    {key}:", file=sys.stderr)
+            cur_map = {str(k): str(v) for k, v in cur.items()}
+            old_map = {str(k): str(v) for k, v in old.items()}
+            for sub in sorted(set(cur_map) | set(old_map)):
+                if sub not in old_map:
+                    print(f"      {sub}(Added): {cur_map[sub]!r}", file=sys.stderr)
+                elif sub not in cur_map:
+                    print(f"      {sub}(Removed): {old_map[sub]!r}", file=sys.stderr)
+                elif cur_map[sub] == old_map[sub]:
+                    continue
+                else:
+                    print(
+                        f"      {sub}(changed): CURRENT={cur_map[sub]!r}  CACHED={old_map[sub]!r}",
+                        file=sys.stderr,
+                    )
+        elif isinstance(cur, list) and isinstance(old, list):
+            added = [v for v in cur if v not in old]
+            removed = [v for v in old if v not in cur]
+            if added or removed:
+                print(
+                    f"    {key}(changed): ADDED={added!r}  REMOVED={removed!r}",
+                    file=sys.stderr,
+                )
+            else:
+                print(f"    {key}(changed): CURRENT={cur!r}  CACHED={old!r}", file=sys.stderr)
+        else:
+            print(f"    {key}(changed): CURRENT={cur!r}  CACHED={old!r}", file=sys.stderr)
+
+    if not found:
+        print("    (no input differences)", file=sys.stderr)
+
+
 class CacheStore:
     """Manages a directory of cached per-package archives keyed by Merkle hash."""
 
@@ -172,15 +228,8 @@ class CacheStore:
                 f"(exists={archive_exists}, size={archive_size})",
                 file=sys.stderr,
             )
-            print("  Cached hash inputs:", file=sys.stderr)
-            all_keys = sorted(set(current_payload) | set(stored))
-            for k in all_keys:
-                cur = current_payload.get(k)
-                old = stored.get(k)
-                if cur != old:
-                    print(f"    {k}: CURRENT={cur!r}  CACHED={old!r}", file=sys.stderr)
-                else:
-                    print(f"    {k}: {cur!r}  (unchanged)", file=sys.stderr)
+            print("  Cached hash inputs (diff only):", file=sys.stderr)
+            _print_diff(current_payload, stored)
         print(f"--- End cache miss diagnosis for {name} ---\n", file=sys.stderr)
 
     def gc(self, current_packages: dict[str, str]) -> int:
