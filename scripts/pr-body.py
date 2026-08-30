@@ -1,7 +1,9 @@
-"""Generate PR body with upstream commit logs for lock file updates.
+"""Generate PR body summarizing lock file updates.
 
-Compares HEAD (old) lock files vs working tree (new) lock files, fetches
-commit logs from GitHub API for each git-sourced package whose SHA changed.
+Compares HEAD (old) lock files vs working tree (new) lock files. URL-sourced
+packages only expose a version and an integrity hash, so they are reported as a
+plain version table without a changelog. Git-sourced packages additionally get
+an upstream commit log from the GitHub compare API.
 
 Usage:
     python scripts/pr-body.py --output-file /tmp/pr-body.md
@@ -12,21 +14,77 @@ Output: markdown text written to --output-file (stdout if omitted).
 from __future__ import annotations
 
 import argparse
-import json
 import os
 import subprocess
-from dataclasses import dataclass
+import sys
+from dataclasses import dataclass, field, replace
 from pathlib import Path
 
 import httpx
+from pydantic import ValidationError
+
+from rtorrent_builder.manifest import (
+    GitSource,
+    LockFile,
+    ResolvedPackage,
+    _lockfile_adapter,
+)
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class ShaChange:
     package: str
     repo: str  # e.g. "rakshasa/rtorrent"
     old_sha: str
     new_sha: str
+    variants: frozenset[str] = field(default_factory=frozenset)
+
+
+@dataclass(frozen=True, kw_only=True)
+class VersionBump:
+    package: str
+    old_version: str
+    new_version: str
+    new_url: str
+    variants: frozenset[str] = field(default_factory=frozenset)
+
+
+@dataclass(frozen=True, kw_only=True)
+class SourceChange:
+    """A package whose source moved while its version stayed the same."""
+
+    package: str
+    version: str
+    old_src: ResolvedPackage
+    new_src: ResolvedPackage
+    variants: frozenset[str] = field(default_factory=frozenset)
+
+
+@dataclass(frozen=True, kw_only=True)
+class PresenceChange:
+    package: str
+    version: str
+    variants: frozenset[str] = field(default_factory=frozenset)
+
+
+@dataclass(frozen=True, kw_only=True)
+class Commit:
+    sha: str
+    subject: str
+
+
+@dataclass(frozen=True, kw_only=True)
+class Changes:
+    bumps: dict[str, VersionBump] = field(default_factory=dict)
+    sources: dict[str, SourceChange] = field(default_factory=dict)
+    shas: dict[str, ShaChange] = field(default_factory=dict)
+    added: dict[str, PresenceChange] = field(default_factory=dict)
+    removed: dict[str, PresenceChange] = field(default_factory=dict)
+    lock_count: int = 0
+
+    @property
+    def empty(self) -> bool:
+        return not (self.bumps or self.sources or self.shas or self.added or self.removed)
 
 
 def _git_show(path: str) -> str:
@@ -42,19 +100,13 @@ def _git_show(path: str) -> str:
     return result.stdout
 
 
-def _extract_sha_from_lock(lock_data: dict, package: str) -> tuple[str, str] | None:
-    """Return (sha, repo_url) for a git-sourced package in a lock file."""
-    pkg = lock_data.get("packages", {}).get(package)
-    if not pkg:
+def _load_lock(text: str, source: str) -> LockFile | None:
+    """Parse a lock file, or None (with a warning) if it predates the current schema."""
+    try:
+        return _lockfile_adapter.validate_json(text)
+    except ValidationError as e:
+        print(f"WARNING: cannot parse {source}: {e}", file=sys.stderr)
         return None
-    src = pkg.get("src")
-    if not src:
-        return None
-    sha = src.get("sha")
-    url = src.get("url", "")
-    if not sha:
-        return None
-    return sha, url
 
 
 def _repo_from_url(url: str) -> str:
@@ -66,38 +118,127 @@ def _repo_from_url(url: str) -> str:
     return url
 
 
-def _collect_changes(manifest_path: Path) -> list[ShaChange]:
-    """Compare old (HEAD) and new (working tree) lock files for a manifest."""
-    lock_path = manifest_path.with_suffix(".lock")
-    # git diff paths are relative to repo root, use as-is for git show
-    rel_path = str(lock_path)
+def _sha_of(pkg: ResolvedPackage) -> str:
+    return pkg.src.sha if isinstance(pkg.src, GitSource) else ""
 
-    try:
-        old_text = _git_show(rel_path)
-    except RuntimeError:
-        return []  # new lock file, no HEAD version
 
-    new_text = lock_path.read_text()
+def _url_of(pkg: ResolvedPackage) -> str:
+    return pkg.src.url if pkg.src is not None else ""
 
-    old_data = json.loads(old_text)
-    new_data = json.loads(new_text)
 
-    changes: list[ShaChange] = []
-    for pkg_name in new_data.get("packages", {}):
-        old_info = _extract_sha_from_lock(old_data, pkg_name)
-        new_info = _extract_sha_from_lock(new_data, pkg_name)
-        if not old_info or not new_info:
+def _record[Entry: (ShaChange, VersionBump, SourceChange, PresenceChange)](
+    bucket: dict[str, Entry], key: str, entry: Entry, variant: str
+) -> None:
+    """Store *entry* under *key*, stamping it with *variant*.
+
+    The records are frozen, so a variant already recorded under the same key is
+    merged by rebuilding that entry instead of mutating it in place.
+    """
+    existing = bucket.get(key)
+    if existing is None:
+        bucket[key] = replace(entry, variants=frozenset({variant}))
+    else:
+        bucket[key] = replace(existing, variants=existing.variants | {variant})
+
+
+def _collect_lock(variant: str, old: LockFile, new: LockFile, out: Changes) -> None:
+    """Classify each package's old/new lock entries into *out*."""
+    for name in sorted(set(old.packages) | set(new.packages)):
+        old_pkg = old.packages.get(name)
+        new_pkg = new.packages.get(name)
+
+        if old_pkg is None and new_pkg is not None:
+            _record(out.added, name, PresenceChange(package=name, version=new_pkg.version), variant)
             continue
-        old_sha, _ = old_info
-        new_sha, url = new_info
-        if old_sha != new_sha:
-            repo = _repo_from_url(url)
-            changes.append(ShaChange(package=pkg_name, repo=repo, old_sha=old_sha, new_sha=new_sha))
+        if new_pkg is None and old_pkg is not None:
+            _record(
+                out.removed, name, PresenceChange(package=name, version=old_pkg.version), variant
+            )
+            continue
+        if old_pkg is None or new_pkg is None:
+            continue
 
-    return changes
+        old_sha, new_sha = _sha_of(old_pkg), _sha_of(new_pkg)
+        if old_sha and new_sha and old_sha != new_sha:
+            # A git-sourced bump carries its own commit log, which says more
+            # than a version column would.
+            _record(
+                out.shas,
+                f"{name}|{old_sha}|{new_sha}",
+                ShaChange(
+                    package=name,
+                    repo=_repo_from_url(_url_of(new_pkg)),
+                    old_sha=old_sha,
+                    new_sha=new_sha,
+                ),
+                variant,
+            )
+            continue
+
+        if old_pkg.version != new_pkg.version:
+            _record(
+                out.bumps,
+                f"{name}|{old_pkg.version}|{new_pkg.version}",
+                VersionBump(
+                    package=name,
+                    old_version=old_pkg.version,
+                    new_version=new_pkg.version,
+                    new_url=_url_of(new_pkg),
+                ),
+                variant,
+            )
+        elif old_pkg.src != new_pkg.src:
+            _record(
+                out.sources,
+                f"{name}|{new_pkg.version}|{old_pkg.src!r}|{new_pkg.src!r}",
+                SourceChange(
+                    package=name,
+                    version=new_pkg.version,
+                    old_src=old_pkg,
+                    new_src=new_pkg,
+                ),
+                variant,
+            )
 
 
-def _fetch_commits(repo: str, old_sha: str, new_sha: str, token: str | None) -> list[dict]:
+def _collect_changes(changed_locks: list[str]) -> Changes:
+    """Compare old (HEAD) and new (working tree) lock files."""
+    out = Changes(lock_count=len(changed_locks))
+    for lock_rel_path in changed_locks:
+        lock_path = Path(lock_rel_path)
+        variant = lock_path.stem
+        if not lock_path.exists():
+            continue  # lock file removed; the file diff already shows that
+        new_lock = _load_lock(lock_path.read_text(), str(lock_path))
+        if new_lock is None:
+            continue
+        try:
+            old_text = _git_show(lock_rel_path)
+        except RuntimeError:
+            continue  # new lock file, nothing to compare against yet
+        old_lock = _load_lock(old_text, f"HEAD:{lock_rel_path}")
+        if old_lock is not None:
+            _collect_lock(variant, old_lock, new_lock, out)
+    return out
+
+
+def _variants_cell(variants: frozenset[str]) -> str:
+    return ", ".join(f"`{v}`" for v in sorted(variants))
+
+
+def _source_cell(pkg: ResolvedPackage) -> str:
+    src = pkg.src
+    if src is None:
+        return "—"
+    bits: list[str] = [f"[url]({src.url})"]
+    if isinstance(src, GitSource):
+        bits.append(f"`{src.ref or src.sha[:12]}`")
+    else:
+        bits.append(f"`{src.integrity[:18]}…`")
+    return " ".join(bits)
+
+
+def _fetch_commits(repo: str, old_sha: str, new_sha: str, token: str | None) -> list[Commit]:
     """Fetch commits between old_sha and new_sha via GitHub compare API."""
     headers: dict[str, str] = {"Accept": "application/vnd.github+json"}
     if token:
@@ -106,62 +247,107 @@ def _fetch_commits(repo: str, old_sha: str, new_sha: str, token: str | None) -> 
     url = f"https://api.github.com/repos/{repo}/compare/{old_sha}...{new_sha}"
     resp = httpx.get(url, headers=headers, follow_redirects=True)
     resp.raise_for_status()
-    data = resp.json()
-    return data.get("commits", [])
+    raw_commits: list[dict] = resp.json().get("commits", [])
+    return [
+        Commit(sha=str(c["sha"]), subject=str(c["commit"]["message"].split("\n")[0]))
+        for c in raw_commits
+    ]
 
 
-def _format_body(
-    changes: list[ShaChange],
-    token: str | None,
-    *,
-    manifest_name: str | None = None,
-) -> str:
+def _format_summary(changes: Changes) -> str:
+    counts = [
+        ("version bumps", len(changes.bumps)),
+        ("git-sourced bumps", len(changes.shas)),
+        ("source changes", len(changes.sources)),
+        ("packages added", len(changes.added)),
+        ("packages removed", len(changes.removed)),
+    ]
+    parts = [f"{count} {label}" for label, count in counts if count]
+    moved = ", ".join(parts) if parts else "no package changes"
+    return f"_{changes.lock_count} lock files changed · {moved}._\n"
+
+
+def _format_body(changes: Changes, token: str | None) -> str:
     """Generate markdown PR body from collected changes."""
-    if not changes:
-        return "No git-sourced package changes detected."
-
-    # Deduplicate by (repo, old_sha, new_sha)
-    seen: set[tuple[str, str, str]] = set()
-    unique: list[ShaChange] = []
-    for c in changes:
-        key = (c.repo, c.old_sha, c.new_sha)
-        if key not in seen:
-            seen.add(key)
-            unique.append(c)
-
-    lines: list[str] = []
-    if manifest_name:
-        lines.append(f"## Changes for `{manifest_name}`\n")
-
-    for change in unique:
-        commits = _fetch_commits(change.repo, change.old_sha, change.new_sha, token)
-        count = len(commits)
-
-        compare_url = (
-            f"https://github.com/{change.repo}/compare/"
-            f"{change.old_sha[:12]}...{change.new_sha[:12]}"
+    if changes.empty:
+        if not changes.lock_count:
+            return "No lock files changed."
+        return (
+            f"{_format_summary(changes)}\n"
+            "No package source changes. Only lock metadata (manifest hash, "
+            "target glibc, toolchain) moved."
         )
 
-        lines.append(
-            f"### {change.package} ([`{change.repo}`](https://github.com/{change.repo}))\n"
-        )
-        lines.append(
-            f"[`{change.old_sha[:7]}...{change.new_sha[:7]}`]({compare_url})"
-            f" ({count} commit{'s' if count != 1 else ''})\n"
-        )
+    lines: list[str] = [_format_summary(changes)]
 
-        for c in commits:
-            sha: str = c["sha"]
-            msg: str = c["commit"]["message"].split("\n")[0]
-            # Escape @ to prevent GitHub from treating usernames in commit
-            # messages as mentions in the PR body.
-            msg = msg.replace("@", "@<!-- -->")
-            if len(msg) > 120:
-                msg = msg[:117] + "..."
-            commit_url = f"https://github.com/{change.repo}/commit/{sha}"
-            lines.append(f"- [`{sha[:7]}`]({commit_url}) {msg}")
-
+    if changes.bumps:
+        lines.append("## Version updates\n")
+        lines.append("| package | old | new | manifests |")
+        lines.append("| --- | --- | --- | --- |")
+        for bump in sorted(changes.bumps.values(), key=lambda b: (b.package, b.new_version)):
+            lines.append(
+                f"| {bump.package} | {bump.old_version} | "
+                f"[{bump.new_version}]({bump.new_url}) | {_variants_cell(bump.variants)} |"
+            )
         lines.append("")
+
+    if changes.sources:
+        lines.append("## Source changes (same version)\n")
+        lines.append("| package | version | old source | new source | manifests |")
+        lines.append("| --- | --- | --- | --- | --- |")
+        for change in sorted(changes.sources.values(), key=lambda c: c.package):
+            lines.append(
+                f"| {change.package} | {change.version} | "
+                f"{_source_cell(change.old_src)} | {_source_cell(change.new_src)} | "
+                f"{_variants_cell(change.variants)} |"
+            )
+        lines.append("")
+
+    for label, bucket in (
+        ("Packages added", changes.added),
+        ("Packages removed", changes.removed),
+    ):
+        if not bucket:
+            continue
+        lines.append(f"## {label}\n")
+        for item in sorted(bucket.values(), key=lambda p: p.package):
+            lines.append(f"- `{item.package}` {item.version} — {_variants_cell(item.variants)}")
+        lines.append("")
+
+    if changes.shas:
+        lines.append("## Git-sourced updates\n")
+        commit_cache: dict[tuple[str, str, str], list[Commit]] = {}
+        for change in sorted(changes.shas.values(), key=lambda c: c.package):
+            cache_key = (change.repo, change.old_sha, change.new_sha)
+            if cache_key not in commit_cache:
+                commit_cache[cache_key] = _fetch_commits(
+                    change.repo, change.old_sha, change.new_sha, token
+                )
+            commits = commit_cache[cache_key]
+            compare_url = (
+                f"https://github.com/{change.repo}/compare/"
+                f"{change.old_sha[:12]}...{change.new_sha[:12]}"
+            )
+            count = len(commits)
+
+            lines.append(
+                f"### {change.package} ([`{change.repo}`](https://github.com/{change.repo}))\n"
+            )
+            lines.append(
+                f"[`{change.old_sha[:7]}...{change.new_sha[:7]}`]({compare_url})"
+                f" ({count} commit{'s' if count != 1 else ''})"
+                f" — {_variants_cell(change.variants)}\n"
+            )
+            for commit in commits:
+                subject = commit.subject
+                if len(subject) > 120:
+                    subject = subject[:117] + "..."
+                # Escape @ so GitHub does not turn usernames in commit messages
+                # into mentions on the PR.
+                subject = subject.replace("@", "@<!-- -->")
+                commit_url = f"https://github.com/{change.repo}/commit/{commit.sha}"
+                lines.append(f"- [`{commit.sha[:7]}`]({commit_url}) {subject}")
+            lines.append("")
 
     return "\n".join(lines)
 
@@ -182,19 +368,7 @@ def main() -> None:
     )
     changed_files = [f for f in result.stdout.strip().split("\n") if f]
 
-    if not changed_files:
-        body = "No lock files changed."
-    else:
-        all_changes: list[ShaChange] = []
-        for lock_rel_path in changed_files:
-            lock_path = Path(lock_rel_path)
-            manifest_path = lock_path.with_suffix(".jsonc")
-            if not manifest_path.exists():
-                continue
-            changes = _collect_changes(manifest_path)
-            if changes:
-                all_changes.extend(changes)
-        body = _format_body(all_changes, token)
+    body = _format_body(_collect_changes(changed_files), token)
 
     if args.output_file:
         Path(args.output_file).write_text(body)
