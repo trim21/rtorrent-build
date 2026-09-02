@@ -21,10 +21,10 @@
         "idn2"
       ],
       "src": {
-        "integrity": "sha256:ec753aa6f408a3ca9f0d6d5f7a77417aecd1544db13c03ae5d443612bf367364",
-        "url": "https://github.com/curl/curl/archive/refs/tags/curl-8_21_0.tar.gz"
+        "integrity": "sha256:222c6b5c1f368ac63aed59bce2774eb5def9e8e67e46e800be182e684d2845a3",
+        "url": "https://github.com/curl/curl/archive/refs/tags/curl-8_22_0.tar.gz"
       },
-      "version": "8.21.0"
+      "version": "8.22.0"
     },
     "libidn2": {
       "src": {
@@ -69,10 +69,10 @@
       ],
       "src": {
         "ref": "master",
-        "sha": "f327523a0700d528d2952279827144aa3caea7ad",
+        "sha": "a8be7e443a5bdb5e34d5c0e877d712b59fb2bab3",
         "url": "https://github.com/rakshasa/rtorrent.git"
       },
-      "version": "f327523a0700"
+      "version": "a8be7e443a5b"
     },
     "rtorrent-libtorrent": {
       "is_sha": true,
@@ -83,10 +83,10 @@
       ],
       "src": {
         "ref": "master",
-        "sha": "5232df05943331645027164a0aba94b739f83bb1",
+        "sha": "21a92a5769fd7804d6ba0d7705656a7ee4096e5c",
         "url": "https://github.com/rakshasa/libtorrent.git"
       },
-      "version": "5232df059433"
+      "version": "21a92a5769fd"
     },
     "zlib": {
       "src": {

@@ -21,10 +21,10 @@
         "idn2"
       ],
       "src": {
-        "integrity": "sha256:ec753aa6f408a3ca9f0d6d5f7a77417aecd1544db13c03ae5d443612bf367364",
-        "url": "https://github.com/curl/curl/archive/refs/tags/curl-8_21_0.tar.gz"
+        "integrity": "sha256:222c6b5c1f368ac63aed59bce2774eb5def9e8e67e46e800be182e684d2845a3",
+        "url": "https://github.com/curl/curl/archive/refs/tags/curl-8_22_0.tar.gz"
       },
-      "version": "8.21.0"
+      "version": "8.22.0"
     },
     "libdeflate": {
       "src": {
