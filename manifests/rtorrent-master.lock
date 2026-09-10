@@ -83,10 +83,10 @@
       ],
       "src": {
         "ref": "master",
-        "sha": "a1e1263b7ee45c0dc81fd02d3e688a94d75c02ae",
+        "sha": "cfce3e6e4084bcfd2890f9cb425252353570473c",
         "url": "https://github.com/rakshasa/libtorrent.git"
       },
-      "version": "a1e1263b7ee4"
+      "version": "cfce3e6e4084"
     },
     "zlib": {
       "src": {
