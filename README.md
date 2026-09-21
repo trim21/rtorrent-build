@@ -8,7 +8,7 @@ Statically (or glibc only) linked [rtorrent](https://github.com/rakshasa/rtorren
 |---|---|---|
 | `rtorrent-0.16` | 0.16.23 | 2.34 |
 | `rtorrent-0.9.8` | 0.9.8 | 2.17 |
-| `rtorrent-master` | `3652329e2d34` (git) | 2.34 |
+| `rtorrent-master` | `d1a6942ea796` (git) | 2.34 |
 
 
 ### qBittorrent
@@ -19,7 +19,7 @@ Statically (or glibc only) linked [rtorrent](https://github.com/rakshasa/rtorren
 | `qbittorrent-5.1-lt2` | 5.1.4 | 2.34 |
 | `qbittorrent-5.2-lt1` | 5.2.3 | 2.34 |
 | `qbittorrent-5.2-lt2` | 5.2.3 | 2.34 |
-| `qbittorrent-master-lt-mater` | `9b0e9311f3e8` (git) | 2.34 |
+| `qbittorrent-master-lt-mater` | `705708085ccd` (git) | 2.34 |
 
 
 ### Transmission
