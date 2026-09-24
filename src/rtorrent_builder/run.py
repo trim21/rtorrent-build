@@ -12,6 +12,17 @@ class CmdError(subprocess.CalledProcessError):
     pass
 
 
+def default_nproc() -> int:
+    """Leave one core free so the build never starves the rest of the machine."""
+    raw = os.environ.get("RTORRENT_NPROC") or os.environ.get("RTORRENT_JOBS")
+    if raw:
+        try:
+            return int(raw)
+        except ValueError:
+            raise SystemExit(f"Invalid job count: {raw!r}") from None
+    return max(1, (os.cpu_count() or 1) - 1)
+
+
 class Commander:
     """Runs shell commands, prints them, and logs full output to a file.
 
@@ -21,11 +32,10 @@ class Commander:
 
     def __init__(self, log_path: Path, jobs: int | None = None) -> None:
         self.log_path = log_path
-        self._jobs = jobs if jobs is not None else (os.cpu_count() or 1)
+        self._jobs = jobs if jobs is not None else default_nproc()
 
     def nproc_args(self) -> list[str]:
-        jobs = os.environ.get("RTORRENT_JOBS") or str(self._jobs)
-        return ["-j", jobs]
+        return ["-j", str(self._jobs)]
 
     def _log_header(self, f, cmd_str: str) -> None:
         ts = datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S")

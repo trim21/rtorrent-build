@@ -274,6 +274,7 @@ def build_rtorrent(
     debug: bool = False,
     cache_dir: Path | None = None,
     jobs: int = 1,
+    nproc: int | None = None,
 ) -> Path:
     work_dir = work_dir.resolve()
     output_dir = output_dir.resolve()
@@ -296,6 +297,7 @@ def build_rtorrent(
         libc=libc,
         arch=arch,
         debug=debug,
+        nproc=nproc,
     )
     tc.setup()
 

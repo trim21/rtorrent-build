@@ -86,6 +86,7 @@ python build.py build manifests/rtorrent-master.jsonc
 | `--debug/--no-debug` | — | Debug build: `-g -O0`, no LTO |
 | `--no-cache` | — | Disable build cache |
 | `-j N` | — | Max concurrent package builds (default: 1) |
+| `--nproc N` | — | Compile parallelism for make/CMake (default: CPU cores minus one) |
 
 ## Troubleshooting
 

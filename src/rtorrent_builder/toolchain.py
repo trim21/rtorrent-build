@@ -97,6 +97,7 @@ class Toolchain:
         libc: Libc = Libc.glibc,
         arch: Arch = Arch.v1,
         debug: bool = False,
+        nproc: int | None = None,
     ) -> None:
         self.variant = variant
         self._toolchain_name = toolchain
@@ -107,6 +108,7 @@ class Toolchain:
         self.libc = libc
         self.arch = arch
         self.debug = debug
+        self.nproc = nproc
 
         self.install_prefix = work_dir / "install"
         self.build_dir = work_dir / "build"
@@ -123,11 +125,11 @@ class Toolchain:
             d.mkdir(parents=True, exist_ok=True)
 
         self._log_dir = work_dir / "logs"
-        self._commander = Commander(work_dir / "prepare.log")
+        self._commander = Commander(work_dir / "prepare.log", self.nproc)
 
     def make_commander(self, name: str) -> Commander:
         self._log_dir.mkdir(parents=True, exist_ok=True)
-        return Commander(self._log_dir / f"{name}.log")
+        return Commander(self._log_dir / f"{name}.log", self.nproc)
 
     def dep_prefix(self, dep_name: str) -> Path:
         return self.install_prefix

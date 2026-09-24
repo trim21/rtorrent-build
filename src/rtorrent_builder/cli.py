@@ -142,6 +142,13 @@ def main() -> None:
     envvar="RTORRENT_BUILD_JOBS",
     help="Max concurrent package builds (1 = sequential)",
 )
+@click.option(
+    "--nproc",
+    type=int,
+    default=None,
+    envvar="RTORRENT_NPROC",
+    help="Compile parallelism (make/CMake -j). Defaults to CPU cores minus one",
+)
 def build(
     manifest: tuple[Path, ...],
     work_dir: Path,
@@ -156,6 +163,7 @@ def build(
     debug: bool,
     cache_dir: Path | None,
     jobs: int,
+    nproc: int | None,
 ) -> None:
     """Build one or more variants from manifest files."""
     output_dir = output_dir.resolve()
@@ -201,6 +209,7 @@ def build(
                 debug=debug,
                 cache_dir=cache_dir,
                 jobs=jobs,
+                nproc=nproc,
             )
         except CmdError as e:
             log_path = variant_work / "logs"
