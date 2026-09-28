@@ -35,10 +35,10 @@
       "is_sha": true,
       "src": {
         "ref": "RC_2_1",
-        "sha": "94bffc25272b6833108d601fc0d824c344c48bc3",
+        "sha": "3b68ebcd2bb5472175826332ea1250278b31b708",
         "url": "https://github.com/arvidn/libtorrent.git"
       },
-      "version": "94bffc25272b"
+      "version": "3b68ebcd2bb5"
     },
     "nghttp2": {
       "src": {
@@ -59,10 +59,10 @@
       "is_sha": true,
       "src": {
         "ref": "master",
-        "sha": "4fd66b3a7eba8ad174c2bf5cf06118a0c80b0518",
+        "sha": "d6d86ff1eca92802a1f34a7bfd20dbd02c1040ee",
         "url": "https://github.com/qbittorrent/qBittorrent.git"
       },
-      "version": "4fd66b3a7eba"
+      "version": "d6d86ff1eca9"
     },
     "qtbase": {
       "src": {
