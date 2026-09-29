@@ -35,10 +35,10 @@
       "is_sha": true,
       "src": {
         "ref": "RC_2_1",
-        "sha": "3b68ebcd2bb5472175826332ea1250278b31b708",
+        "sha": "39216053784e216ccb4346f5c2452d20bf7d3883",
         "url": "https://github.com/arvidn/libtorrent.git"
       },
-      "version": "3b68ebcd2bb5"
+      "version": "39216053784e"
     },
     "nghttp2": {
       "src": {
@@ -49,10 +49,10 @@
     },
     "openssl": {
       "src": {
-        "integrity": "sha256:c6b94124bb76ac5f8aa80de121e0f922a93d3bbf1be478bd50ebc36a30dc1db1",
-        "url": "https://github.com/openssl/openssl/archive/refs/tags/openssl-3.6.4.tar.gz"
+        "integrity": "sha256:f3091b7ccb41a11d877b7406b7afc9dd9c5003d299c6bb33cff882127bc06c91",
+        "url": "https://github.com/openssl/openssl/archive/refs/tags/openssl-3.6.5.tar.gz"
       },
-      "version": "3.6.4"
+      "version": "3.6.5"
     },
     "qbittorrent": {
       "cxx_std": "c++20",
