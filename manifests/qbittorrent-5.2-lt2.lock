@@ -1,6 +1,6 @@
 {
   "executable_package": "qbittorrent",
-  "manifest_hash": "d67a1c79927c41b68cf314c301e2c9e68b34d861b62b925e45b570640c35d846",
+  "manifest_hash": "f02d74eeb8f20a97109a31d20f9f5e8051a12f7dd07d4cbe820283072c513249",
   "packages": {
     "boost": {
       "src": {
@@ -62,17 +62,17 @@
     },
     "qtbase": {
       "src": {
-        "integrity": "sha256:56001b905601bb9023d399f3ba780d7fa940f3e4861e496a7c490331f49e0b80",
-        "url": "https://download.qt.io/official_releases/qt/6.8/6.8.3/submodules/qtbase-everywhere-src-6.8.3.tar.xz"
+        "integrity": "sha256:532dfbf3fa3cbc68fa37441ea9e81c5009da044eaecda78ffaeafd8bd125532f",
+        "url": "https://download.qt.io/archive/qt/6.8/6.8.4/submodules/qtbase-everywhere-opensource-src-6.8.4.tar.xz"
       },
-      "version": "6.8.3"
+      "version": "6.8.4"
     },
     "qttools": {
       "src": {
-        "integrity": "sha256:02a4e219248b94f1333df843d25763f35251c1074cdc4fb5bda67d340f8c8b3a",
-        "url": "https://download.qt.io/official_releases/qt/6.8/6.8.3/submodules/qttools-everywhere-src-6.8.3.tar.xz"
+        "integrity": "sha256:c6030ea66d7be1ca7e3b40578beb35b0f4ff4014277d8e051d3219759f6ab399",
+        "url": "https://download.qt.io/archive/qt/6.8/6.8.4/submodules/qttools-everywhere-opensource-src-6.8.4.tar.xz"
       },
-      "version": "6.8.3"
+      "version": "6.8.4"
     },
     "zlib": {
       "src": {

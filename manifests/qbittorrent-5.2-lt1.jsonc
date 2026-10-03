@@ -24,15 +24,17 @@
     },
     "qtbase": {
       "source": {
-        "url": "https://download.qt.io/official_releases/qt/6.8/6.8.3/submodules/qtbase-everywhere-src-6.8.3.tar.xz"
-      },
-      "version": "6.8.3"
+        "github": "qt/qtbase",
+        "tag_range": ">=6.8,<6.9",
+        "url_template": "https://download.qt.io/archive/qt/6.8/{version}/submodules/qtbase-everywhere-opensource-src-{version}.tar.xz"
+      }
     },
     "qttools": {
       "source": {
-        "url": "https://download.qt.io/official_releases/qt/6.8/6.8.3/submodules/qttools-everywhere-src-6.8.3.tar.xz"
-      },
-      "version": "6.8.3"
+        "github": "qt/qttools",
+        "tag_range": ">=6.8,<6.9",
+        "url_template": "https://download.qt.io/archive/qt/6.8/{version}/submodules/qttools-everywhere-opensource-src-{version}.tar.xz"
+      }
     },
     "qbittorrent": {
       "source": {

@@ -106,3 +106,11 @@ def verify_integrity(path: Path, integrity: str) -> None:
             f"Integrity check failed for {path.name}: "
             f"expected sha256:{expected}, got sha256:{actual}"
         )
+
+
+def archive_ext(url: str) -> str:
+    """Return the archive suffix (e.g. '.tar.gz') implied by *url*."""
+    suffixes = Path(url).suffixes
+    if len(suffixes) >= 2 and suffixes[-2] == ".tar":
+        return suffixes[-2] + suffixes[-1]
+    return suffixes[-1] if suffixes else ".tar.gz"
