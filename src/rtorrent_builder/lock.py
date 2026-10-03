@@ -12,7 +12,7 @@ import httpx
 
 from . import PROJECT_ROOT
 from .builder import compute_deps
-from .download import compute_sha256, download_file
+from .download import archive_ext, compute_sha256, download_file
 from .manifest import (
     ChecksumSource,
     GenericRefSource,
@@ -41,6 +41,8 @@ _VERSION_PATTERNS: dict[str, str] = {
     "curl/curl": r"^curl-(\d+)_(\d+)_(\d+)$",
     "openssl/openssl": r"^openssl-(\d+)\.(\d+)\.(\d+)$",
     "qbittorrent/qBittorrent": r"^release-(\d+)\.(\d+)\.(\d+)$",
+    "qt/qtbase": r"^v(\d+)\.(\d+)\.(\d+)(?:-lts-lgpl)?$",
+    "qt/qttools": r"^v(\d+)\.(\d+)\.(\d+)(?:-lts-lgpl)?$",
 }
 
 
@@ -238,7 +240,7 @@ _ASSETS_DIR = PROJECT_ROOT / "assets"
 def _download_and_hash(url: str, name: str, version: str, assets_dir: Path) -> str:
     """Download a tarball and return its integrity hash (sha256:<hex>)."""
     assets_dir.mkdir(parents=True, exist_ok=True)
-    dest = assets_dir / f"{name}-{version}"
+    dest = assets_dir / f"{name}-{version}{archive_ext(url)}"
     if not dest.exists():
         download_file(url, dest, desc=f"{name}-{version}")
     digest = compute_sha256(dest)

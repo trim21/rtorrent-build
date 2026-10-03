@@ -15,7 +15,7 @@ from pathlib import Path
 
 from . import PROJECT_ROOT as _PROJECT_ROOT
 from ._types import Arch, Libc
-from .download import download_file
+from .download import archive_ext, download_file
 from .manifest import (
     ChecksumSource,
     GenericRefSource,
@@ -147,13 +147,6 @@ class Toolchain:
         raise TypeError(f"Unsupported source type: {type(lib.source)}")
 
     @staticmethod
-    def _archive_ext(url: str) -> str:
-        suffixes = Path(url).suffixes
-        if len(suffixes) >= 2 and suffixes[-2] == ".tar":
-            return suffixes[-2] + suffixes[-1]
-        return suffixes[-1] if suffixes else ".tar.gz"
-
-    @staticmethod
     def _archive_prefix(archive: Path) -> str:
         if archive.suffix == ".zip":
             with zipfile.ZipFile(archive) as zf:
@@ -169,7 +162,7 @@ class Toolchain:
                 shutil.rmtree(src_dir)
             return
         if isinstance(lib.source, URLSource):
-            ext = self._archive_ext(lib.source.url)
+            ext = archive_ext(lib.source.url)
             tarball = self.package_dir / f"{name}-{lib.version}{ext}"
             if not tarball.exists():
                 return
@@ -189,7 +182,7 @@ class Toolchain:
     def _prepare_url_source(
         self, name: str, url: str, version: str, integrity: str = ""
     ) -> ResolvedSource:
-        archive = self.package_dir / f"{name}-{version}{self._archive_ext(url)}"
+        archive = self.package_dir / f"{name}-{version}{archive_ext(url)}"
 
         download_file(url, archive, desc=f"{name}-{version}", integrity=integrity)
 
