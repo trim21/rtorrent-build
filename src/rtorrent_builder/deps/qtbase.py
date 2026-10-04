@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from ..version_range import matches
 from ._cmake import CMakeBuilder
 
 
@@ -9,7 +10,7 @@ class QtBaseBuilder(CMakeBuilder):
     default_deps: list[str] = ["zlib", "openssl", "zstd", "brotli"]
 
     def cmake_args(self) -> list[str]:
-        return [
+        args = [
             "-DCMAKE_BUILD_TYPE=Release",
             "-DFEATURE_shared=OFF",
             "-DFEATURE_gui=OFF",
@@ -33,6 +34,8 @@ class QtBaseBuilder(CMakeBuilder):
             "-DFEATURE_system_pcre2=OFF",
             "-DFEATURE_system_doubleconversion=OFF",
             "-DFEATURE_system_textmarkdown=OFF",
-            "-DFEATURE_reduce_relocations=ON",
             "-DFEATURE_brotli=ON",
         ]
+        if not matches(self.lib.version, ">=6.10"):
+            args.append("-DFEATURE_reduce_relocations=ON")
+        return args
