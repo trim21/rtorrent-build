@@ -19,7 +19,7 @@ Statically (or glibc only) linked [rtorrent](https://github.com/rakshasa/rtorren
 | `qbittorrent-5.1-lt2` | 5.1.4 | 2.34 |
 | `qbittorrent-5.2-lt1` | 5.2.4 | 2.34 |
 | `qbittorrent-5.2-lt2` | 5.2.4 | 2.34 |
-| `qbittorrent-master-lt-mater` | `4df3aff93799` (git) | 2.34 |
+| `qbittorrent-master-lt-mater` | `8182ae071e8c` (git) | 2.34 |
 
 
 ### Transmission
