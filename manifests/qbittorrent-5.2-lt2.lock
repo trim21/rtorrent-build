@@ -25,10 +25,10 @@
     },
     "curl": {
       "src": {
-        "integrity": "sha256:222c6b5c1f368ac63aed59bce2774eb5def9e8e67e46e800be182e684d2845a3",
-        "url": "https://github.com/curl/curl/archive/refs/tags/curl-8_22_0.tar.gz"
+        "integrity": "sha256:d0605d5883124ef5ae64c6d2b307e1417c482b362583b57491fdf37d9a99a792",
+        "url": "https://github.com/curl/curl/archive/refs/tags/curl-8_23_0.tar.gz"
       },
-      "version": "8.22.0"
+      "version": "8.23.0"
     },
     "libtorrent-rasterbar": {
       "cxx_std": "c++17",
