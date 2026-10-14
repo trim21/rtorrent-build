@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import argparse
 import os
+import re
 import subprocess
 import sys
 from dataclasses import dataclass, field, replace
@@ -226,6 +227,24 @@ def _variants_cell(variants: frozenset[str]) -> str:
     return ", ".join(f"`{v}`" for v in sorted(variants))
 
 
+_GITHUB_ARCHIVE_TAG_RE = re.compile(
+    r"^https://github\.com/(?P<repo>[^/]+/[^/]+)/archive/refs/tags/(?P<tag>.+?)"
+    r"\.(?:tar\.gz|tar\.xz|tar\.bz2|tgz|zip)$"
+)
+_GITHUB_RELEASE_TAG_RE = re.compile(
+    r"^https://github\.com/(?P<repo>[^/]+/[^/]+)/releases/download/(?P<tag>[^/]+)/"
+)
+
+
+def _html_url(url: str) -> str:
+    """Point GitHub download links at the tag's page instead of the archive."""
+    for pattern in (_GITHUB_ARCHIVE_TAG_RE, _GITHUB_RELEASE_TAG_RE):
+        match = pattern.match(url)
+        if match is not None:
+            return f"https://github.com/{match['repo']}/releases/tag/{match['tag']}"
+    return url
+
+
 def _source_cell(pkg: ResolvedPackage) -> str:
     src = pkg.src
     if src is None:
@@ -285,9 +304,10 @@ def _format_body(changes: Changes, token: str | None) -> str:
         lines.append("| package | old | new | manifests |")
         lines.append("| --- | --- | --- | --- |")
         for bump in sorted(changes.bumps.values(), key=lambda b: (b.package, b.new_version)):
+            link = _html_url(bump.new_url)
             lines.append(
                 f"| {bump.package} | {bump.old_version} | "
-                f"[{bump.new_version}]({bump.new_url}) | {_variants_cell(bump.variants)} |"
+                f"[{bump.new_version}]({link}) | {_variants_cell(bump.variants)} |"
             )
         lines.append("")
 
