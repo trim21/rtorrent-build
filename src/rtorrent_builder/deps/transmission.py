@@ -34,4 +34,6 @@ class TransmissionBuilder(CMakeBuilder):
             "-DREBUILD_WEB=OFF",
             "-DINSTALL_DOC=OFF",
             "-DINSTALL_LIB=OFF",
+            # transmission runs any clang-tidy it finds on the host, which fails on -march=x86_64
+            "-DRUN_CLANG_TIDY=OFF",
         ]
