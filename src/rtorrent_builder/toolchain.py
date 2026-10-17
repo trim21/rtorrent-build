@@ -405,10 +405,18 @@ class Toolchain:
 
     @property
     def cmake_cflags_init(self) -> str:
+        return self._cmake_cflags(lto=True)
+
+    @property
+    def cmake_cflags_no_lto(self) -> str:
+        return self._cmake_cflags(lto=False)
+
+    def _cmake_cflags(self, lto: bool) -> str:
         march = f"-march={self.arch.march}"
         if self.debug:
             return f"-fPIC -g -O0 -w -fno-semantic-interposition {march}"
-        return f"-fPIC -flto -w -fno-semantic-interposition {march}"
+        lto_flag = "-flto " if lto else ""
+        return f"-fPIC {lto_flag}-w -fno-semantic-interposition {march}"
 
     def _write_toolchain_file(self) -> Path:
         path = self.work_dir / "zig-toolchain.cmake"
