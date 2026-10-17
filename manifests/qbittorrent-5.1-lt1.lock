@@ -62,17 +62,17 @@
     },
     "qtbase": {
       "src": {
-        "integrity": "sha256:532dfbf3fa3cbc68fa37441ea9e81c5009da044eaecda78ffaeafd8bd125532f",
-        "url": "https://download.qt.io/archive/qt/6.8/6.8.4/submodules/qtbase-everywhere-opensource-src-6.8.4.tar.xz"
+        "integrity": "sha256:fc95010e94d8b1ec342eda9281fd278d5f096cf9ad8f1a0adfba9575438b0abc",
+        "url": "https://download.qt.io/archive/qt/6.8/6.8.5/submodules/qtbase-everywhere-opensource-src-6.8.5.tar.xz"
       },
-      "version": "6.8.4"
+      "version": "6.8.5"
     },
     "qttools": {
       "src": {
-        "integrity": "sha256:c6030ea66d7be1ca7e3b40578beb35b0f4ff4014277d8e051d3219759f6ab399",
-        "url": "https://download.qt.io/archive/qt/6.8/6.8.4/submodules/qttools-everywhere-opensource-src-6.8.4.tar.xz"
+        "integrity": "sha256:e8a1d632f9e9091852244b83c7b77f7dad0e1213e4e5b8b612071ae169659aa9",
+        "url": "https://download.qt.io/archive/qt/6.8/6.8.5/submodules/qttools-everywhere-opensource-src-6.8.5.tar.xz"
       },
-      "version": "6.8.4"
+      "version": "6.8.5"
     },
     "zlib": {
       "src": {
