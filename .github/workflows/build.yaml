@@ -20,6 +20,7 @@ jobs:
         variant:
           - rtorrent-0.9.8
           - rtorrent-0.16
+          - transmission-4
           - qbittorrent-5.2-lt2
           - qbittorrent-5.2-lt1
           - qbittorrent-5.1-lt2
@@ -133,7 +134,15 @@ jobs:
 
       - name: Generate release notes
         run: |
-          uv run python scripts/generate_release_notes.py manifests/*.jsonc --output /tmp/release-body.md
+          uv run python scripts/generate_release_notes.py \
+            manifests/rtorrent-0.9.8.jsonc \
+            manifests/rtorrent-0.16.jsonc \
+            manifests/transmission-4.jsonc \
+            manifests/qbittorrent-5.1-lt1.jsonc \
+            manifests/qbittorrent-5.1-lt2.jsonc \
+            manifests/qbittorrent-5.2-lt1.jsonc \
+            manifests/qbittorrent-5.2-lt2.jsonc \
+            --output /tmp/release-body.md
 
       - name: Publish release
         uses: softprops/action-gh-release@v3

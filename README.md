@@ -26,7 +26,7 @@ Statically (or glibc only) linked [rtorrent](https://github.com/rakshasa/rtorren
 
 | Variant | Version | Glibc Target |
 |---|---|---|
-| `transmission` | 4.1.3 | 2.28 |
+| `transmission-4` | 4.1.3 | 2.28 |
 
 
 ## Docker Images

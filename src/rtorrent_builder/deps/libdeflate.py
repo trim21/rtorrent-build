@@ -15,5 +15,4 @@ class LibdeflateBuilder(CMakeBuilder):
             "-DLIBDEFLATE_BUILD_GZIP=OFF",
             "-DLIBDEFLATE_BUILD_SHARED_LIB=OFF",
             "-DLIBDEFLATE_BUILD_TESTS=OFF",
-            f"-DCMAKE_C_FLAGS={self.tc.cmake_cflags_init} -mevex512",
         ]

@@ -10,7 +10,7 @@ python build.py build manifests/rtorrent-0.9.8.jsonc
 python build.py build manifests/rtorrent-0.16.jsonc
 python build.py build manifests/rtorrent-master.jsonc
 python build.py build manifests/qbittorrent-5.2-lt2.jsonc
-python build.py build manifests/transmission.jsonc
+python build.py build manifests/transmission-4.jsonc
 
 # With options
 python build.py build manifests/rtorrent-master.jsonc --libc musl --arch amd/v2
