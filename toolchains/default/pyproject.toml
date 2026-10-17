@@ -9,7 +9,7 @@ dependencies = [
   "ninja>=1,<2",
   "patchelf>=0.17,<1",
   "pkgconf>=3,<4",
-  "ziglang==0.16.0",
+  "ziglang==0.17.0",
 ]
 
 [tool.uv]

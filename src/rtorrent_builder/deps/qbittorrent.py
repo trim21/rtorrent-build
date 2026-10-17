@@ -7,6 +7,8 @@ from ._cmake import CMakeBuilder
 
 
 class QbittorrentBuilder(CMakeBuilder):
+    no_lto = True
+
     default_deps: list[str] = [
         "zlib",
         "openssl",

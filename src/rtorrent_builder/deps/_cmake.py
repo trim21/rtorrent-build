@@ -8,6 +8,12 @@ from ..toolchain import Builder, ResolvedSource, Toolchain
 
 
 class CMakeBuilder(Builder):
+    # zig 0.17's bundled LLVM aborts with "Broken module found" when the LTO
+    # link verifies bitcode emitted with -g for some C++ codebases; builders
+    # that hit this set no_lto to compile without -flto (linker keeps -flto so
+    # dependency bitcode archives still link).
+    no_lto: bool = False
+
     def __init__(
         self, toolchain: Toolchain, lib: LibInfo, source: ResolvedSource, commander: Commander
     ) -> None:
@@ -21,8 +27,14 @@ class CMakeBuilder(Builder):
     @abstractmethod
     def cmake_args(self) -> list[str]: ...
 
+    def no_lto_args(self) -> list[str]:
+        if not self.no_lto:
+            return []
+        flags = self.tc.cmake_cflags_no_lto
+        return [f"-DCMAKE_C_FLAGS={flags}", f"-DCMAKE_CXX_FLAGS={flags}"]
+
     def cache_key_extra(self) -> list[str]:
-        return super().cache_key_extra() + self.cmake_args()
+        return super().cache_key_extra() + self.no_lto_args() + self.cmake_args()
 
     @property
     def cmake_build_dir(self) -> str:
@@ -45,6 +57,7 @@ class CMakeBuilder(Builder):
                 f"-DCMAKE_BUILD_TYPE={build_type}",
                 "-DBUILD_SHARED_LIBS=OFF",
                 "-DBUILD_TESTING=OFF",
+                *self.no_lto_args(),
                 *self.cmake_args(),
                 "-S",
                 str(self.src_dir),
