@@ -21,21 +21,18 @@ jobs:
           - rtorrent-0.9.8
           - rtorrent-0.16
           - transmission-4
+          - qbittorrent-5.3-lt2
           - qbittorrent-5.2-lt2
-          - qbittorrent-5.2-lt1
           - qbittorrent-5.1-lt2
-          - qbittorrent-5.1-lt1
         libc: [glibc, musl]
         arch:
           - { flag: amd/v1, name: amd.v1 }
         exclude:
+          - variant: qbittorrent-5.3-lt2
+            libc: musl
           - variant: qbittorrent-5.2-lt2
             libc: musl
-          - variant: qbittorrent-5.2-lt1
-            libc: musl
           - variant: qbittorrent-5.1-lt2
-            libc: musl
-          - variant: qbittorrent-5.1-lt1
             libc: musl
     runs-on: ubuntu-latest
     steps:
@@ -138,10 +135,9 @@ jobs:
             manifests/rtorrent-0.9.8.jsonc \
             manifests/rtorrent-0.16.jsonc \
             manifests/transmission-4.jsonc \
-            manifests/qbittorrent-5.1-lt1.jsonc \
             manifests/qbittorrent-5.1-lt2.jsonc \
-            manifests/qbittorrent-5.2-lt1.jsonc \
             manifests/qbittorrent-5.2-lt2.jsonc \
+            manifests/qbittorrent-5.3-lt2.jsonc \
             --output /tmp/release-body.md
 
       - name: Publish release
