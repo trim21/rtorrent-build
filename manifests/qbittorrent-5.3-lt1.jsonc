@@ -26,14 +26,14 @@
       "source": {
         "github": "qt/qtbase",
         "tag_range": ">=6.12,<6.13",
-        "url_template": "https://download.qt.io/archive/qt/6.12/{version}/submodules/qtbase-everywhere-opensource-src-{version}.tar.xz"
+        "url_template": "https://download.qt.io/archive/qt/6.12/{version}/submodules/qtbase-everywhere-src-{version}.tar.xz"
       }
     },
     "qttools": {
       "source": {
         "github": "qt/qttools",
         "tag_range": ">=6.12,<6.13",
-        "url_template": "https://download.qt.io/archive/qt/6.12/{version}/submodules/qttools-everywhere-opensource-src-{version}.tar.xz"
+        "url_template": "https://download.qt.io/archive/qt/6.12/{version}/submodules/qttools-everywhere-src-{version}.tar.xz"
       }
     },
     "qbittorrent": {
