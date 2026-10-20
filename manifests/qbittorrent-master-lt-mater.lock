@@ -18,10 +18,10 @@
     },
     "cares": {
       "src": {
-        "integrity": "sha256:ddf8be8b179ef6ff656e7413da93cf0f3038c627aca29ce9aae30f66e5b32bc1",
-        "url": "https://github.com/c-ares/c-ares/archive/refs/tags/v1.34.8.tar.gz"
+        "integrity": "sha256:453bab9eb8c2bd4343b527dd97dbd77e1fab6608781dda2dbbfde7e480882c97",
+        "url": "https://github.com/c-ares/c-ares/archive/refs/tags/v1.34.9.tar.gz"
       },
-      "version": "1.34.8"
+      "version": "1.34.9"
     },
     "curl": {
       "src": {
@@ -35,10 +35,10 @@
       "is_sha": true,
       "src": {
         "ref": "RC_2_1",
-        "sha": "dc57967a5065a3a64fb2f80c30493629046226b7",
+        "sha": "1f6d75916fabfd8d11c51e30cbf3af9a7a8ea146",
         "url": "https://github.com/arvidn/libtorrent.git"
       },
-      "version": "dc57967a5065"
+      "version": "1f6d75916fab"
     },
     "nghttp2": {
       "src": {
@@ -59,10 +59,10 @@
       "is_sha": true,
       "src": {
         "ref": "master",
-        "sha": "846f97e0638a70c7174427d0a77bda5730c5e864",
+        "sha": "a87f8f9c282e7341b1f4f9e9a5a66c869d2366a6",
         "url": "https://github.com/qbittorrent/qBittorrent.git"
       },
-      "version": "846f97e0638a"
+      "version": "a87f8f9c282e"
     },
     "qtbase": {
       "src": {
