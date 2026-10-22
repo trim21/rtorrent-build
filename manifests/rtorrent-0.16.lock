@@ -4,10 +4,10 @@
   "packages": {
     "brotli": {
       "src": {
-        "integrity": "sha256:816c96e8e8f193b40151dad7e8ff37b1221d019dbcb9c35cd3fadbfe6477dfec",
-        "url": "https://github.com/google/brotli/archive/refs/tags/v1.2.0.tar.gz"
+        "integrity": "sha256:98d35d11a78dc453aebb7d10c3748f3f73ff78c8267c0dc697b8631f67bf7e8f",
+        "url": "https://github.com/google/brotli/archive/refs/tags/v1.2.1.tar.gz"
       },
-      "version": "1.2.0"
+      "version": "1.2.1"
     },
     "cares": {
       "src": {
@@ -75,10 +75,10 @@
         "lua"
       ],
       "src": {
-        "integrity": "sha256:d9c17e0fae59f0cb7533966f3ed778e9df701ad84d5dd50e9bae2aefe0f00a2a",
-        "url": "https://github.com/rakshasa/rtorrent/releases/download/v0.16.25/rtorrent-0.16.25.tar.gz"
+        "integrity": "sha256:d10811b0678745e5c7b557c4394d54f7fd564d37cbdeb236d0e2f63a0f72918b",
+        "url": "https://github.com/rakshasa/rtorrent/releases/download/v0.16.26/rtorrent-0.16.26.tar.gz"
       },
-      "version": "0.16.25"
+      "version": "0.16.26"
     },
     "rtorrent-libtorrent": {
       "requires": [
@@ -87,10 +87,10 @@
         "curl"
       ],
       "src": {
-        "integrity": "sha256:6266db1d5575d3b99846a4caad98e4c2a8aa6ad034d8b09e566d610123deb569",
-        "url": "https://github.com/rakshasa/rtorrent/releases/download/v0.16.25/libtorrent-0.16.25.tar.gz"
+        "integrity": "sha256:19da1441ed628117025ff6a5d2035c5e6d81126fc9d442d8b10210df4246420c",
+        "url": "https://github.com/rakshasa/rtorrent/releases/download/v0.16.26/libtorrent-0.16.26.tar.gz"
       },
-      "version": "0.16.25"
+      "version": "0.16.26"
     },
     "zlib": {
       "src": {

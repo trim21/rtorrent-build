@@ -4,10 +4,10 @@
   "packages": {
     "brotli": {
       "src": {
-        "integrity": "sha256:816c96e8e8f193b40151dad7e8ff37b1221d019dbcb9c35cd3fadbfe6477dfec",
-        "url": "https://github.com/google/brotli/archive/refs/tags/v1.2.0.tar.gz"
+        "integrity": "sha256:98d35d11a78dc453aebb7d10c3748f3f73ff78c8267c0dc697b8631f67bf7e8f",
+        "url": "https://github.com/google/brotli/archive/refs/tags/v1.2.1.tar.gz"
       },
-      "version": "1.2.0"
+      "version": "1.2.1"
     },
     "cares": {
       "src": {
@@ -69,10 +69,10 @@
       ],
       "src": {
         "ref": "master",
-        "sha": "29f705c22ae1a3510e547cd5ded8641af8c0a47a",
+        "sha": "62899bd053c39b70380464e8f64dbcfce92579aa",
         "url": "https://github.com/rakshasa/rtorrent.git"
       },
-      "version": "29f705c22ae1"
+      "version": "62899bd053c3"
     },
     "rtorrent-libtorrent": {
       "is_sha": true,
@@ -83,10 +83,10 @@
       ],
       "src": {
         "ref": "master",
-        "sha": "4742a92472eff6cff914764ec563368cf25564a2",
+        "sha": "21daa3b96a3b8cfe14961545b5115de7ed12da95",
         "url": "https://github.com/rakshasa/libtorrent.git"
       },
-      "version": "4742a92472ef"
+      "version": "21daa3b96a3b"
     },
     "zlib": {
       "src": {

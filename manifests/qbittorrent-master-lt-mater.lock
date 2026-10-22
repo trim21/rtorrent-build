@@ -11,10 +11,10 @@
     },
     "brotli": {
       "src": {
-        "integrity": "sha256:816c96e8e8f193b40151dad7e8ff37b1221d019dbcb9c35cd3fadbfe6477dfec",
-        "url": "https://github.com/google/brotli/archive/refs/tags/v1.2.0.tar.gz"
+        "integrity": "sha256:98d35d11a78dc453aebb7d10c3748f3f73ff78c8267c0dc697b8631f67bf7e8f",
+        "url": "https://github.com/google/brotli/archive/refs/tags/v1.2.1.tar.gz"
       },
-      "version": "1.2.0"
+      "version": "1.2.1"
     },
     "cares": {
       "src": {
@@ -35,10 +35,10 @@
       "is_sha": true,
       "src": {
         "ref": "RC_2_1",
-        "sha": "6b5dca687fa226ec678824eb38de034448becb61",
+        "sha": "ce3c9d08461341d0663b64b7539e38087f92ad63",
         "url": "https://github.com/arvidn/libtorrent.git"
       },
-      "version": "6b5dca687fa2"
+      "version": "ce3c9d084613"
     },
     "nghttp2": {
       "src": {
