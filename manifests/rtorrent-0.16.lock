@@ -63,10 +63,10 @@
     },
     "openssl": {
       "src": {
-        "integrity": "sha256:29cbaaabad1f3b0e8f28274eb8445a1cb0c54af21a6f845882ee018763df7159",
-        "url": "https://github.com/openssl/openssl/archive/refs/tags/openssl-4.0.3.tar.gz"
+        "integrity": "sha256:2a54158eb6861c07cefc92f1a1d68b12d5ecc0883d53c61a092995b221c7d5fe",
+        "url": "https://github.com/openssl/openssl/archive/refs/tags/openssl-4.1.0.tar.gz"
       },
-      "version": "4.0.3"
+      "version": "4.1.0"
     },
     "rtorrent": {
       "requires": [

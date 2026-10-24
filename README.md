@@ -8,7 +8,7 @@ Statically (or glibc only) linked [rtorrent](https://github.com/rakshasa/rtorren
 |---|---|---|
 | `rtorrent-0.16` | 0.16.26 | 2.34 |
 | `rtorrent-0.9.8` | 0.9.8 | 2.17 |
-| `rtorrent-master` | `62899bd053c3` (git) | 2.34 |
+| `rtorrent-master` | `94e33fee9aad` (git) | 2.34 |
 
 
 ### qBittorrent
@@ -28,7 +28,7 @@ Statically (or glibc only) linked [rtorrent](https://github.com/rakshasa/rtorren
 
 | Variant | Version | Glibc Target |
 |---|---|---|
-| `transmission-4` | 4.1.3 | 2.28 |
+| `transmission-4` | 4.1.4 | 2.28 |
 
 
 ## Docker Images

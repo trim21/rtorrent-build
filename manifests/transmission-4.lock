@@ -64,10 +64,10 @@
     "transmission": {
       "cxx_std": "c++17",
       "src": {
-        "integrity": "sha256:ce7d2d8b101f7eb54bc3cf0bc55f52f7ebd4a25fa48e00bdca9a7e0fc02617da",
-        "url": "https://github.com/transmission/transmission/releases/download/4.1.3/transmission-4.1.3.tar.xz"
+        "integrity": "sha256:86e7aa020cdf64826447034bc85f4d3b7c848d8c0891d9dc9b9fddfb2c805d22",
+        "url": "https://github.com/transmission/transmission/releases/download/4.1.4/transmission-4.1.4.tar.xz"
       },
-      "version": "4.1.3"
+      "version": "4.1.4"
     },
     "zlib": {
       "src": {

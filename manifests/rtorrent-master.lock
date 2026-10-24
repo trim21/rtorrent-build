@@ -56,10 +56,10 @@
     },
     "openssl": {
       "src": {
-        "integrity": "sha256:29cbaaabad1f3b0e8f28274eb8445a1cb0c54af21a6f845882ee018763df7159",
-        "url": "https://github.com/openssl/openssl/archive/refs/tags/openssl-4.0.3.tar.gz"
+        "integrity": "sha256:2a54158eb6861c07cefc92f1a1d68b12d5ecc0883d53c61a092995b221c7d5fe",
+        "url": "https://github.com/openssl/openssl/archive/refs/tags/openssl-4.1.0.tar.gz"
       },
-      "version": "4.0.3"
+      "version": "4.1.0"
     },
     "rtorrent": {
       "is_sha": true,
@@ -69,10 +69,10 @@
       ],
       "src": {
         "ref": "master",
-        "sha": "62899bd053c39b70380464e8f64dbcfce92579aa",
+        "sha": "94e33fee9aad05c0acdfb1f4847675fc0e8d0fad",
         "url": "https://github.com/rakshasa/rtorrent.git"
       },
-      "version": "62899bd053c3"
+      "version": "94e33fee9aad"
     },
     "rtorrent-libtorrent": {
       "is_sha": true,
@@ -83,10 +83,10 @@
       ],
       "src": {
         "ref": "master",
-        "sha": "21daa3b96a3b8cfe14961545b5115de7ed12da95",
+        "sha": "0ed4fc20d4d53de18e6ddd9703c31e60559f70a2",
         "url": "https://github.com/rakshasa/libtorrent.git"
       },
-      "version": "21daa3b96a3b"
+      "version": "0ed4fc20d4d5"
     },
     "zlib": {
       "src": {
