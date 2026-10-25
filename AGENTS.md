@@ -28,8 +28,8 @@ python build.py build manifests/rtorrent-master.jsonc --build-info           # w
 CI: `.github/workflows/build.yaml` — matrix of variants × 2 libc × 3 arch, triggered on push to master, tags (`v*`), PRs, and manual dispatch.
 
 Additional workflows:
-- `.github/workflows/manifest-lock.yaml` — daily uv.lock update + auto-PR for manifest lockfiles
-- `.github/workflows/new-release.yml` — daily check for new rtorrent releases, auto-creates manifest PRs
+- `.github/workflows/manifest-lock.yaml` — weekly lockfile update (Thursday 05:00 UTC+8) + auto-PR for manifest lockfiles
+- `.github/workflows/new-release.yml` — daily check for new rtorrent releases, auto-creates manifest PRs; skipped while the previous release PR is still open
 - `.github/workflows/docker.yaml` — builds and pushes distroless Docker images to ghcr.io
 - `.github/workflows/cleanup-runs.yaml` — cancels stale workflow runs on PR close
 
