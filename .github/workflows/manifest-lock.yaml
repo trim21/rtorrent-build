@@ -2,7 +2,7 @@ name: lock
 
 on:
   schedule:
-    - cron: "8 17 * * *"
+    - cron: "0 21 * * 3" # Thu 05:00 UTC+8
   push:
     branches:
       - master
