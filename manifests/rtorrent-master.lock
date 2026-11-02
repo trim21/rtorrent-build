@@ -49,10 +49,10 @@
     },
     "nghttp2": {
       "src": {
-        "integrity": "sha256:d38d641fb3877b4847c774ad88b5f3ab70daf1ae0e616079bbeec4691186fc6a",
-        "url": "https://github.com/nghttp2/nghttp2/archive/refs/tags/v1.70.0.tar.gz"
+        "integrity": "sha256:81c3702fdaee37145c875cb6d1288698e4f755558341fc85335d9750fb718f33",
+        "url": "https://github.com/nghttp2/nghttp2/archive/refs/tags/v1.71.0.tar.gz"
       },
-      "version": "1.70.0"
+      "version": "1.71.0"
     },
     "openssl": {
       "src": {
@@ -69,10 +69,10 @@
       ],
       "src": {
         "ref": "master",
-        "sha": "cab23f12a4ecf43db046ed813bed3d835416338e",
+        "sha": "b240e020f825a81bd1267ddf3c1cf50258ad2e00",
         "url": "https://github.com/rakshasa/rtorrent.git"
       },
-      "version": "cab23f12a4ec"
+      "version": "b240e020f825"
     },
     "rtorrent-libtorrent": {
       "is_sha": true,
@@ -83,10 +83,10 @@
       ],
       "src": {
         "ref": "master",
-        "sha": "47114f095b3476ed4ccd8dbee6f027f5905adce7",
+        "sha": "b893c6ba41ba15d4471dc552e3968a625c761e34",
         "url": "https://github.com/rakshasa/libtorrent.git"
       },
-      "version": "47114f095b34"
+      "version": "b893c6ba41ba"
     },
     "zlib": {
       "src": {
