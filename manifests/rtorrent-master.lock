@@ -69,10 +69,10 @@
       ],
       "src": {
         "ref": "master",
-        "sha": "b240e020f825a81bd1267ddf3c1cf50258ad2e00",
+        "sha": "065ce64825e15ac8ff7fc9473e17db4ba0f48cd6",
         "url": "https://github.com/rakshasa/rtorrent.git"
       },
-      "version": "b240e020f825"
+      "version": "065ce64825e1"
     },
     "rtorrent-libtorrent": {
       "is_sha": true,
