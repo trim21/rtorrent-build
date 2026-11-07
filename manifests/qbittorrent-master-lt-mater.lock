@@ -59,10 +59,10 @@
       "is_sha": true,
       "src": {
         "ref": "master",
-        "sha": "42f0a9ae6970d1434f3d0207f6a426cec7667635",
+        "sha": "49f26f62859f95bf6482ce576dc57cabc9a3ad29",
         "url": "https://github.com/qbittorrent/qBittorrent.git"
       },
-      "version": "42f0a9ae6970"
+      "version": "49f26f62859f"
     },
     "qtbase": {
       "src": {
