@@ -73,27 +73,20 @@ jobs:
           path: assets/
           key: sources-${{ hashFiles('manifests/*.lock') }}
 
-      - name: Set cache week
-        id: cache-week
-        run: |
-          echo "this_week=$(date +%Y-W%V)" >> $GITHUB_OUTPUT
-          echo "last_week=$(date -d '7 days ago' +%Y-W%V)" >> $GITHUB_OUTPUT
-
       - name: Cache build artifacts (Merkle tree)
         uses: actions/cache@v6
         with:
           path: .rtorrent-cache/
-          key: build-v3-${{ matrix.arch.name }}-${{ matrix.libc }}-${{ matrix.variant }}-${{ steps.cache-week.outputs.this_week }}
+          key: build-v3-${{ matrix.arch.name }}-${{ matrix.libc }}-${{ matrix.variant }}-${{ github.run_id }}
           restore-keys: |
-            build-v3-${{ matrix.arch.name }}-${{ matrix.libc }}-${{ matrix.variant }}-${{ steps.cache-week.outputs.last_week }}
-            build-v3-${{ matrix.arch.name }}-${{ matrix.libc }}-${{ matrix.variant }}
+            build-v3-${{ matrix.arch.name }}-${{ matrix.libc }}-${{ matrix.variant }}-
             build-v3-${{ matrix.arch.name }}-${{ matrix.libc }}
 
       - name: Build ${{ matrix.variant }} (${{ matrix.libc }}/${{ matrix.arch.name }})
         env:
           PYTHONUNBUFFERED: "1"
           RTORRENT_CACHE_DIR: ${{ github.workspace }}/.rtorrent-cache
-        run: python build.py build "manifests/${{ matrix.variant }}.jsonc" --libc "${{ matrix.libc }}" --arch "${{ matrix.arch.flag }}"
+        run: python build.py build "manifests/${{ matrix.variant }}.jsonc" --libc "${{ matrix.libc }}" --arch "${{ matrix.arch.flag }}" --cache-gc
 
       - name: Upload artifact
         uses: actions/upload-artifact@v7
