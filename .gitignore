@@ -12,3 +12,4 @@ assets/
 .cache/
 .envrc
 .task/
+.build.lock

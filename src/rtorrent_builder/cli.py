@@ -25,6 +25,7 @@ from .manifest import (
     _raw_manifest_adapter,
 )
 from .run import CmdError
+from .utils import BuildBusyError, exclusive_build
 
 _VERSIONED_GLIBC_RE = re.compile(r"glibc(\d+\.\d+)")
 
@@ -230,22 +231,25 @@ def build(
         resolved = load_resolved_manifest(manifest_path)
 
         try:
-            output_bin = build_rtorrent(
-                variant=variant,
-                manifest=resolved,
-                work_dir=variant_work,
-                output_dir=output_dir,
-                no_cache=no_cache,
-                cache_gc=cache_gc,
-                options=options,
-                libc=resolved_libc,
-                arch=Arch(arch),
-                docker_target_glibc=glibc_override,
-                debug=debug,
-                cache_dir=cache_dir,
-                jobs=jobs,
-                nproc=nproc,
-            )
+            with exclusive_build(PROJECT_ROOT / ".build.lock"):
+                output_bin = build_rtorrent(
+                    variant=variant,
+                    manifest=resolved,
+                    work_dir=variant_work,
+                    output_dir=output_dir,
+                    no_cache=no_cache,
+                    cache_gc=cache_gc,
+                    options=options,
+                    libc=resolved_libc,
+                    arch=Arch(arch),
+                    docker_target_glibc=glibc_override,
+                    debug=debug,
+                    cache_dir=cache_dir,
+                    jobs=jobs,
+                    nproc=nproc,
+                )
+        except BuildBusyError as e:
+            raise SystemExit(str(e)) from None
         except CmdError as e:
             log_path = variant_work / "logs"
             if e.output:

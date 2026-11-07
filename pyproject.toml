@@ -16,6 +16,7 @@ dependencies = [
   "tqdm>=4.67.0",
   "packaging>=24.0",
   "pyyaml>=6.0",
+  "filelock>=4.2.9",
 ]
 
 [project.scripts]
@@ -54,6 +55,7 @@ venv = ".venv"
 include = ["src"]
 reportMissingTypeStubs = false
 reportUnknownMemberType = false
+reportDeprecated = "error"
 
 [dependency-groups]
 dev = [
