@@ -1,9 +1,11 @@
+from typing import ClassVar
+
 from ..utils import replace_in_file
 from ._cmake import CMakeBuilder
 
 
 class BrotliBuilder(CMakeBuilder):
-    default_deps: list[str] = []
+    default_deps: ClassVar[list[str]] = []
 
     def cmake_args(self) -> list[str]:
         return [

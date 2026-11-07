@@ -38,6 +38,7 @@ select = [
   "B",
   "C4",
   "SIM",
+  "RUF",
 ]
 extend-ignore = ['SIM108']
 

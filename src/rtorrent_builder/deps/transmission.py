@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+from typing import ClassVar
+
 from ._cmake import CMakeBuilder
 
 
 class TransmissionBuilder(CMakeBuilder):
-    default_deps: list[str] = ["openssl", "curl", "libdeflate"]
+    default_deps: ClassVar[list[str]] = ["openssl", "curl", "libdeflate"]
 
     def cmake_args(self) -> list[str]:
         return [

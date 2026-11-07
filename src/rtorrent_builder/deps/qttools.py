@@ -1,8 +1,10 @@
+from typing import ClassVar
+
 from ._cmake import CMakeBuilder
 
 
 class QtToolsBuilder(CMakeBuilder):
-    default_deps: list[str] = ["qtbase"]
+    default_deps: ClassVar[list[str]] = ["qtbase"]
 
     def cmake_args(self) -> list[str]:
         return [

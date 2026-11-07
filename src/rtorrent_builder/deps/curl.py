@@ -1,10 +1,12 @@
+from typing import ClassVar
+
 from ..utils import conditional_args
 from ._cmake import CMakeBuilder
 
 
 class CurlBuilder(CMakeBuilder):
-    features = {"idn2": ["libidn2"]}
-    default_deps: list[str] = ["zlib", "openssl", "brotli", "cares", "zstd", "nghttp2"]
+    features: ClassVar[dict[str, list[str]]] = {"idn2": ["libidn2"]}
+    default_deps: ClassVar[list[str]] = ["zlib", "openssl", "brotli", "cares", "zstd", "nghttp2"]
 
     def cmake_args(self) -> list[str]:
         tc = self.tc

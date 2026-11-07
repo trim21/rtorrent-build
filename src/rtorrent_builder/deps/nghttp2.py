@@ -1,8 +1,10 @@
+from typing import ClassVar
+
 from ._cmake import CMakeBuilder
 
 
 class Nghttp2Builder(CMakeBuilder):
-    default_deps: list[str] = ["zlib"]
+    default_deps: ClassVar[list[str]] = ["zlib"]
 
     def cmake_args(self) -> list[str]:
         return [

@@ -1,11 +1,14 @@
+from typing import ClassVar
+
 from ._make import MakeBuilder
 
 
 class NcursesBuilder(MakeBuilder):
-    default_deps: list[str] = []
+    default_deps: ClassVar[list[str]] = []
 
     def cache_key_extra(self) -> list[str]:
-        return super().cache_key_extra() + [
+        return [
+            *super().cache_key_extra(),
             "--enable-static",
             "--disable-shared",
             "--with-termlib",
