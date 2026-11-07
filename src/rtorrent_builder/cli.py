@@ -6,7 +6,7 @@ import re
 import subprocess
 import sys
 import time
-from enum import Enum
+from dataclasses import dataclass
 from pathlib import Path
 
 import click
@@ -26,13 +26,42 @@ from .manifest import (
 )
 from .run import CmdError
 
+_VERSIONED_GLIBC_RE = re.compile(r"glibc(\d+\.\d+)")
 
-class CliLibc(Enum):
-    """Extended libc choices for CLI including 'current'."""
 
-    glibc = Libc.glibc.value
-    musl = Libc.musl.value
-    current = "current"
+@dataclass(frozen=True)
+class LibcTarget:
+    """Parsed ``--libc`` value."""
+
+    libc: Libc
+    glibc_version: str | None = None
+    host: bool = False
+
+
+class LibcType(click.ParamType):
+    name = "libc"
+
+    def convert(
+        self, value: str, param: click.Parameter | None, ctx: click.Context | None
+    ) -> LibcTarget:
+        if value == "current":
+            return LibcTarget(Libc.glibc, host=True)
+        if value == Libc.musl.value:
+            return LibcTarget(Libc.musl)
+        if value == Libc.glibc.value:
+            return LibcTarget(Libc.glibc)
+        match = _VERSIONED_GLIBC_RE.fullmatch(value)
+        if match:
+            return LibcTarget(Libc.glibc, glibc_version=match.group(1))
+        self.fail(
+            f"{value!r} is not one of {Libc.glibc.value}, {Libc.glibc.value}<X.Y>, "
+            f"{Libc.musl.value}, current",
+            param,
+            ctx,
+        )
+
+
+_LIBC = LibcType()
 
 
 _MANIFESTS_DIR = PROJECT_ROOT / "manifests"
@@ -92,11 +121,15 @@ def main() -> None:
 )
 @click.option(
     "--libc",
-    type=click.Choice([e.value for e in CliLibc]),
-    default=CliLibc.glibc.value,
+    type=_LIBC,
+    default=Libc.glibc.value,
     show_default=True,
     envvar="RTORRENT_BUILD_LIBC",
-    help="Target libc: glibc (dynamic), musl (fully static), current (host glibc)",
+    help=(
+        "Target libc: glibc (lowest glibc version the app supports, from the manifest), "
+        "glibc<X.Y> (explicit glibc version, e.g. glibc2.41), "
+        "musl (fully static), current (host glibc)"
+    ),
 )
 @click.option(
     "--arch",
@@ -156,7 +189,7 @@ def build(
     no_cache: bool,
     cache_gc: bool,
     disguise: bool,
-    libc: str,
+    libc: LibcTarget,
     arch: str,
     build_docker: bool,
     build_info: Path | None,
@@ -173,18 +206,20 @@ def build(
         options["rtorrent.disguise"] = "1"
         options["rtorrent-libtorrent.disguise"] = "1"
 
-    libc_enum = CliLibc(libc)
-    if libc_enum == CliLibc.current and build_docker:
-        raise click.BadParameter("--libc current cannot be used with --docker")
-    glibc_override: str | None = None
-    if libc_enum == CliLibc.current:
-        resolved_libc = Libc.glibc
-        glibc_override = _detect_host_glibc()
-        print(f"Detected host glibc version: {glibc_override}")
-    else:
-        resolved_libc = Libc(libc_enum.value)
+    if libc.host:
         if build_docker:
-            glibc_override = DISTROLESS_GLIBC_VERSION
+            raise click.BadParameter("--libc current cannot be used with --docker")
+        glibc_override: str | None = _detect_host_glibc()
+        print(f"Detected host glibc version: {glibc_override}")
+    elif libc.glibc_version is not None:
+        if build_docker:
+            raise click.BadParameter("--libc glibc<X.Y> cannot be used with --docker")
+        glibc_override = libc.glibc_version
+    elif build_docker:
+        glibc_override = DISTROLESS_GLIBC_VERSION
+    else:
+        glibc_override = None
+    resolved_libc = libc.libc
 
     for manifest_path in manifest:
         variant = manifest_path.stem

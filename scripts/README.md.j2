@@ -48,7 +48,7 @@ python build.py build manifests/rtorrent-master.jsonc
 
 | Option | Values | Description |
 |---|---|---|
-| `--libc` | `glibc` (default), `musl`, `current` | glibc dynamic link / musl fully static / host glibc |
+| `--libc` | `glibc` (default), `glibc<X.Y>` (e.g. `glibc2.41`), `musl`, `current` | lowest glibc version the app supports (from manifest) / explicit glibc version / musl fully static / host glibc |
 | `--arch` | `amd/v1` (default), `amd/v2`, `amd/v3`, `amd/v4`, `native` | x86-64 microarchitecture level |
 | `--docker` | — | Build distroless Docker image |
 | `--disguise` | — | Spoof rtorrent/0.9.8 User-Agent |

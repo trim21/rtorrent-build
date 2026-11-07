@@ -34,6 +34,13 @@ jobs:
             libc: musl
           - variant: qbittorrent-5.1-lt2
             libc: musl
+        include:
+          - variant: qbittorrent-5.2-lt2
+            libc: glibc2.41
+            arch: { flag: amd/v3, name: amd.v3 }
+          - variant: qbittorrent-5.2-lt2
+            libc: glibc2.41
+            arch: { flag: amd/v4, name: amd.v4 }
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
