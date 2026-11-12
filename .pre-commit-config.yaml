@@ -25,6 +25,6 @@ repos:
       - id: ruff-format
 
   - repo: https://github.com/trim21/dprint-pre-commit
-    rev: "v0.51.1.0"
+    rev: "v0.64.3.0"
     hooks:
       - id: dprint
