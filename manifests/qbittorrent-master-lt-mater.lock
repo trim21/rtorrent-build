@@ -1,6 +1,6 @@
 {
   "executable_package": "qbittorrent",
-  "manifest_hash": "7ed5d1f241aa825766d637a2a1cc9893bb806ae8563b788eaf70b2eddbf8de43",
+  "manifest_hash": "fb39cac95dd2888ec2011bd11b5e2659f2d2a423169005db48679414996a5a6b",
   "packages": {
     "boost": {
       "src": {

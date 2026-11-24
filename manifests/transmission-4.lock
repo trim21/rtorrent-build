@@ -1,6 +1,6 @@
 {
   "executable_package": "transmission",
-  "manifest_hash": "99d285d1c881a9391baf2ed238fed0dbb13f7e61603b5817d388a2ade307265d",
+  "manifest_hash": "50fd02211485953a7407085a47280b28c7c89d71d931c69e641d38311d07092e",
   "packages": {
     "brotli": {
       "src": {
@@ -36,14 +36,14 @@
     "libidn2": {
       "src": {
         "integrity": "sha256:f557911bf6171621e1f72ff35f5b1825bb35b52ed45325dcdee931e5d3c0787a",
-        "url": "https://ftp.gnu.org/gnu/libidn/libidn2-2.3.8.tar.gz"
+        "url": "https://ftpmirror.gnu.org/gnu/libidn/libidn2-2.3.8.tar.gz"
       },
       "version": "2.3.8"
     },
     "libunistring": {
       "src": {
         "integrity": "sha256:f7e39ddeca18858ecdd02c60d1d5374fcdcbbcdb6b68a391f8497cb1cb2cf3f7",
-        "url": "https://ftp.gnu.org/gnu/libunistring/libunistring-1.4.tar.gz"
+        "url": "https://ftpmirror.gnu.org/gnu/libunistring/libunistring-1.4.tar.gz"
       },
       "version": "1.4"
     },

@@ -8,7 +8,10 @@ import httpx
 from tqdm import tqdm
 
 MAX_RETRIES = 5
-RETRY_DELAY = 3
+RETRY_BASE_DELAY = 3
+RETRY_MAX_DELAY = 60
+
+TIMEOUT = httpx.Timeout(connect=15.0, read=60.0, write=30.0, pool=15.0)
 
 
 def download_file(url: str, dest: Path, desc: str = "", integrity: str = "") -> None:
@@ -16,7 +19,9 @@ def download_file(url: str, dest: Path, desc: str = "", integrity: str = "") -> 
 
     Downloads to a ``.part`` temp file first, then atomically renames to
     *dest* on success so an interrupted download is never mistaken for
-    a complete one. Retries up to 5 times on failure.
+    a complete one. Retries up to 5 times on failure, backing off
+    exponentially (3s, 6s, 12s, 24s) so a briefly unreachable host has
+    time to recover.
 
     When *integrity* (format: 'sha256:<hex>') is given, the file is verified
     against it before being accepted: a cached *dest* that fails the check is
@@ -43,7 +48,7 @@ def download_file(url: str, dest: Path, desc: str = "", integrity: str = "") -> 
     for attempt in range(1, MAX_RETRIES + 1):
         try:
             print(f"Downloading {desc} from {url} (attempt {attempt}/{MAX_RETRIES})")
-            with httpx.stream("GET", url, follow_redirects=True) as response:
+            with httpx.stream("GET", url, follow_redirects=True, timeout=TIMEOUT) as response:
                 response.raise_for_status()
                 total = int(response.headers.get("content-length", 0))
                 with (
@@ -71,11 +76,12 @@ def download_file(url: str, dest: Path, desc: str = "", integrity: str = "") -> 
             if part.exists():
                 part.unlink()
             if attempt < MAX_RETRIES:
+                delay = min(RETRY_BASE_DELAY * 2 ** (attempt - 1), RETRY_MAX_DELAY)
                 print(
                     f"Download failed (attempt {attempt}/{MAX_RETRIES}): "
-                    f"{exc}, retrying in {RETRY_DELAY}s..."
+                    f"{exc}, retrying in {delay}s..."
                 )
-                time.sleep(RETRY_DELAY)
+                time.sleep(delay)
             else:
                 print(f"Download failed after {MAX_RETRIES} attempts: {exc}")
     raise RuntimeError(f"Failed to download {url} after {MAX_RETRIES} attempts") from last_exc
