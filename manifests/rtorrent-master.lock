@@ -69,10 +69,10 @@
       ],
       "src": {
         "ref": "master",
-        "sha": "f6d1bcae47f676c0f227c7662b3741a9516e6734",
+        "sha": "5761e7dad23e563b9e81dca6a0574683da89ce74",
         "url": "https://github.com/rakshasa/rtorrent.git"
       },
-      "version": "f6d1bcae47f6"
+      "version": "5761e7dad23e"
     },
     "rtorrent-libtorrent": {
       "is_sha": true,
@@ -83,10 +83,10 @@
       ],
       "src": {
         "ref": "master",
-        "sha": "fcc021385d611c0701a96d9f29a966a47f3520aa",
+        "sha": "263efd79c18c2430fc9c854b9d740af461c35b17",
         "url": "https://github.com/rakshasa/libtorrent.git"
       },
-      "version": "fcc021385d61"
+      "version": "263efd79c18c"
     },
     "zlib": {
       "src": {
@@ -97,10 +97,10 @@
     },
     "zstd": {
       "src": {
-        "integrity": "sha256:37d7284556b20954e56e1ca85b80226768902e2edabd3b649e9e72c0c9012ee3",
-        "url": "https://github.com/facebook/zstd/archive/refs/tags/v1.5.7.tar.gz"
+        "integrity": "sha256:289bb207935e5b4f241239f9832e665fa6b9636c3f87f479e125371e13842b8e",
+        "url": "https://github.com/facebook/zstd/archive/refs/tags/v1.6.0.tar.gz"
       },
-      "version": "1.5.7"
+      "version": "1.6.0"
     }
   },
   "target_glibc": "2.34",

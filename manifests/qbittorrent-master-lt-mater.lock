@@ -35,10 +35,10 @@
       "is_sha": true,
       "src": {
         "ref": "RC_2_1",
-        "sha": "a53f32a8e65d74f1f9730e32dbed7a68c9573dc9",
+        "sha": "8674dbba0e1d9bfd5e701edd8c92680c625dac81",
         "url": "https://github.com/arvidn/libtorrent.git"
       },
-      "version": "a53f32a8e65d"
+      "version": "8674dbba0e1d"
     },
     "nghttp2": {
       "src": {
@@ -59,10 +59,10 @@
       "is_sha": true,
       "src": {
         "ref": "master",
-        "sha": "d9aae7f7a4f696274e03c735e2c5869da1ea0bf7",
+        "sha": "e6b69eb4b532146b34177b405734d36ff7624762",
         "url": "https://github.com/qbittorrent/qBittorrent.git"
       },
-      "version": "d9aae7f7a4f6"
+      "version": "e6b69eb4b532"
     },
     "qtbase": {
       "src": {
@@ -87,10 +87,10 @@
     },
     "zstd": {
       "src": {
-        "integrity": "sha256:37d7284556b20954e56e1ca85b80226768902e2edabd3b649e9e72c0c9012ee3",
-        "url": "https://github.com/facebook/zstd/archive/refs/tags/v1.5.7.tar.gz"
+        "integrity": "sha256:289bb207935e5b4f241239f9832e665fa6b9636c3f87f479e125371e13842b8e",
+        "url": "https://github.com/facebook/zstd/archive/refs/tags/v1.6.0.tar.gz"
       },
-      "version": "1.5.7"
+      "version": "1.6.0"
     }
   },
   "target_glibc": "2.34",
