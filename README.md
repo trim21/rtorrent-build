@@ -6,9 +6,9 @@ Statically (or glibc only) linked [rtorrent](https://github.com/rakshasa/rtorren
 
 | Variant | Version | Glibc Target |
 |---|---|---|
-| `rtorrent-0.16` | 0.16.27 | 2.34 |
+| `rtorrent-0.16` | 0.16.28 | 2.34 |
 | `rtorrent-0.9.8` | 0.9.8 | 2.17 |
-| `rtorrent-master` | `6ad34d37b128` (git) | 2.34 |
+| `rtorrent-master` | `f6d1bcae47f6` (git) | 2.34 |
 
 
 ### qBittorrent
@@ -21,7 +21,7 @@ Statically (or glibc only) linked [rtorrent](https://github.com/rakshasa/rtorren
 | `qbittorrent-5.2-lt2` | 5.2.4 | 2.34 |
 | `qbittorrent-5.3-lt1` | 5.3.0 | 2.34 |
 | `qbittorrent-5.3-lt2` | 5.3.0 | 2.34 |
-| `qbittorrent-master-lt-mater` | `42f0a9ae6970` (git) | 2.34 |
+| `qbittorrent-master-lt-mater` | `d9aae7f7a4f6` (git) | 2.34 |
 
 
 ### Transmission
@@ -45,10 +45,10 @@ All images are based on `gcr.io/distroless/cc-debian13` (glibc 2.40) and include
 |---|---|
 | `0.amd.v1` | x86_64-v1 |
 | `0.16.amd.v1` | x86_64-v1 |
-| `0.16.27.amd.v1` | x86_64-v1 |
+| `0.16.28.amd.v1` | x86_64-v1 |
 | `0.amd.v3` | x86_64-v3 |
 | `0.16.amd.v3` | x86_64-v3 |
-| `0.16.27.amd.v3` | x86_64-v3 |
+| `0.16.28.amd.v3` | x86_64-v3 |
 
 
 #### rtorrent 0.9.8
