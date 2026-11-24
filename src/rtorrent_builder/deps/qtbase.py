@@ -10,6 +10,8 @@ from ._cmake import CMakeBuilder
 
 class QtBaseBuilder(CMakeBuilder):
     default_deps: ClassVar[list[str]] = ["zlib", "openssl", "zstd", "brotli"]
+    builds_host_tools: ClassVar[bool] = True
+    uses_host_tools: ClassVar[bool] = True
 
     def cmake_args(self) -> list[str]:
         args = [
@@ -23,12 +25,6 @@ class QtBaseBuilder(CMakeBuilder):
             "-DFEATURE_dbus=OFF",
             "-DFEATURE_icu=OFF",
             "-DFEATURE_glib=OFF",
-            "-DFEATURE_system_zlib=ON",
-            f"-DZLIB_ROOT={self.tc.dep_prefix('zlib')}",
-            "-DFEATURE_openssl=ON",
-            "-DFEATURE_openssl_linked=ON",
-            "-DINPUT_openssl=linked",
-            f"-DOPENSSL_ROOT_DIR={self.tc.dep_prefix('openssl')}",
             "-DFEATURE_system_openjpeg=OFF",
             "-DFEATURE_system_jpeg=OFF",
             "-DFEATURE_system_png=OFF",
@@ -36,8 +32,27 @@ class QtBaseBuilder(CMakeBuilder):
             "-DFEATURE_system_pcre2=OFF",
             "-DFEATURE_system_doubleconversion=OFF",
             "-DFEATURE_system_textmarkdown=OFF",
-            "-DFEATURE_brotli=ON",
         ]
+        if self.tc.host_tools:
+            # Host tools only have to run on the build machine, so keep them free of
+            # external dependencies: those would be target-arch archives that the
+            # v4-built tools would then execute on a possibly older CPU.
+            args += [
+                "-DFEATURE_system_zlib=OFF",
+                "-DFEATURE_openssl=OFF",
+                "-DFEATURE_brotli=OFF",
+                "-DFEATURE_zstd=OFF",
+            ]
+        else:
+            args += [
+                "-DFEATURE_system_zlib=ON",
+                f"-DZLIB_ROOT={self.tc.dep_prefix('zlib')}",
+                "-DFEATURE_openssl=ON",
+                "-DFEATURE_openssl_linked=ON",
+                "-DINPUT_openssl=linked",
+                f"-DOPENSSL_ROOT_DIR={self.tc.dep_prefix('openssl')}",
+                "-DFEATURE_brotli=ON",
+            ]
         if not matches(self.lib.version, ">=6.10"):
             args.append("-DFEATURE_reduce_relocations=ON")
         return args

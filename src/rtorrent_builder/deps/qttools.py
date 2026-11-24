@@ -5,6 +5,8 @@ from ._cmake import CMakeBuilder
 
 class QtToolsBuilder(CMakeBuilder):
     default_deps: ClassVar[list[str]] = ["qtbase"]
+    builds_host_tools: ClassVar[bool] = True
+    uses_host_tools: ClassVar[bool] = True
 
     def cmake_args(self) -> list[str]:
         return [

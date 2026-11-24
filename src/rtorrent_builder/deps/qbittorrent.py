@@ -10,6 +10,7 @@ from ._cmake import CMakeBuilder
 
 class QbittorrentBuilder(CMakeBuilder):
     no_lto = True
+    uses_host_tools: ClassVar[bool] = True
 
     default_deps: ClassVar[list[str]] = [
         "zlib",

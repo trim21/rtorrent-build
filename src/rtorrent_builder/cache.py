@@ -232,13 +232,14 @@ class CacheStore:
             _print_diff(current_payload, stored)
         print(f"--- End cache miss diagnosis for {name} ---\n", file=sys.stderr)
 
-    def gc(self, current_packages: dict[str, str]) -> int:
+    def gc(self, current_packages: dict[str, set[str]]) -> int:
         """Remove cached archives not referenced by *current_packages*.
 
-        *current_packages* is a mapping of ``{name: merkle_hash}`` for the
-        current build.  Archives and metadata for other hashes (within each
-        package directory) are removed.  Empty package directories are
-        also removed.
+        *current_packages* maps a package name to every merkle hash kept for it
+        in the current build (a package can be built more than once, e.g. the Qt
+        host tools alongside the target build).  Archives and metadata for other
+        hashes (within each package directory) are removed.  Empty package
+        directories are also removed.
         """
         removed = 0
 
@@ -255,11 +256,11 @@ class CacheStore:
                 continue
 
             pkg_dir = entry
-            current_key = current_packages.get(pkg_dir.name)
+            current_keys = current_packages.get(pkg_dir.name, set())
 
             for f in sorted(pkg_dir.glob(f"*{CACHE_EXT}")):
                 key = f.stem
-                if current_key is not None and key == current_key:
+                if key in current_keys:
                     continue
                 print(f"Cache GC: removing stale {f}")
                 f.unlink()
@@ -270,7 +271,7 @@ class CacheStore:
 
             for m in sorted(pkg_dir.glob("*.json")):
                 key = m.stem
-                if current_key is not None and key == current_key:
+                if key in current_keys:
                     continue
                 m.unlink()
 
