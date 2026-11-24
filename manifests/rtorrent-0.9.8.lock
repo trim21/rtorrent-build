@@ -1,6 +1,6 @@
 {
   "executable_package": "rtorrent",
-  "manifest_hash": "4246b0ccc0dad3ed8ebf4dad644e5ae4ee95b75e44d7d4c14dab100b1a2e6e92",
+  "manifest_hash": "5d9df8d42e4f3cefdd51d4cdc65b9adaefb1948aed28eaf86e84b97b816ae477",
   "packages": {
     "brotli": {
       "src": {
@@ -29,21 +29,21 @@
     "libidn2": {
       "src": {
         "integrity": "sha256:f557911bf6171621e1f72ff35f5b1825bb35b52ed45325dcdee931e5d3c0787a",
-        "url": "https://ftp.gnu.org/gnu/libidn/libidn2-2.3.8.tar.gz"
+        "url": "https://ftpmirror.gnu.org/gnu/libidn/libidn2-2.3.8.tar.gz"
       },
       "version": "2.3.8"
     },
     "libunistring": {
       "src": {
         "integrity": "sha256:f7e39ddeca18858ecdd02c60d1d5374fcdcbbcdb6b68a391f8497cb1cb2cf3f7",
-        "url": "https://ftp.gnu.org/gnu/libunistring/libunistring-1.4.tar.gz"
+        "url": "https://ftpmirror.gnu.org/gnu/libunistring/libunistring-1.4.tar.gz"
       },
       "version": "1.4"
     },
     "ncurses": {
       "src": {
         "integrity": "sha256:355b4cbbed880b0381a04c46617b7656e362585d52e9cf84a67e2009b749ff11",
-        "url": "https://ftp.gnu.org/pub/gnu/ncurses/ncurses-6.6.tar.gz"
+        "url": "https://ftpmirror.gnu.org/gnu/ncurses/ncurses-6.6.tar.gz"
       },
       "version": "6.6"
     },

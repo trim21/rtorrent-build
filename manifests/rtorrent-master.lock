@@ -1,6 +1,6 @@
 {
   "executable_package": "rtorrent",
-  "manifest_hash": "f6431a8800e8eb051eb3aa098e656a4a76bd1968c5bad6021dd86a952994e0bb",
+  "manifest_hash": "296508f261973b112ba7ebf0fdd2c60cc59a6e1a2fc17a83933bd19da9b0e683",
   "packages": {
     "brotli": {
       "src": {
@@ -29,14 +29,14 @@
     "libidn2": {
       "src": {
         "integrity": "sha256:f557911bf6171621e1f72ff35f5b1825bb35b52ed45325dcdee931e5d3c0787a",
-        "url": "https://ftp.gnu.org/gnu/libidn/libidn2-2.3.8.tar.gz"
+        "url": "https://ftpmirror.gnu.org/gnu/libidn/libidn2-2.3.8.tar.gz"
       },
       "version": "2.3.8"
     },
     "libunistring": {
       "src": {
         "integrity": "sha256:f7e39ddeca18858ecdd02c60d1d5374fcdcbbcdb6b68a391f8497cb1cb2cf3f7",
-        "url": "https://ftp.gnu.org/gnu/libunistring/libunistring-1.4.tar.gz"
+        "url": "https://ftpmirror.gnu.org/gnu/libunistring/libunistring-1.4.tar.gz"
       },
       "version": "1.4"
     },

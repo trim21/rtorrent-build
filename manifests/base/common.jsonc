@@ -28,7 +28,7 @@
     },
     "ncurses": {
       "source": {
-        "url": "https://ftp.gnu.org/pub/gnu/ncurses/ncurses-6.6.tar.gz"
+        "url": "https://ftpmirror.gnu.org/gnu/ncurses/ncurses-6.6.tar.gz"
       },
       "version": "6.6"
     },
@@ -52,7 +52,7 @@
     },
     "libunistring": {
       "source": {
-        "url": "https://ftp.gnu.org/gnu/libunistring/libunistring-1.4.tar.gz"
+        "url": "https://ftpmirror.gnu.org/gnu/libunistring/libunistring-1.4.tar.gz"
       },
       "version": "1.4"
     },
@@ -60,7 +60,7 @@
       "source": {
         "github": "libidn/libidn2",
         "tag_range": ">=2,<3",
-        "url_template": "https://ftp.gnu.org/gnu/libidn/libidn2-{version}.tar.gz"
+        "url_template": "https://ftpmirror.gnu.org/gnu/libidn/libidn2-{version}.tar.gz"
       }
     },
     "lua": {
