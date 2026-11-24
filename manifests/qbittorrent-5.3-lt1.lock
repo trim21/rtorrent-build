@@ -55,24 +55,24 @@
     "qbittorrent": {
       "cxx_std": "c++20",
       "src": {
-        "integrity": "sha256:dcb5273496117ebf264fc1fc7936de8707374f07dcee0805228ac5adb403a465",
-        "url": "https://github.com/qbittorrent/qBittorrent/archive/refs/tags/release-5.3.0.tar.gz"
+        "integrity": "sha256:5b97c28f890a86788288cbcdf2b1f587e4804c8383f97e0f7aa8c5f2f4e2af68",
+        "url": "https://github.com/qbittorrent/qBittorrent/archive/refs/tags/release-5.3.1.tar.gz"
       },
-      "version": "5.3.0"
+      "version": "5.3.1"
     },
     "qtbase": {
       "src": {
-        "integrity": "sha256:a951bd163c7b80fc6b8c88d7668fb56abf91c152373e13c10666763238131307",
-        "url": "https://download.qt.io/archive/qt/6.12/6.12.0/submodules/qtbase-everywhere-src-6.12.0.tar.xz"
+        "integrity": "sha256:cd837bb9fd631e20439a04eaa0c2f252f19ad92fdf5adf10229d0fbc2fab2d53",
+        "url": "https://download.qt.io/archive/qt/6.12/6.12.1/submodules/qtbase-everywhere-src-6.12.1.tar.xz"
       },
-      "version": "6.12.0"
+      "version": "6.12.1"
     },
     "qttools": {
       "src": {
-        "integrity": "sha256:8dab8f3611496486a470ad5f115ceea584f36bc22a2b8b6f6ebdbafbb8160693",
-        "url": "https://download.qt.io/archive/qt/6.12/6.12.0/submodules/qttools-everywhere-src-6.12.0.tar.xz"
+        "integrity": "sha256:0d3d1a7eba32d1477f36211fb527c2c75f60cb10f3ddc41fdb804fd94147b640",
+        "url": "https://download.qt.io/archive/qt/6.12/6.12.1/submodules/qttools-everywhere-src-6.12.1.tar.xz"
       },
-      "version": "6.12.0"
+      "version": "6.12.1"
     },
     "zlib": {
       "src": {
@@ -83,10 +83,10 @@
     },
     "zstd": {
       "src": {
-        "integrity": "sha256:37d7284556b20954e56e1ca85b80226768902e2edabd3b649e9e72c0c9012ee3",
-        "url": "https://github.com/facebook/zstd/archive/refs/tags/v1.5.7.tar.gz"
+        "integrity": "sha256:289bb207935e5b4f241239f9832e665fa6b9636c3f87f479e125371e13842b8e",
+        "url": "https://github.com/facebook/zstd/archive/refs/tags/v1.6.0.tar.gz"
       },
-      "version": "1.5.7"
+      "version": "1.6.0"
     }
   },
   "target_glibc": "2.34",

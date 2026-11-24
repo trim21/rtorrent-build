@@ -33,10 +33,10 @@
     "libtorrent-rasterbar": {
       "cxx_std": "c++17",
       "src": {
-        "integrity": "sha256:5e2e79129823b7ea48721164c32b5aaf83d3fd733b5502100f6705b29f27bb02",
-        "url": "https://github.com/arvidn/libtorrent/releases/download/v2.0.15/libtorrent-rasterbar-2.0.15.tar.gz"
+        "integrity": "sha256:8463b8d786141c3923dbf54ab34e5c3312af9913b591239cb0e30f66ead34b9b",
+        "url": "https://github.com/arvidn/libtorrent/releases/download/v2.0.16/libtorrent-rasterbar-2.0.16.tar.gz"
       },
-      "version": "2.0.15"
+      "version": "2.0.16"
     },
     "nghttp2": {
       "src": {
@@ -83,10 +83,10 @@
     },
     "zstd": {
       "src": {
-        "integrity": "sha256:37d7284556b20954e56e1ca85b80226768902e2edabd3b649e9e72c0c9012ee3",
-        "url": "https://github.com/facebook/zstd/archive/refs/tags/v1.5.7.tar.gz"
+        "integrity": "sha256:289bb207935e5b4f241239f9832e665fa6b9636c3f87f479e125371e13842b8e",
+        "url": "https://github.com/facebook/zstd/archive/refs/tags/v1.6.0.tar.gz"
       },
-      "version": "1.5.7"
+      "version": "1.6.0"
     }
   },
   "target_glibc": "2.34",
