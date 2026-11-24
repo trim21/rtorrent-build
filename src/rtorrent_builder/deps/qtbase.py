@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 
+from typing import ClassVar
+
 from ..version_range import matches
 from ._cmake import CMakeBuilder
 
 
 class QtBaseBuilder(CMakeBuilder):
-    default_deps: list[str] = ["zlib", "openssl", "zstd", "brotli"]
+    default_deps: ClassVar[list[str]] = ["zlib", "openssl", "zstd", "brotli"]
 
     def cmake_args(self) -> list[str]:
         args = [

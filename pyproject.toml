@@ -16,6 +16,7 @@ dependencies = [
   "tqdm>=4.67.0",
   "packaging>=24.0",
   "pyyaml>=6.0",
+  "filelock>=4.2.9",
 ]
 
 [project.scripts]
@@ -37,6 +38,7 @@ select = [
   "B",
   "C4",
   "SIM",
+  "RUF",
 ]
 extend-ignore = ['SIM108']
 
@@ -54,6 +56,7 @@ venv = ".venv"
 include = ["src"]
 reportMissingTypeStubs = false
 reportUnknownMemberType = false
+reportDeprecated = "error"
 
 [dependency-groups]
 dev = [

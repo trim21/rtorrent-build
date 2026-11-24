@@ -55,7 +55,7 @@ jobs:
       - uses: actions/checkout@v7
 
       - name: Install Python
-        uses: actions/setup-python@v7.0.0
+        uses: actions/setup-python@v7.1.0
         with:
           python-version: "3.12"
 
@@ -63,7 +63,7 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y autoconf automake libtool
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v10.3.0
+        uses: astral-sh/setup-uv@v10.3.3
         with:
           activate-environment: "true"
 
@@ -76,20 +76,13 @@ jobs:
           path: assets/
           key: docker-sources-${{ hashFiles('manifests/*.lock') }}
 
-      - name: Set cache week
-        id: cache-week
-        run: |
-          echo "this_week=$(date +%Y-W%V)" >> $GITHUB_OUTPUT
-          echo "last_week=$(date -d '7 days ago' +%Y-W%V)" >> $GITHUB_OUTPUT
-
       - name: Cache build artifacts (Merkle tree)
         uses: actions/cache@v6
         with:
           path: .rtorrent-cache/
-          key: docker-v3-a${{ matrix.debug }}-${{ matrix.arch.name }}-${{ matrix.libc }}-${{ matrix.variant }}-b${{ matrix.disguise }}-${{ steps.cache-week.outputs.this_week }}
+          key: docker-v3-a${{ matrix.debug }}-${{ matrix.arch.name }}-${{ matrix.libc }}-${{ matrix.variant }}-b${{ matrix.disguise }}-${{ github.run_id }}
           restore-keys: |
-            docker-v3-a${{ matrix.debug }}-${{ matrix.arch.name }}-${{ matrix.libc }}-${{ matrix.variant }}-b${{ matrix.disguise }}-${{ steps.cache-week.outputs.last_week }}
-            docker-v3-a${{ matrix.debug }}-${{ matrix.arch.name }}-${{ matrix.libc }}-${{ matrix.variant }}-b${{ matrix.disguise }}
+            docker-v3-a${{ matrix.debug }}-${{ matrix.arch.name }}-${{ matrix.libc }}-${{ matrix.variant }}-b${{ matrix.disguise }}-
             docker-v3-a${{ matrix.debug }}-${{ matrix.arch.name }}-${{ matrix.libc }}
 
       - name: Build ${{ matrix.variant }} (${{ matrix.libc }}/${{ matrix.arch.name }})${{ matrix.disguise && ' disguised' || '' }}${{ matrix.debug && ' debug' || '' }}

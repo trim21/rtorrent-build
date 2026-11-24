@@ -1,8 +1,10 @@
+from typing import ClassVar
+
 from ._make import MakeBuilder
 
 
 class Libidn2Builder(MakeBuilder):
-    default_deps: list[str] = ["libunistring"]
+    default_deps: ClassVar[list[str]] = ["libunistring"]
 
     def configure(self) -> None:
         self.commander.run(

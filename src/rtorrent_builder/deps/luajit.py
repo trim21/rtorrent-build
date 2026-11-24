@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+from typing import ClassVar
+
 from ._make import MakeBuilder
 
 
 class LuaJITBuilder(MakeBuilder):
-    default_deps: list[str] = []
+    default_deps: ClassVar[list[str]] = []
 
     def make_args(self) -> list[str]:
         return [

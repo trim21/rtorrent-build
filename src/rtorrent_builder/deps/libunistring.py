@@ -1,8 +1,10 @@
+from typing import ClassVar
+
 from ._make import MakeBuilder
 
 
 class LibunistringBuilder(MakeBuilder):
-    default_deps: list[str] = []
+    default_deps: ClassVar[list[str]] = []
 
     def configure(self) -> None:
         self.commander.run(

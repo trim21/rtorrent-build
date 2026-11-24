@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import ClassVar
+
 from ..utils import replace_in_file
 from ._cmake import CMakeBuilder
 
@@ -9,7 +11,7 @@ from ._cmake import CMakeBuilder
 class QbittorrentBuilder(CMakeBuilder):
     no_lto = True
 
-    default_deps: list[str] = [
+    default_deps: ClassVar[list[str]] = [
         "zlib",
         "openssl",
         "boost",

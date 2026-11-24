@@ -35,17 +35,17 @@
       "is_sha": true,
       "src": {
         "ref": "RC_2_1",
-        "sha": "87b553a1813bb23f77311d0063461b731ba35bdb",
+        "sha": "a53f32a8e65d74f1f9730e32dbed7a68c9573dc9",
         "url": "https://github.com/arvidn/libtorrent.git"
       },
-      "version": "87b553a1813b"
+      "version": "a53f32a8e65d"
     },
     "nghttp2": {
       "src": {
-        "integrity": "sha256:d38d641fb3877b4847c774ad88b5f3ab70daf1ae0e616079bbeec4691186fc6a",
-        "url": "https://github.com/nghttp2/nghttp2/archive/refs/tags/v1.70.0.tar.gz"
+        "integrity": "sha256:81c3702fdaee37145c875cb6d1288698e4f755558341fc85335d9750fb718f33",
+        "url": "https://github.com/nghttp2/nghttp2/archive/refs/tags/v1.71.0.tar.gz"
       },
-      "version": "1.70.0"
+      "version": "1.71.0"
     },
     "openssl": {
       "src": {
@@ -59,10 +59,10 @@
       "is_sha": true,
       "src": {
         "ref": "master",
-        "sha": "408efd104e408a13f192c98dc34ee141fffdc9f6",
+        "sha": "d9aae7f7a4f696274e03c735e2c5869da1ea0bf7",
         "url": "https://github.com/qbittorrent/qBittorrent.git"
       },
-      "version": "408efd104e40"
+      "version": "d9aae7f7a4f6"
     },
     "qtbase": {
       "src": {

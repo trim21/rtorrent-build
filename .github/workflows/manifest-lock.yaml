@@ -18,34 +18,23 @@ jobs:
       - uses: actions/checkout@v7
 
       - name: Install Python
-        uses: actions/setup-python@v7.0.0
+        uses: actions/setup-python@v7.1.0
         with:
           python-version: "3.12"
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v10.3.0
+        uses: astral-sh/setup-uv@v10.3.3
         with:
           activate-environment: "true"
 
       - name: Install dependencies
         run: uv sync --frozen
 
-      - name: Set cache date
-        id: cache-date
-        run: |
-          echo "date=$(date +%Y-%m-%d)" >> $GITHUB_OUTPUT
-          echo "month=$(date +%Y-%m)" >> $GITHUB_OUTPUT
-          echo "year=$(date +%Y)" >> $GITHUB_OUTPUT
-
       - name: Cache downloaded sources
         uses: actions/cache@v6
         with:
           path: assets/
-          key: lock-sources-${{ hashFiles('manifests/*.lock') }}-${{ steps.cache-date.outputs.date }}
-          restore-keys: |
-            lock-sources-${{ hashFiles('manifests/*.lock') }}-${{ steps.cache-date.outputs.month }}
-            lock-sources-${{ hashFiles('manifests/*.lock') }}-${{ steps.cache-date.outputs.year }}
-            lock-sources-${{ hashFiles('manifests/*.lock') }}
+          key: lock-sources-${{ hashFiles('manifests/*.lock') }}
 
       - name: Regenerate lock files
         run: uv run python scripts/lock.py

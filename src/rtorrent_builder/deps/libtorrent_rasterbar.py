@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 
+from typing import ClassVar
+
 from ..utils import conditional_args, replace_in_file
 from ._cmake import CMakeBuilder
 
 
 class LibtorrentRasterbarBuilder(CMakeBuilder):
-    default_deps: list[str] = ["boost", "openssl", "curl"]
+    default_deps: ClassVar[list[str]] = ["boost", "openssl", "curl"]
 
     def cmake_args(self) -> list[str]:
         cxx_std = self.lib.cxx_std.removeprefix("c++") if self.lib.cxx_std else None
@@ -23,9 +25,7 @@ class LibtorrentRasterbarBuilder(CMakeBuilder):
         })
 
     def cache_key_extra(self) -> list[str]:
-        return super().cache_key_extra() + [
-            "patch:CMakeLists.txt:-Weverything+narrowing",
-        ]
+        return [*super().cache_key_extra(), "patch:CMakeLists.txt:-Weverything+narrowing"]
 
     def generate(self) -> None:
         replace_in_file(

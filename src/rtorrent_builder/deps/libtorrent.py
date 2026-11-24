@@ -1,6 +1,7 @@
 """libtorrent builder."""
 
 import re
+from typing import ClassVar
 
 from .._options import LibtorrentOptions
 from ..manifest import LibInfo
@@ -11,7 +12,7 @@ from ..version_range import matches
 
 
 class LibtorrentBuilder(Builder):
-    default_deps: list[str] = ["openssl", "zlib"]
+    default_deps: ClassVar[list[str]] = ["openssl", "zlib"]
 
     def __init__(
         self, toolchain: Toolchain, lib: LibInfo, source: ResolvedSource, commander: Commander

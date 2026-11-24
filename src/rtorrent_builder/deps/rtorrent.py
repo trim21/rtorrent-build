@@ -1,6 +1,7 @@
 """rtorrent builder module."""
 
 import re
+from typing import ClassVar
 
 from .._options import RtorrentOptions
 from ..manifest import LibInfo
@@ -11,7 +12,7 @@ from ..version_range import matches
 
 
 class RtorrentBuilder(Builder):
-    default_deps: list[str] = ["rtorrent-libtorrent"]
+    default_deps: ClassVar[list[str]] = ["rtorrent-libtorrent"]
 
     def __init__(
         self, toolchain: Toolchain, lib: LibInfo, source: ResolvedSource, commander: Commander

@@ -7,7 +7,7 @@ Usage:
     python build.py lock manifests/rtorrent-master.jsonc
 """
 
-from rtorrent_builder.cli import main  # noqa: E402
+from rtorrent_builder.cli import main
 
 if __name__ == "__main__":
     main()
