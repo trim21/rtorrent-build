@@ -12,6 +12,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from functools import cached_property
 from pathlib import Path
+from typing import ClassVar
 
 from . import PROJECT_ROOT as _PROJECT_ROOT
 from ._types import Arch, Libc
@@ -46,6 +47,11 @@ class ResolvedSource:
 class Builder(ABC):
     commander: Commander
     src_dir: Path
+
+    # Builders whose package provides binaries that run during the build (e.g. Qt's
+    # moc/rcc/uic).  Those get an extra portable-arch build when the target arch may
+    # be newer than the build machine.
+    builds_host_tools: ClassVar[bool] = False
 
     @abstractmethod
     def __init__(
@@ -98,6 +104,7 @@ class Toolchain:
         arch: Arch = Arch.v1,
         debug: bool = False,
         nproc: int | None = None,
+        host_tools: bool = False,
     ) -> None:
         self.variant = variant
         self._toolchain_name = toolchain
@@ -109,9 +116,17 @@ class Toolchain:
         self.arch = arch
         self.debug = debug
         self.nproc = nproc
+        # A host-tools toolchain builds the target arch's build-time-only binaries
+        # (Qt's moc/rcc/uic...) with a portable arch, into its own prefix.
+        self.host_tools = host_tools
+        self.host_tools_prefix: Path | None = None
+        self._suffix = "-host" if host_tools else ""
 
-        self.install_prefix = work_dir / "install"
+        self.install_prefix = work_dir / f"install{self._suffix}"
+        # Sources are shared between the target and host-tools builds; only the
+        # CMake build directories differ.
         self.build_dir = work_dir / "build"
+        self.cmake_build_dirname = f"build{self._suffix}"
         self.package_dir = self._project_root / "assets"
         self.venv_dir = self._project_root / "toolchains" / toolchain / ".venv"
         for d in [
@@ -124,8 +139,8 @@ class Toolchain:
         ]:
             d.mkdir(parents=True, exist_ok=True)
 
-        self._log_dir = work_dir / "logs"
-        self._commander = Commander(work_dir / "prepare.log", self.nproc)
+        self._log_dir = work_dir / f"logs{self._suffix}"
+        self._commander = Commander(work_dir / f"prepare{self._suffix}.log", self.nproc)
 
     def make_commander(self, name: str) -> Commander:
         self._log_dir.mkdir(parents=True, exist_ok=True)
@@ -419,7 +434,7 @@ class Toolchain:
         return f"-fPIC {lto_flag}-w -fno-semantic-interposition {march}"
 
     def _write_toolchain_file(self) -> Path:
-        path = self.work_dir / "zig-toolchain.cmake"
+        path = self.work_dir / f"zig-toolchain{self._suffix}.cmake"
         install_lib = str(self.install_prefix / "lib")
         install_lib64 = str(self.install_prefix / "lib64")
         wd = str(self.work_dir / "wrappers")
@@ -504,7 +519,7 @@ class Toolchain:
         }
 
     def _write_meson_native_file(self) -> Path:
-        path = self.work_dir / "zig-meson-native.ini"
+        path = self.work_dir / f"zig-meson-native{self._suffix}.ini"
         wd = str(self.work_dir / "wrappers")
         install_lib = str(self.install_prefix / "lib")
         install_lib64 = str(self.install_prefix / "lib64")

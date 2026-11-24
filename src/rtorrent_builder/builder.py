@@ -315,6 +315,28 @@ def build_rtorrent(
         print(f"{msg}: {missing}")
     names = [n for n in _BUILDER_MAP if n in needed and n in pkgs]
 
+    # Qt tools (moc/rcc/uic/syncqt, lrelease) are compiled with the target arch but
+    # executed during the build.  When the target arch can be newer than the build
+    # machine (x86_64-v4 needs AVX-512), build them separately with a portable arch.
+    host_pkgs = [n for n in names if _BUILDER_MAP[n].builds_host_tools]
+    host_tc: Toolchain | None = None
+    if arch is Arch.v4 and host_pkgs:
+        host_tc = Toolchain(
+            variant=variant,
+            toolchain=manifest.toolchain,
+            work_dir=work_dir,
+            project_root=PROJECT_ROOT,
+            glibc_target=glibc_target,
+            options=options,
+            libc=libc,
+            arch=Arch.v1,
+            debug=debug,
+            nproc=nproc,
+            host_tools=True,
+        )
+        host_tc.setup()
+        tc.host_tools_prefix = host_tc.install_prefix
+
     ts = TopologicalSorter({
         name: [
             d
@@ -329,12 +351,20 @@ def build_rtorrent(
     timings: list[_Timing] = []
     build_origin = time.monotonic()
     _pkg_hashes: dict[str, str] = {}
+    _host_pkg_hashes: dict[str, str] = {}
     _file_owners: dict[str, str] = {}
+    _host_file_owners: dict[str, str] = {}
     _cache_store = CacheStore(cache_dir) if cache_dir else None
     _install_lock = threading.Lock()
 
-    def _build_pkg(name: str) -> str:
-        t = _Timing(name=name, start=time.monotonic() - build_origin)
+    def _build_pkg(
+        name: str,
+        tcx: Toolchain,
+        hashes: dict[str, str],
+        owners: dict[str, str],
+    ) -> str:
+        label = f"{name} (host)" if tcx.host_tools else name
+        t = _Timing(name=label, start=time.monotonic() - build_origin)
         timings.append(t)
 
         pkg = pkgs[name]
@@ -344,31 +374,34 @@ def build_rtorrent(
         # Compute cache key WITHOUT downloading source.
         # cache_key_extra() does not need a real source directory.
         key_source = ResolvedSource(name=name, version=pkg.version, src_dir=Path())
-        key_builder = builder_cls(tc, lib, key_source, tc.make_commander(name))
+        key_builder = builder_cls(tcx, lib, key_source, tcx.make_commander(name))
         cache_key = key_builder.cache_key_extra()
 
         deps = deps_for(name, pkgs, all_features=all_features, default_deps=default_deps)
-        dep_hashes = {d: _pkg_hashes[d] for d in deps if d in _pkg_hashes}
+        dep_hashes = {d: hashes[d] for d in deps if d in hashes}
+        if not tcx.host_tools and getattr(builder_cls, "uses_host_tools", False):
+            # The Qt host tools are build inputs of these packages.
+            dep_hashes |= {f"{n}-host": h for n, h in _host_pkg_hashes.items()}
         merkle_hash, merkle_payload = compute_merkle_hash(
             name=name,
             version=pkg.version,
             options=cache_key,
-            toolchain_name=tc._toolchain_name,
-            zig_version=tc.zig_version,
-            libc=tc.libc.value,
-            arch=tc.arch.safe,
-            glibc_target=tc._glibc_target,
-            debug=tc.debug,
-            install_prefix=str(tc.install_prefix.resolve()),
+            toolchain_name=tcx._toolchain_name,
+            zig_version=tcx.zig_version,
+            libc=tcx.libc.value,
+            arch=tcx.arch.safe,
+            glibc_target=tcx._glibc_target,
+            debug=tcx.debug,
+            install_prefix=str(tcx.install_prefix.resolve()),
             dep_hashes=dep_hashes,
         )
-        _pkg_hashes[name] = merkle_hash
+        hashes[name] = merkle_hash
 
         if not no_cache and _cache_store and _cache_store.has(name, merkle_hash):
             with _install_lock:
-                restored_files = _cache_store.restore(name, merkle_hash, tc.install_prefix)
+                restored_files = _cache_store.restore(name, merkle_hash, tcx.install_prefix)
                 if restored_files is not None:
-                    _claim_files(_file_owners, name, restored_files)
+                    _claim_files(owners, name, restored_files)
             if restored_files is not None:
                 resolved[name] = ResolvedSource(name=name, version=pkg.version, src_dir=Path())
                 t.gen_end = time.monotonic() - build_origin
@@ -379,31 +412,47 @@ def build_rtorrent(
         if _cache_store and not no_cache:
             _cache_store.diagnose_miss(name, merkle_payload)
 
-        source = tc.prepare_source(name, lib)
+        source = tcx.prepare_source(name, lib)
         resolved[name] = source
-        commander = tc.make_commander(name)
-        builder = builder_cls(tc, lib, source, commander)
+        commander = tcx.make_commander(name)
+        builder = builder_cls(tcx, lib, source, commander)
         builder.generate()
         t.gen_end = time.monotonic() - build_origin
         builder.build()
 
         # Keep attribution and archiving in the same critical section as installation.
         with _install_lock:
-            before = _snapshot_prefix(tc.install_prefix)
+            before = _snapshot_prefix(tcx.install_prefix)
             builder.install()
-            after = _snapshot_prefix(tc.install_prefix)
+            after = _snapshot_prefix(tcx.install_prefix)
             new_files, modified_files = _classify_prefix_changes(before, after)
             installed_files = new_files | modified_files
             if not installed_files:
                 raise RuntimeError(f"Package {name!r} did not install or update any files")
-            _claim_files(_file_owners, name, {str(f) for f in installed_files})
+            _claim_files(owners, name, {str(f) for f in installed_files})
             if _cache_store and not no_cache:
                 _cache_store.store_files(
-                    name, merkle_hash, merkle_payload, tc.install_prefix, installed_files
+                    name, merkle_hash, merkle_payload, tcx.install_prefix, installed_files
                 )
         t.end = time.monotonic() - build_origin
 
         return name
+
+    if host_tc is not None:
+        print(f"Building host tools (arch {host_tc.arch.safe}): {', '.join(host_pkgs)}")
+        host_ts = TopologicalSorter({
+            name: [
+                d
+                for d in deps_for(name, pkgs, all_features=all_features, default_deps=default_deps)
+                if d in host_pkgs
+            ]
+            for name in host_pkgs
+        })
+        host_ts.prepare()
+        while host_ts.is_active():
+            for name in host_ts.get_ready():
+                _build_pkg(name, tcx=host_tc, hashes=_host_pkg_hashes, owners=_host_file_owners)
+                host_ts.done(name)
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=jobs) as pool:
         futures: dict[concurrent.futures.Future[str], str] = {}
@@ -411,7 +460,7 @@ def build_rtorrent(
         while ts.is_active() or futures:
             ready_names = ts.get_ready()
             for n in ready_names:
-                futures[pool.submit(_build_pkg, n)] = n
+                futures[pool.submit(_build_pkg, n, tc, _pkg_hashes, _file_owners)] = n
 
             if not futures:
                 break
@@ -433,7 +482,10 @@ def build_rtorrent(
 
     total_elapsed = time.monotonic() - build_origin
     if _cache_store and cache_gc:
-        _cache_store.gc(_pkg_hashes)
+        keep: dict[str, set[str]] = {n: {h} for n, h in _pkg_hashes.items()}
+        for n, h in _host_pkg_hashes.items():
+            keep.setdefault(n, set()).add(h)
+        _cache_store.gc(keep)
     _render_timeline_table(timings, total_elapsed)
 
     app_name = manifest.executable_package

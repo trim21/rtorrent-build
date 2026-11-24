@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from abc import abstractmethod
+from typing import ClassVar
 
 from ..manifest import LibInfo
 from ..run import Commander
@@ -13,6 +14,12 @@ class CMakeBuilder(Builder):
     # that hit this set no_lto to compile without -flto (linker keeps -flto so
     # dependency bitcode archives still link).
     no_lto: bool = False
+
+    # Qt-based builders that need the Qt host tools (moc/rcc/uic/syncqt) at build
+    # time.  Those tools are compiled with the target arch and then executed, so
+    # they need a separately built copy when the target arch can be newer than the
+    # build machine (see host_tools in Toolchain).
+    uses_host_tools: ClassVar[bool] = False
 
     def __init__(
         self, toolchain: Toolchain, lib: LibInfo, source: ResolvedSource, commander: Commander
@@ -27,6 +34,11 @@ class CMakeBuilder(Builder):
     @abstractmethod
     def cmake_args(self) -> list[str]: ...
 
+    def host_tools_args(self) -> list[str]:
+        if not self.uses_host_tools or self.tc.host_tools or self.tc.host_tools_prefix is None:
+            return []
+        return [f"-DQT_HOST_PATH={self.tc.host_tools_prefix}"]
+
     def no_lto_args(self) -> list[str]:
         if not self.no_lto:
             return []
@@ -34,11 +46,16 @@ class CMakeBuilder(Builder):
         return [f"-DCMAKE_C_FLAGS={flags}", f"-DCMAKE_CXX_FLAGS={flags}"]
 
     def cache_key_extra(self) -> list[str]:
-        return super().cache_key_extra() + self.no_lto_args() + self.cmake_args()
+        return (
+            super().cache_key_extra()
+            + self.no_lto_args()
+            + self.host_tools_args()
+            + self.cmake_args()
+        )
 
     @property
     def cmake_build_dir(self) -> str:
-        return str(self.src_dir / "build")
+        return str(self.src_dir / self.tc.cmake_build_dirname)
 
     def generate(self) -> None:
         print(f"Generating {self.name} {self.version}")
@@ -58,6 +75,7 @@ class CMakeBuilder(Builder):
                 "-DBUILD_SHARED_LIBS=OFF",
                 "-DBUILD_TESTING=OFF",
                 *self.no_lto_args(),
+                *self.host_tools_args(),
                 *self.cmake_args(),
                 "-S",
                 str(self.src_dir),
